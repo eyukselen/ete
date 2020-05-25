@@ -157,8 +157,6 @@ class FindReplaceDlg(wx.Dialog):
                 te.SetCurrentPos(res)
                 te.SetAnchor(res + len(search_str))  # need to call refresh to make selection visible
                 te.Refresh()
-                # stc.SetSelectionEnd(res) and stc.SetSelectionStart() is not usable for backward selection
-                # when stc.SetSelectionEnd called its updating SelectionStart to minimum selection end automatically
             else:
                 te.SetSelection(res, res + len(search_str))
 

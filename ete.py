@@ -8,7 +8,7 @@ import wx.stc as stc
 import FindReplaceDlg as Frd
 from TextEditor import TextEditor
 # region high dpi settings for windows
-if sys.platform == 'win32' or wx.Platform == '__WXMSW__':
+if sys.platform == 'win32':
     import ctypes
     try:
         # ctypes.windll.shcore.SetProcessDpiAwareness(True)
@@ -527,7 +527,7 @@ class MainWindow(wx.Frame):
         pass
 
     def on_menu_tools_compare(self, _):
-        if len(self.compare_tabs) == 2:  # already in compare so do nothing to avoid confusion
+        if len(self.compare_tabs) == 2:  # already in compare so do nothing
             return
 
         # region splitting window for compare
@@ -622,14 +622,12 @@ class MainWindow(wx.Frame):
             self.notebook.RemovePage(idx)
             # re-add in the same position so it will tab
             self.notebook.InsertPage(idx, win, title, False, bmp)
-        # restore orignial selected tab
+        # restore original selected tab
         self.notebook.SetSelection(now_selected)
 
         self.Thaw()
 
     def set_tabs_in_sync(self, lstc, rstc, activate):
-        # DONE : in compare mode caret freezes until text area clicked. after switching to wx.aui this is working fine
-        # DONE : two carets are visible at the same time one on lstc and one on rstc, after switching to wx.aui its fine
         def set_zoom_r(event):
             rstc.SetZoom(lstc.GetZoom())
             event.Skip()
@@ -684,23 +682,16 @@ class MainWindow(wx.Frame):
         for inew, val in enumerate(new):
             _overlap = dict()
             for iold in old_index_map.get(val, list()):
-                # now we are considering all values of iold such that
-                # `old[iold] == new[inew]`.
                 _overlap[iold] = (iold and overlap.get(iold - 1, 0)) + 1
                 if _overlap[iold] > sub_length:
-                    # this is the largest substring seen so far, so store its
-                    # indices
                     sub_length = _overlap[iold]
                     sub_start_old = iold - sub_length + 1
                     sub_start_new = inew - sub_length + 1
             overlap = _overlap
 
         if sub_length == 0:
-            # If no common substring is found, we return an insert and delete...
             return (old and [('-', old)] or []) + (new and [('+', new)] or [])
         else:
-            # ...otherwise, the common substring is unchanged and we recursively
-            # diff the text before and after that substring
             return self.diff(old[: sub_start_old], new[: sub_start_new]) + \
                    [('=', new[sub_start_new: sub_start_new + sub_length])] + \
                    self.diff(old[sub_start_old + sub_length:], new[sub_start_new + sub_length:])

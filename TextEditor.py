@@ -6,9 +6,12 @@ class TextEditor(wx.stc.StyledTextCtrl):
 
     def __init__(self, parent, filename=''):
         stc.StyledTextCtrl.__init__(self, parent, style=wx.SIMPLE_BORDER)
+        self.ID_MARGIN_CLICK = wx.ID_ANY
+        self.FOLD_MARGIN = 2
         self.check_for_braces = False
         self.file_name = filename
         self.lang = ''
+        self.folding = False
         self.status_bar = self.GetParent().GetParent().GetParent().GetParent().status_bar
         self.Bind(stc.EVT_STC_UPDATEUI, self.on_update_ui)
         self.Bind(stc.EVT_STC_ZOOM, self.on_update_ui)
@@ -180,8 +183,40 @@ class TextEditor(wx.stc.StyledTextCtrl):
         if lang == 'mssql':
             self.lang = 'mssql'
             self.lang_mssql()
-        if lang == 'txt':
+        if lang == 'text':
             self.lang_txt()
+
+    def set_folding(self, fold=False):
+        if fold:
+            self.folding = True
+            self.SetProperty('fold', '1')  # this needs to be send to stc
+            self.SetMarginType(2, wx.stc.STC_MARGIN_SYMBOL)
+            self.SetMarginMask(2, wx.stc.STC_MASK_FOLDERS)
+            self.SetMarginSensitive(self.FOLD_MARGIN, True)
+            self.SetMarginWidth(2, 16)
+            self.MarkerDefine(stc.STC_MARKNUM_FOLDERMIDTAIL, stc.STC_MARK_TCORNERCURVE, "WHEAT", "#808080")
+            self.MarkerDefine(stc.STC_MARKNUM_FOLDEROPEN, stc.STC_MARK_BOXMINUS, "WHEAT", "#808080")
+            self.MarkerDefine(stc.STC_MARKNUM_FOLDER, stc.STC_MARK_BOXPLUS, "WHEAT", "#808080")
+            self.MarkerDefine(stc.STC_MARKNUM_FOLDERSUB, stc.STC_MARK_VLINE, "WHEAT", "#808080")
+            self.MarkerDefine(stc.STC_MARKNUM_FOLDERTAIL, stc.STC_MARK_LCORNER, "WHEAT", "#808080")
+            self.MarkerDefine(stc.STC_MARKNUM_FOLDEREND, stc.STC_MARK_BOXPLUSCONNECTED, "WHEAT", "#808080")
+            self.MarkerDefine(stc.STC_MARKNUM_FOLDEROPENMID, stc.STC_MARK_BOXMINUSCONNECTED, "WHEAT", "#808080")
+            self.SetAutomaticFold(wx.stc.STC_AUTOMATICFOLD_SHOW)
+            self.Bind(wx.stc.EVT_STC_MARGINCLICK, self.on_margin_click, id=self.ID_MARGIN_CLICK)
+        else:
+            self.folding = False
+            self.SetProperty('fold', '0')  # this needs to be send to stc
+            self.SetMarginWidth(self.FOLD_MARGIN, 0)
+            self.SetMarginSensitive(self.FOLD_MARGIN, False)
+            self.Unbind(wx.stc.EVT_STC_MARGINCLICK, id=self.ID_MARGIN_CLICK)
+
+    def on_margin_click(self, event):
+        print(' margin clicked')
+        print(event.GetMargin())
+        if event.GetMargin() == self.FOLD_MARGIN:
+            line_clicked = self.LineFromPosition(event.GetPosition())
+            print(line_clicked)
+            self.ToggleFold(line_clicked)
 
     def lang_python(self):
         self.StyleClearAll()
@@ -208,11 +243,14 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.StyleSetSpec(stc.STC_STYLE_BRACELIGHT, "fore:RED,back:MEDIUM TURQUOISE,bold")
         self.StyleSetSpec(stc.STC_STYLE_BRACEBAD, "fore:RED,back:THISTLE,bold")
         self.SetProperty("tab.timmy.whinge.level", "1")  # to mark inconsistent indentation
+        self.set_folding(True)
 
     def lang_txt(self):
         self.StyleClearAll()
+        self.SetLexer(stc.STC_LEX_NULL)
         self.StyleSetSpec(stc.STC_STYLE_BRACELIGHT, "fore:RED,back:MEDIUM TURQUOISE,bold")
         self.StyleSetSpec(stc.STC_STYLE_BRACEBAD, "fore:RED,back:THISTLE,bold")
+        self.set_folding(False)
 
     def lang_mssql(self):
         self.StyleClearAll()
@@ -256,12 +294,12 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.StyleSetSpec(stc.STC_STYLE_BRACEBAD, "fore:RED,back:THISTLE,bold")
 
     def set_styles(self):
-        self.StyleSetSpec(4, 'back:TURQUOISE')
-        self.StyleSetSpec(5, 'back:WHEAT')
+        self.StyleSetSpec(4, 'back:TURQUOISE')  # style set 4 for compare matched line
+        self.StyleSetSpec(5, 'back:WHEAT')  # style set 5 for compare unmatched line
         self.StyleSetEOLFilled(4, True)
         self.StyleSetEOLFilled(5, True)
         self.SetIndicatorCurrent(9)
-        self.IndicatorSetStyle(9, stc.STC_INDIC_ROUNDBOX)
+        self.IndicatorSetStyle(9, stc.STC_INDIC_ROUNDBOX)  # style set 9 for matched search word indicator
         self.IndicatorSetForeground(9, 'BLUE')
 
     def indicate_words(self, word, clear=False):

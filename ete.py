@@ -524,7 +524,7 @@ class MainWindow(wx.Frame):
             return
 
     def on_info(self, event):
-        pass
+        self.on_about(None)
 
     def on_menu_tools_compare(self, _):
         if len(self.compare_tabs) == 2:  # already in compare so do nothing
@@ -538,6 +538,9 @@ class MainWindow(wx.Frame):
 
         lstc = self.get_text_editor_from_page(lpi)
         rstc = self.get_text_editor_from_page(rpi)
+
+        lstc.set_lang('text')
+        rstc.set_lang('text')
 
         self.compare_tabs = [lstc, rstc]
         self.notebook.Split(rpi, wx.RIGHT)
@@ -560,7 +563,7 @@ class MainWindow(wx.Frame):
         for x in res:
             for _ in x[1]:
                 if x[0] == '-':
-                    lstc.StartStyling(lstc.XYToPosition(0, c), 255)
+                    lstc.StartStyling(lstc.XYToPosition(0, c))
                     lstc.SetStyling(lstc.GetLineLength(c) + 2, 5)
                     pos = max(rstc.XYToPosition(0, c), 0)
                     rstc.InsertText(pos, '\r\n')  # add empty line to right
@@ -569,12 +572,12 @@ class MainWindow(wx.Frame):
                     pos = max(lstc.XYToPosition(0, c), 0)
                     lstc.InsertText(pos, '\r\n')  # add empty line to left
                     lstc.SetLineState(c, 1)
-                    rstc.StartStyling(rstc.XYToPosition(0, c), 255)
+                    rstc.StartStyling(rstc.XYToPosition(0, c))
                     rstc.SetStyling(rstc.GetLineLength(c) + 2, 5)
                 if x[0] == '=':
-                    lstc.StartStyling(lstc.XYToPosition(0, c,), 255)
+                    lstc.StartStyling(lstc.XYToPosition(0, c,))
                     lstc.SetStyling(lstc.GetLineLength(c) + 2, 4)
-                    rstc.StartStyling(rstc.XYToPosition(0, c, ), 255)
+                    rstc.StartStyling(rstc.XYToPosition(0, c, ))
                     rstc.SetStyling(rstc.GetLineLength(c) + 2, 4)
                 c += 1
         self.set_tabs_in_sync(lstc, rstc, True)
@@ -597,8 +600,14 @@ class MainWindow(wx.Frame):
                 rstc.GotoLine(i)
                 rstc.LineDelete()
 
-        lstc.StyleClearAll()  # if there is pre-set style I need to check that
+        lstc.StyleClearAll()
         rstc.StyleClearAll()
+
+        if lstc.lang:
+            lstc.set_lang(lstc.lang)
+
+        if rstc.lang:
+            rstc.set_lang(lstc.lang)
 
         self.set_tabs_in_sync(lstc, rstc, False)
         self.compare_tabs = []
@@ -769,9 +778,9 @@ class MainWindow(wx.Frame):
         elif event.GetId() == self.menu_language_sql.GetId():
             lang = 'mssql'
         elif event.GetId() == self.menu_language_txt.GetId():
-            lang = 'txt'
+            lang = 'text'
         else:
-            lang = 'txt'
+            lang = 'text'
         cp = self.notebook.GetCurrentPage()
         te = self.get_text_editor_from_page(self.notebook.GetPageIndex(cp))
         te.set_lang(lang)

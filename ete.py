@@ -189,6 +189,12 @@ class MainWindow(wx.Frame):
         self.menu_language_sql = wx.MenuItem(parentMenu=self.menu_language, id=wx.ID_ANY, text='SQL',
                                              kind=wx.ITEM_NORMAL)
         self.menu_language.Append(self.menu_language_sql)
+        self.menu_language_bash = wx.MenuItem(parentMenu=self.menu_language, id=wx.ID_ANY, text='Bash',
+                                              kind=wx.ITEM_NORMAL)
+        self.menu_language.Append(self.menu_language_bash)
+        self.menu_language_ps = wx.MenuItem(parentMenu=self.menu_language, id=wx.ID_ANY, text='PowerShell',
+                                            kind=wx.ITEM_NORMAL)
+        self.menu_language.Append(self.menu_language_ps)
         # endregion
 
         # region tools menu
@@ -318,6 +324,8 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_language, self.menu_language_txt)
         self.Bind(wx.EVT_MENU, self.on_language, self.menu_language_python)
         self.Bind(wx.EVT_MENU, self.on_language, self.menu_language_sql)
+        self.Bind(wx.EVT_MENU, self.on_language, self.menu_language_bash)
+        self.Bind(wx.EVT_MENU, self.on_language, self.menu_language_ps)
 
         self.Bind(wx.EVT_MENU, self.on_view_whitespace, self.menu_view_whitespace)
         self.Bind(wx.EVT_MENU, self.on_view_eol, self.menu_view_eol)
@@ -524,6 +532,7 @@ class MainWindow(wx.Frame):
             return
 
     def on_info(self, event):
+        _ = event
         self.on_about(None)
 
     def on_menu_tools_compare(self, _):
@@ -779,6 +788,10 @@ class MainWindow(wx.Frame):
             lang = 'mssql'
         elif event.GetId() == self.menu_language_txt.GetId():
             lang = 'text'
+        elif event.GetId() == self.menu_language_bash.GetId():
+            lang = 'bash'
+        elif event.GetId() == self.menu_language_ps.GetId():
+            lang = 'ps'
         else:
             lang = 'text'
         cp = self.notebook.GetCurrentPage()
@@ -802,10 +815,3 @@ app = wx.App()
 MainWindow(None)
 # wx.lib.inspection.InspectionTool().Show()
 app.MainLoop()
-
-# 4.0.7.post2 msw (phoenix) wxWidgets 3.0.5
-# 3.7.4 (tags/v3.7.4:e09359112e, Jul  8 2019, 20:34:20) [MSC v.1916 64 bit (AMD64)]
-# upgraded to
-# 3.8.3 (tags/v3.8.3:6f8c832, May 13 2020, 22:37:02) [MSC v.1924 64 bit (AMD64)]
-# 4.1.0 msw (phoenix) wxWidgets 3.1.4
-# Scintilla 3.7.2

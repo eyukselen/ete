@@ -119,20 +119,11 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.SetMarginWidth(1, line_width)
 
     def on_receive_event(self, event):
-        # if event.GetId() == wx.ID_FIND:
-        #     print('find requested')
-        #     event.StopPropagation()
-        # if for an event I dont process it here or stop propagation, it will propagate up to parent class and
-        # will be sent to here from parent class with on_menu_edit_event method. It will keep in a loop forever!
         wx.PostEvent(self.GetEventHandler(), event)
-        # self.GetEventHandler().ProcessEvent(event)
-        # wx.PostEvent is better than wx.ProcessEvent but in practise there is no difference
-        # (may be process in process event is noun not verb!)
-        # self.QueueEvent(event)  # this is processing event and exiting application which is not usable
         event.Skip()
 
     def on_update_ui(self, event):
-        cursor, anchor = self.GetSelection()  # switching cursor and anchor returning cursor smaller
+        cursor, anchor = self.GetSelection()
         line_num = self.GetCurrentLine() + 1
         col_num = self.GetColumn(self.GetCurrentPos())
         sel_len = abs(cursor - anchor)
@@ -142,14 +133,12 @@ class TextEditor(wx.stc.StyledTextCtrl):
                 self.indicate_words(self.GetSelectedText())
         else:
             self.indicate_words('', True)
-
-        self.set_margins()  # update line numbers margin width when UI updates
+        self.set_margins()
         self.check_braces()
         event.Skip()            
 
     def check_braces(self):
         cp = self.GetCurrentPos()
-        # cc = self.GetCharAt(cp)  # for out of range GetCharAt is not giving error just returning 0
         if chr(self.GetCharAt(cp)) in "[]{}()<>":  # found after caret
             bm = self.BraceMatch(cp)
             if bm != -1:  # found matching brace
@@ -183,6 +172,12 @@ class TextEditor(wx.stc.StyledTextCtrl):
         if lang == 'mssql':
             self.lang = 'mssql'
             self.lang_mssql()
+        if lang == 'bash':
+            self.lang = 'bash'
+            self.lang_bash()
+        if lang == 'ps':
+            self.lang = 'ps'
+            self.lang_ps()
         if lang == 'text':
             self.lang_txt()
 
@@ -244,6 +239,103 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.StyleSetSpec(stc.STC_STYLE_BRACEBAD, "fore:RED,back:THISTLE,bold")
         self.SetProperty("tab.timmy.whinge.level", "1")  # to mark inconsistent indentation
         self.set_folding(True)
+
+    def lang_ps(self):
+        self.StyleClearAll()
+        self.SetLexer(stc.STC_LEX_BASH)
+        self.SetKeyWords(0, 'break continue do else elseif filter for foreach function if in return switch until '
+                            'where while')
+        self.SetKeyWords(1, 'add-content add-history add-member add-pssnapin clear-content clear-item '
+                            'clear-itemproperty clear-variable compare-object convertfrom-securestring convert-path '
+                            'convertto-html convertto-securestring copy-item copy-itemproperty export-alias '
+                            'export-clixml export-console export-csv foreach-object format-custom format-list '
+                            'format-table format-wide get-acl get-alias get-authenticodesignature get-childitem '
+                            'get-command get-content get-credential get-culture get-date get-eventlog '
+                            'get-executionpolicy get-help get-history get-host get-item get-itemproperty get-location '
+                            'get-member get-pfxcertificate get-process get-psdrive get-psprovider get-pssnapin '
+                            'get-service get-tracesource get-uiculture get-unique get-variable get-wmiobject '
+                            'group-object import-alias import-clixml import-csv invoke-expression invoke-history '
+                            'invoke-item join-path measure-command measure-object move-item move-itemproperty '
+                            'new-alias new-item new-itemproperty new-object new-psdrive new-service new-timespan '
+                            'new-variable out-default out-file out-host out-null out-printer out-string pop-location '
+                            'push-location read-host remove-item remove-itemproperty remove-psdrive remove-pssnapin '
+                            'remove-variable rename-item rename-itemproperty resolve-path restart-service '
+                            'resume-service select-object select-string set-acl set-alias set-authenticodesignature '
+                            'set-content set-date set-executionpolicy set-item set-itemproperty set-location '
+                            'set-psdebug set-service set-tracesource set-variable sort-object split-path '
+                            'start-service start-sleep start-transcript stop-process stop-service stop-transcript '
+                            'suspend-service tee-object test-path trace-command update-formatdata update-typedata '
+                            'where-object write-debug write-error write-host write-output write-progress '
+                            'write-verbose write-warning')
+        self.SetKeyWords(2, 'ac asnp clc cli clp clv cpi cpp cvpa diff epal epcsv fc fl foreach ft fw gal gc gci gcm '
+                            'gdr ghy gi gl gm gp gps group gsv gsnp gu gv gwmi iex ihy ii ipal ipcsv mi mp nal ndr ni '
+                            'nv oh rdr ri rni rnp rp rsnp rv rvpa sal sasv sc select si sl sleep sort sp spps spsv sv '
+                            'tee where write cat cd clear cp h history kill lp ls mount mv popd ps pushd pwd r rm '
+                            'rmdir echo cls chdir copy del dir erase move rd ren set type')
+        self.SetKeyWords(3, 'component description example externalhelp forwardhelpcategory forwardhelptargetname '
+                            'functionality inputs link notes outputs parameter remotehelprunspace role synopsis')
+        self.StyleSetSpec(stc.STC_POWERSHELL_ALIAS, 'fore:#0080FF,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_POWERSHELL_CHARACTER, 'fore:#808080,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_POWERSHELL_CMDLET, 'fore:#8000FF,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_POWERSHELL_COMMENT, 'fore:#008000,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_POWERSHELL_COMMENTDOCKEYWORD, 'fore:#008080,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_POWERSHELL_COMMENTSTREAM, 'fore:#008080,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_POWERSHELL_DEFAULT, 'fore:#000000,back:#FFFFFF')
+        # self.StyleSetSpec(stc.STC_POWERSHELL_FUNCTION, 'fore:#880088,back:#FFFFFF,bold')
+        self.StyleSetSpec(stc.STC_POWERSHELL_HERE_CHARACTER, 'fore:#808080,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_POWERSHELL_HERE_STRING, 'fore:#808080,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_POWERSHELL_IDENTIFIER, 'fore:#0000FF,back:#FFFFFF,bold')
+        # self.StyleSetSpec(stc.STC_POWERSHELL_KEYWORD, 'fore:#880088,back:#FFFFFF,bold')
+        self.StyleSetSpec(stc.STC_POWERSHELL_NUMBER, 'fore:#FF8000,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_POWERSHELL_OPERATOR, 'fore:#000080,back:#FFFFFF,bold')
+        self.StyleSetSpec(stc.STC_POWERSHELL_STRING, 'fore:#808080,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_POWERSHELL_USER1, 'fore:#000000,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_POWERSHELL_VARIABLE, 'fore:#000000,back:#FFFFFF,bold')
+
+    def lang_bash(self):
+        self.StyleClearAll()
+        self.SetLexer(stc.STC_LEX_BASH)
+        self.SetKeyWords(0, '7z adduser alias apt-get ar as asa autoconf automake awk banner base64 basename bash '
+                            'bc bdiff blkid break bsdcpio bsdtar bunzip2 bzcmp bzdiff bzegrep bzfgrep bzgrep bzip2 '
+                            'bzip2recover bzless bzmore c++ cal calendar case cat cc cd cfdisk chattr chgrp chmod '
+                            'chown chroot chvt cksum clang clang++ clear cmp col column comm compgen compress '
+                            'continue convert cp cpio crontab crypt csplit ctags curl cut date dc dd deallocvt '
+                            'declare deluser depmod deroff df dialog diff diff3 dig dircmp dirname disown dmesg '
+                            'do done dpkg dpkg-deb du echo ed egrep elif else env esac eval ex exec exit expand '
+                            'export expr fakeroot false fc fdisk ffmpeg fgrep fi file find flex flock fmt fold for '
+                            'fsck function functions fuser fusermount g++ gas gawk gcc gdb genisoimage getconf '
+                            'getopt getopts git gpg gpgsplit gpgv grep gres groff groups gunzip gzexe hash hd head '
+                            'help hexdump hg history httpd iconv id if ifconfig ifdown ifquery ifup in insmod '
+                            'integer inxi ip ip6tables ip6tables-save ip6tables-restore iptables iptables-save '
+                            'iptables-restore ip jobs join kill killall killall5 lc ld ldd let lex line ln local '
+                            'logname look ls lsattr lsb_release lsblk lscpu lshw lslocks lsmod lsusb lzcmp lzegrep '
+                            'lzfgrep lzgrep lzless lzma lzmainfo lzmore m4 mail mailx make man mkdir mkfifo mkswap '
+                            'mktemp modinfo modprobe mogrify more mount msgfmt mt mv nameif nasm nc ndisasm netcat '
+                            'newgrp nl nm nohup ntps objdump od openssl p7zip pacman passwd paste patch pathchk '
+                            'pax pcat pcregrep pcretest perl pg ping ping6 pivot_root poweroff pr print printf ps '
+                            'pwd python python2 python3 ranlib read readlink readonly reboot reset return rev rm '
+                            'rmdir rmmod rpm rsync sed select service set sh sha1sum sha224sum sha256sum sha3sum '
+                            'sha512sum shift shred shuf shutdown size sleep sort spell split start stop strings '
+                            'strip stty su sudo sum suspend switch_root sync systemctl tac tail tar tee test then '
+                            'time times touch tr trap troff true tsort tty type typeset ulimit umask umount '
+                            'unalias uname uncompress unexpand uniq unlink unlzma unset until unzip unzipsfx '
+                            'useradd userdel uudecode uuencode vi vim wait wc wget whence which while who wpaste '
+                            'wstart xargs xdotool xxd xz xzcat xzcmp xzdiff xzfgrep xzgrep xzless xzmore yes yum '
+                            'zcat zcmp zdiff zegrep zfgrep zforce zgrep zless zmore znew zsh')
+        self.StyleSetSpec(stc.STC_SH_BACKTICKS, 'fore:#FFFF00')
+        self.StyleSetSpec(stc.STC_SH_NUMBER, 'fore:#FF00FF')
+        self.StyleSetSpec(stc.STC_SH_CHARACTER, 'fore:#8DB0D3')
+        self.StyleSetSpec(stc.STC_SH_COMMENTLINE, 'italic,fore:#00CFCB')
+        self.StyleSetSpec(stc.STC_SH_DEFAULT, 'fore:#8DB0D3')
+        self.StyleSetSpec(stc.STC_SH_ERROR, 'fore:#0000FF')
+        self.StyleSetSpec(stc.STC_SH_HERE_DELIM, 'fore:#00FF80')
+        self.StyleSetSpec(stc.STC_SH_HERE_Q, 'fore:#00FF80')
+        self.StyleSetSpec(stc.STC_SH_IDENTIFIER, 'fore:#8DB0D3')
+        self.StyleSetSpec(stc.STC_SH_OPERATOR, 'fore:#F0804F')
+        self.StyleSetSpec(stc.STC_SH_PARAM, 'fore:#8DB0D3')
+        self.StyleSetSpec(stc.STC_SH_SCALAR, 'fore:#FF00FF')
+        self.StyleSetSpec(stc.STC_SH_STRING, 'fore:#00FF80')
+        self.StyleSetSpec(stc.STC_SH_WORD, 'fore:#FFFF00')
 
     def lang_txt(self):
         self.StyleClearAll()

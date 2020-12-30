@@ -83,7 +83,8 @@ class MainWindow(wx.Frame):
 
         # region edit menu
         self.menu_edit = wx.Menu()
-        self.menu_edit_undo = wx.MenuItem(parentMenu=self.menu_edit, id=wx.ID_UNDO, text='&Undo\tCTRL+Z',
+        self.menu_edit_undo = wx.MenuItem(parentMenu=self.menu_edit,
+                                          id=wx.ID_UNDO, text='&Undo\tCTRL+Z',
                                           kind=wx.ITEM_NORMAL)
         self.menu_edit_undo.SetBitmap(undo_ico)
         self.menu_edit.Append(self.menu_edit_undo)
@@ -148,6 +149,15 @@ class MainWindow(wx.Frame):
         self.menu_edit_lowercase = wx.MenuItem(parentMenu=self.menu_edit, id=wx.ID_ANY, text='Lower Case',
                                                kind=wx.ITEM_NORMAL)
         self.menu_edit.Append(self.menu_edit_lowercase)
+
+        self.menu_edit_eol = wx.Menu()
+        self.menu_edit_eol_crlf = wx.MenuItem(parentMenu=self.menu_edit, id=wx.ID_ANY, text='CRLF', kind=wx.ITEM_NORMAL)
+        self.menu_edit_eol.Append(self.menu_edit_eol_crlf)
+        self.menu_edit_eol_lf = wx.MenuItem(parentMenu=self.menu_edit, id=wx.ID_ANY, text='LF', kind=wx.ITEM_NORMAL)
+        self.menu_edit_eol.Append(self.menu_edit_eol_lf)
+        self.menu_edit_eol_cr = wx.MenuItem(parentMenu=self.menu_edit, id=wx.ID_ANY, text='CR', kind=wx.ITEM_NORMAL)
+        self.menu_edit_eol.Append(self.menu_edit_eol_cr)
+        self.menu_edit.AppendSubMenu(self.menu_edit_eol, 'Change Eol')
         # endregion
 
         # region view menu
@@ -205,6 +215,7 @@ class MainWindow(wx.Frame):
         self.menu_tools_clear_compare = wx.MenuItem(parentMenu=self.menu_tools, id=wx.ID_ANY, text='Clea&r Compare',
                                                     kind=wx.ITEM_NORMAL)
         self.menu_tools.Append(self.menu_tools_clear_compare)
+
         # endregion
 
         # region about menu
@@ -296,7 +307,7 @@ class MainWindow(wx.Frame):
         # region status bar
 
         self.status_bar = wx.StatusBar(self)
-        self.status_bar.SetFieldsCount(2, [-2, -1])
+        self.status_bar.SetFieldsCount(4, [-2, -1, -1, -1])
         self.SetStatusBar(self.status_bar)
 
         # endregion
@@ -337,6 +348,10 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_menu_tools_clear_compare, self.menu_tools_clear_compare)
         self.Bind(wx.EVT_MENU, self.on_menu_edit_case, self.menu_edit_uppercase)
         self.Bind(wx.EVT_MENU, self.on_menu_edit_case, self.menu_edit_lowercase)
+
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_eol, self.menu_edit_eol_crlf)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_eol, self.menu_edit_eol_lf)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_eol, self.menu_edit_eol_cr)
 
         # detect double click on tab bar empty space
         self.Bind(aui.EVT_AUINOTEBOOK_BG_DCLICK, self.new_page, id=wx.ID_ANY)  # ID_ANY?
@@ -742,7 +757,7 @@ class MainWindow(wx.Frame):
     def on_view_whitespace(self, _):
         if self.notebook.GetPageCount() == 0:
             return
-        cp = self.notebook.GetCurrentPage()  # return none if there is no page open
+        cp = self.notebook.GetCurrentPage()  # returns none if there is no page open
         te = self.get_text_editor_from_page(self.notebook.GetPageIndex(cp))
         if te.ViewWhiteSpace:
             te.SetViewWhiteSpace(False)
@@ -810,6 +825,20 @@ class MainWindow(wx.Frame):
         te = self.get_text_editor_from_page(self.notebook.GetPageIndex(cp))
         te.set_case(cs)
 
+    def on_menu_edit_eol(self, event):
+        if self.notebook.GetPageCount() == 0:
+            return
+        eol_mode = 0
+        if event.GetId() == self.menu_edit_eol_crlf.GetId():
+            eol_mode = wx.stc.STC_EOL_CRLF
+        elif event.GetId() == self.menu_edit_eol_lf.GetId():
+            eol_mode = wx.stc.STC_EOL_LF
+        elif event.GetId() == self.menu_edit_eol_cr.GetId():
+            eol_mode = wx.stc.STC_EOL_CR
+        cp = self.notebook.GetCurrentPage()
+        te = self.get_text_editor_from_page(self.notebook.GetPageIndex(cp))
+        te.set_eol(eol_mode)
+        
 
 app = wx.App()
 MainWindow(None)

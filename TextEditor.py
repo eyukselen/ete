@@ -11,6 +11,8 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.check_for_braces = False
         self.file_name = filename
         self.lang = ''
+        self.code_page = ''
+        self.style_no = 0
         self.folding = False
         self.status_bar = self.GetParent().GetParent().GetParent().GetParent().status_bar
         self.Bind(stc.EVT_STC_UPDATEUI, self.on_update_ui)
@@ -135,7 +137,22 @@ class TextEditor(wx.stc.StyledTextCtrl):
             self.indicate_words('', True)
         self.set_margins()
         self.check_braces()
-        event.Skip()            
+        self.get_eolmode()
+        # TODO: get_eolmode only needs to be updated when changed from menu or newfile or tab changes.
+        event.Skip()
+
+    def get_eolmode(self):
+        eolmode = 'None'
+        eolmode_int = self.GetEOLMode()
+        if eolmode_int == wx.stc.STC_EOL_CRLF:
+            eolmode = 'CRLF'
+        elif eolmode_int == wx.stc.STC_EOL_LF:
+            eolmode = 'LF'
+        elif eolmode_int == wx.stc.STC_EOL_CR:
+            eolmode = 'CR'
+        else:
+            pass
+        self.status_bar.SetStatusText(str(eolmode), 2)
 
     def check_braces(self):
         cp = self.GetCurrentPos()
@@ -164,6 +181,10 @@ class TextEditor(wx.stc.StyledTextCtrl):
             self.UpperCase()
         if case == 'lower':
             self.LowerCase()
+
+    def set_eol(self, eol_mode):
+        self.ConvertEOLs(eol_mode)
+        self.SetEOLMode(eol_mode)
 
     def set_lang(self, lang):
         if lang == 'python':

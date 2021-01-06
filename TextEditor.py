@@ -429,3 +429,30 @@ class TextEditor(wx.stc.StyledTextCtrl):
             else:
                 self.IndicatorFillRange(res, len(word))
                 start = res + len(word)
+    
+    def load_file(self, file):
+        with open(file, 'rb') as ff:
+            f = ff.read()
+
+        if self.isUTF8(f):
+            self.code_page = 'utf-8'
+            self.SetTextRaw(f)
+            self.status_bar.SetStatusText('utf-8', 3)
+        else:
+            self.code_page = 'windows-1252'
+            self.SetText(f.decode('windows-1252'))
+            self.status_bar.SetStatusText('windows-1252', 3)
+
+    def save_file(self, file):
+        f = open(file,'w', encoding=self.code_page, newline='')
+        f.write(self.GetText())
+        self.SetSavePoint()
+        f.close()
+
+    def isUTF8(self, data):
+        try:
+            data.decode('UTF-8')
+        except UnicodeDecodeError:
+            return False
+        else:
+            return True

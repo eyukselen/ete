@@ -4,7 +4,7 @@ import wx
 import wx.adv
 import wx.aui as aui
 import wx.stc as stc
-# import wx.lib.inspection
+# import wx.lib.inspection # for debugging 
 import FindReplaceDlg as Frd
 from TextEditor import TextEditor
 # region high dpi settings for windows
@@ -13,6 +13,7 @@ if sys.platform == 'win32':
     try:
         # ctypes.windll.shcore.SetProcessDpiAwareness(True)
         ctypes.OleDLL('shcore').SetProcessDpiAwareness(1)
+        pass
     except (AttributeError, OSError):
         pass
 # endregion
@@ -207,6 +208,16 @@ class MainWindow(wx.Frame):
         self.menu_language.Append(self.menu_language_ps)
         # endregion
 
+        # region encodings menu
+        self.menu_encode = wx.Menu()
+        self.menu_encode_utf8 = wx.MenuItem(parentMenu=self.menu_encode, id=wx.ID_ANY, text='UTF-8', kind=wx.ITEM_NORMAL)
+        self.menu_encode.Append(self.menu_encode_utf8)
+        self.menu_encode_win1252 = wx.MenuItem(parentMenu=self.menu_encode, id=wx.ID_ANY, text='Win1252', kind=wx.ITEM_NORMAL)
+        self.menu_encode.Append(self.menu_encode_win1252)
+        self.menu_encode_win1254 = wx.MenuItem(parentMenu=self.menu_encode, id=wx.ID_ANY, text='Win1254', kind=wx.ITEM_NORMAL)
+        self.menu_encode.Append(self.menu_encode_win1254)
+        # endregion
+
         # region tools menu
         self.menu_tools = wx.Menu()
         self.menu_tool_compare = wx.MenuItem(parentMenu=self.menu_tools, id=wx.ID_ANY, text='&Compare',
@@ -215,7 +226,6 @@ class MainWindow(wx.Frame):
         self.menu_tools_clear_compare = wx.MenuItem(parentMenu=self.menu_tools, id=wx.ID_ANY, text='Clea&r Compare',
                                                     kind=wx.ITEM_NORMAL)
         self.menu_tools.Append(self.menu_tools_clear_compare)
-
         # endregion
 
         # region about menu
@@ -232,6 +242,7 @@ class MainWindow(wx.Frame):
         self.menu_bar.Append(self.menu_edit, '&Edit')
         self.menu_bar.Append(self.menu_view, '&View')
         self.menu_bar.Append(self.menu_language, '&Language')
+        self.menu_bar.Append(self.menu_encode, 'Encode')
         self.menu_bar.Append(self.menu_tools, '&Tools')
         self.menu_bar.Append(self.menu_about, '&About')
 
@@ -353,8 +364,12 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_menu_edit_eol, self.menu_edit_eol_lf)
         self.Bind(wx.EVT_MENU, self.on_menu_edit_eol, self.menu_edit_eol_cr)
 
+        self.Bind(wx.EVT_MENU, self.on_menu_encode, self.menu_encode_utf8)
+        self.Bind(wx.EVT_MENU, self.on_menu_encode, self.menu_encode_win1252)
+        self.Bind(wx.EVT_MENU, self.on_menu_encode, self.menu_encode_win1254)
+
         # detect double click on tab bar empty space
-        self.Bind(aui.EVT_AUINOTEBOOK_BG_DCLICK, self.new_page, id=wx.ID_ANY)  # ID_ANY?
+        self.Bind(aui.EVT_AUINOTEBOOK_BG_DCLICK, self.new_page, id=wx.ID_ANY)
         self.Bind(aui.EVT_AUINOTEBOOK_TAB_RIGHT_UP, self.on_tab_popup, id=wx.ID_ANY)
 
         self.notebook.Bind(aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.on_tab_close, id=wx.ID_ANY)
@@ -382,10 +397,11 @@ class MainWindow(wx.Frame):
             self.SetTransparent(255)
 
     def on_about(self, _):
-        self.info.SetName("Emre's text editor")
-        self.info.SetVersion('0.1')
-        self.info.SetDescription('This is a project about my experiment with wxpython')
+        self.info.SetName("ete text editor")
+        self.info.SetVersion('0.2.a')
+        self.info.SetDescription('Text editor using wxpython')
         self.info.SetDevelopers(['Emre Yukselen'])
+        self.info.SetWebSite('https://github.com/eyukselen/ete')
         wx.adv.AboutBox(self.info)
 
     def new_page(self, _):
@@ -393,8 +409,10 @@ class MainWindow(wx.Frame):
         page_sizer = wx.BoxSizer(wx.VERTICAL)
         page.SetSizer(page_sizer)
         te = TextEditor(parent=page, filename='')
-        te.DragAcceptFiles(True)
-        te.Bind(wx.EVT_DROP_FILES, self.open_page)
+        te.code_page = 'utf-8'
+        if sys.platform == 'win32':
+            te.DragAcceptFiles(True)
+            te.Bind(wx.EVT_DROP_FILES, self.open_page)
         page_sizer.Add(te, 1, wx.EXPAND)
         self.notebook.AddPage(page, 'New *', select=True)
 
@@ -418,11 +436,14 @@ class MainWindow(wx.Frame):
                 page_sizer = wx.BoxSizer(wx.VERTICAL)
                 page.SetSizer(page_sizer)
                 te = TextEditor(parent=page, filename=file)
-                te.DragAcceptFiles(True)
-                te.Bind(wx.EVT_DROP_FILES, self.open_page)
+                if sys.platform == 'win32':
+                    te.DragAcceptFiles(True)
+                    te.Bind(wx.EVT_DROP_FILES, self.open_page)
                 page_sizer.Add(te, 1, wx.EXPAND)
                 self.notebook.AddPage(page, select=True, caption=file_name)
-                te.LoadFile(file)
+                # te.LoadFile(file) # adding my method to replace builtin
+                te.load_file(file)
+                
                 self.notebook.SetPageToolTip(self.notebook.GetPageIndex(self.notebook.GetCurrentPage()), file)
                 _, f = os.path.split(file)
                 self.notebook.SetPageText(self.notebook.GetPageIndex(self.notebook.GetCurrentPage()), f)
@@ -434,7 +455,8 @@ class MainWindow(wx.Frame):
             te = self.get_text_editor_from_page(self.notebook.GetPageIndex(self.notebook.GetCurrentPage()))
             filename = te.file_name
             if filename:
-                te.SaveFile(filename)
+                # te.SaveFile(filename) # adding my method to replace builtin 
+                te.save_file(filename)
             else:
                 self.save_as_page(None)
         else:
@@ -452,7 +474,8 @@ class MainWindow(wx.Frame):
             if fileDialog.ShowModal() == wx.ID_CANCEL:
                 return
             filename = fileDialog.GetPath()
-            te.SaveFile(filename)
+            # te.SaveFile(filename) # adding my method to replace builtin
+            te.save_file(filename)
             te.file_name = filename
             self.notebook.SetPageToolTip(self.notebook.GetPageIndex(self.notebook.GetCurrentPage()), filename)
             _, file = os.path.split(filename)
@@ -838,9 +861,50 @@ class MainWindow(wx.Frame):
         cp = self.notebook.GetCurrentPage()
         te = self.get_text_editor_from_page(self.notebook.GetPageIndex(cp))
         te.set_eol(eol_mode)
+
+    def on_menu_encode(self, event):
+        if event.GetId() == self.menu_encode_utf8.GetId():
+            self.set_encoding('utf-8')
+        elif event.GetId() == self.menu_encode_win1252.GetId():
+            self.set_encoding('windows-1252')
+        elif event.GetId() == self.menu_encode_win1254.GetId():
+            self.set_encoding('windows-1254')
+        else:
+            return
+    
+    def set_encoding(self, enc):
+        if self.notebook.GetPageCount() == 0:
+            return
+        cp = self.notebook.GetCurrentPage()
+        te = self.get_text_editor_from_page(self.notebook.GetPageIndex(cp))
+        if te.code_page == enc:
+            return
+        xx = te.GetText()
+
+        if enc == 'utf-8':
+            str_tr = bytes(xx, encoding=te.code_page).decode(te.code_page) # pseudo conversion
+            te.SetText(str_tr)
+            te.code_page = enc
+            self.status_bar.SetStatusText(enc, 3)
+        elif enc == 'windows-1254':
+            if te.code_page != 'utf-8':
+                str_tr = xx.encode('windows-1252').decode('windows-1254') # works for ansi2ansi not uni2ansi
+            else:
+                str_tr = bytes(xx, encoding='windows-1254').decode('windows-1254')
+            te.SetText(str_tr)
+            te.code_page = enc
+            self.status_bar.SetStatusText(enc, 3)
+        elif enc == 'windows-1252':
+            if te.code_page != 'utf-8':
+                str_tr = xx.encode(te.code_page).decode('windows-1252') # works for ansi2 ansi not uni2ansi
+            else:
+                str_tr = bytes(xx, encoding='windows-1252').decode('windows-1252')
+            te.SetText(str_tr)
+            te.code_page = enc
+            self.status_bar.SetStatusText(enc, 3)
         
 
 app = wx.App()
 MainWindow(None)
-# wx.lib.inspection.InspectionTool().Show()
+# wx.lib.inspection.InspectionTool().Show() # for debugging 
 app.MainLoop()

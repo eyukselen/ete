@@ -1,6 +1,6 @@
 # ete text editor 
 
-V 0.1.a
+V 0.2.a
 
 Ete is my experiment with wxPython library - styled text control in particular.
 
@@ -8,13 +8,25 @@ Currently in alpha phase.
 
 Features:
 
-* find & replace with standard features
-* syntax highlighting
-* code folding
+* text editor with multi tabs 
+* find & replace
 * side by side compare
-* multi tabs
+* code folding
 * show/convert end of line between CRLF-LF-CR
+* drag and drop files to open (only on windows)
+* syntax highlighting for 
+    * python
+    * sql
+    * bash
+    * powershell
+* code page conversion ! needs more testing
+  * utf-8
+  * windows-1252
+  * windows-1254
 
-python 3.8.3\
-wxpython 4.1.0 msw (phoenix) wxWidgets 3.1.4\
+
+
+v 0.2.a
+python 3.9.0
+4.1.1 msw (phoenix) wxWidgets 3.1.5
 Scintilla 3.7.2

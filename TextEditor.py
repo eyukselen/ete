@@ -199,8 +199,13 @@ class TextEditor(wx.stc.StyledTextCtrl):
         if lang == 'ps':
             self.lang = 'ps'
             self.lang_ps()
+        if lang == 'xml':
+            self.lang = 'xml'
+            self.lang_xml()
         if lang == 'text':
+            self.lang = 'text'
             self.lang_txt()
+        
 
     def set_folding(self, fold=False):
         if fold:
@@ -239,7 +244,7 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.SetLexer(stc.STC_LEX_PYTHON)
         self.SetKeyWords(0, 'False None True and as assert async await break class continue def del elif else '
                             'except finally for from global if import in is lambda nonlocal not or pass raise '
-                            'return try while with yield')
+                            'return try while with yield self')
         self.StyleSetSpec(stc.STC_P_DEFAULT, 'fore:#000000,back:#FFFFFF')
         self.StyleSetSpec(stc.STC_P_COMMENTLINE, 'fore:#008000,back:#FFFFFF')
         self.StyleSetSpec(stc.STC_P_NUMBER, 'fore:#FF0000,back:#FFFFFF')
@@ -402,9 +407,32 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.StyleSetSpec(stc.STC_MSSQL_STRING, 'fore:#FF3AFF, bold')
         self.StyleSetSpec(stc.STC_MSSQL_SYSTABLE, 'fore:#9D2424')
         self.StyleSetSpec(stc.STC_MSSQL_VARIABLE, 'fore:#AB37F2')
-        self.StyleSetSpec(stc.STC_P_STRINGEOL, 'fore:#000000,back:#FFFFFF')
         self.StyleSetSpec(stc.STC_STYLE_BRACELIGHT, "fore:RED,back:MEDIUM TURQUOISE,bold")
         self.StyleSetSpec(stc.STC_STYLE_BRACEBAD, "fore:RED,back:THISTLE,bold")
+
+    def lang_xml(self):
+        self.StyleClearAll()
+        self.SetLexer(stc.STC_LEX_XML)
+        # setting keywords 0 has an unexpected behaviour such as tags and attributes are not styled as expected
+        self.SetKeyWords(1, 'xml xaml xsl xslt xsd xul kml svg mxml xsml wsdl xlf xliff xbl sxbl sitemap gml gpx plist ')
+        self.StyleSetSpec(stc.STC_H_DEFAULT, 'fore:#000000,back:#FFFFFF,bold')
+        self.StyleSetSpec(stc.STC_H_XMLSTART, 'fore:#FF0000,back:#FFFF00')
+        self.StyleSetSpec(stc.STC_H_XMLEND, 'fore:#FF0000,back:#FFFF00')
+        self.StyleSetSpec(stc.STC_H_COMMENT, 'fore:#008000,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_H_NUMBER, 'fore:#FF0000,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_H_DOUBLESTRING, 'fore:#8000FF,back:#FFFFFF,bold')
+        self.StyleSetSpec(stc.STC_H_SINGLESTRING, 'fore:#8000FF,back:#FFFFFF,bold')
+        self.StyleSetSpec(stc.STC_H_TAG, 'fore:#0000FF,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_H_TAGEND, 'fore:#0000FF,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_H_TAGUNKNOWN, 'fore:#0000FF,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_H_ATTRIBUTE, 'fore:#FF0000,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_H_ATTRIBUTEUNKNOWN, 'fore:#FF0000,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_H_SGML_DEFAULT, 'fore:#000000,back:#A6CAF0')
+        self.StyleSetSpec(stc.STC_H_CDATA, 'fore:#FF8000,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_H_ENTITY, 'fore:#000000,back:#FEFDE0,italic')
+        self.StyleSetSpec(stc.STC_H_VALUE, 'fore:#000000,back:#A6CAF0')
+        # self.source.SetProperty("fold.html", "1") # not sure xml version of this
+        self.set_folding(True)
 
     def set_styles(self):
         self.StyleSetSpec(4, 'back:TURQUOISE')  # style set 4 for compare matched line

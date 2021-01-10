@@ -206,6 +206,9 @@ class MainWindow(wx.Frame):
         self.menu_language_ps = wx.MenuItem(parentMenu=self.menu_language, id=wx.ID_ANY, text='PowerShell',
                                             kind=wx.ITEM_NORMAL)
         self.menu_language.Append(self.menu_language_ps)
+        self.menu_language_xml = wx.MenuItem(parentMenu=self.menu_language, id=wx.ID_ANY, text='XML',
+                                            kind=wx.ITEM_NORMAL)
+        self.menu_language.Append(self.menu_language_xml)
         # endregion
 
         # region encodings menu
@@ -348,6 +351,7 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_language, self.menu_language_sql)
         self.Bind(wx.EVT_MENU, self.on_language, self.menu_language_bash)
         self.Bind(wx.EVT_MENU, self.on_language, self.menu_language_ps)
+        self.Bind(wx.EVT_MENU, self.on_language, self.menu_language_xml)
 
         self.Bind(wx.EVT_MENU, self.on_view_whitespace, self.menu_view_whitespace)
         self.Bind(wx.EVT_MENU, self.on_view_eol, self.menu_view_eol)
@@ -410,6 +414,7 @@ class MainWindow(wx.Frame):
         page.SetSizer(page_sizer)
         te = TextEditor(parent=page, filename='')
         te.code_page = 'utf-8'
+        self.status_bar.SetStatusText('utf-8', 3)
         if sys.platform == 'win32':
             te.DragAcceptFiles(True)
             te.Bind(wx.EVT_DROP_FILES, self.open_page)
@@ -830,6 +835,8 @@ class MainWindow(wx.Frame):
             lang = 'bash'
         elif event.GetId() == self.menu_language_ps.GetId():
             lang = 'ps'
+        elif event.GetId() == self.menu_language_xml.GetId():
+            lang = 'xml'
         else:
             lang = 'text'
         cp = self.notebook.GetCurrentPage()

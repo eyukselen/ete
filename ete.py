@@ -209,6 +209,9 @@ class MainWindow(wx.Frame):
         self.menu_language_xml = wx.MenuItem(parentMenu=self.menu_language, id=wx.ID_ANY, text='XML',
                                             kind=wx.ITEM_NORMAL)
         self.menu_language.Append(self.menu_language_xml)
+        self.menu_language_html = wx.MenuItem(parentMenu=self.menu_language, id=wx.ID_ANY, text='HTML',
+                                            kind=wx.ITEM_NORMAL)
+        self.menu_language.Append(self.menu_language_html)
         # endregion
 
         # region encodings menu
@@ -352,6 +355,7 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_language, self.menu_language_bash)
         self.Bind(wx.EVT_MENU, self.on_language, self.menu_language_ps)
         self.Bind(wx.EVT_MENU, self.on_language, self.menu_language_xml)
+        self.Bind(wx.EVT_MENU, self.on_language, self.menu_language_html)
 
         self.Bind(wx.EVT_MENU, self.on_view_whitespace, self.menu_view_whitespace)
         self.Bind(wx.EVT_MENU, self.on_view_eol, self.menu_view_eol)
@@ -574,9 +578,6 @@ class MainWindow(wx.Frame):
         else:
             return
 
-    def on_info(self, event):
-        _ = event
-        self.on_about(None)
 
     def on_menu_tools_compare(self, _):
         if len(self.compare_tabs) == 2:  # already in compare so do nothing
@@ -837,6 +838,8 @@ class MainWindow(wx.Frame):
             lang = 'ps'
         elif event.GetId() == self.menu_language_xml.GetId():
             lang = 'xml'
+        elif event.GetId() == self.menu_language_html.GetId():
+            lang = 'html'
         else:
             lang = 'text'
         cp = self.notebook.GetCurrentPage()
@@ -910,6 +913,16 @@ class MainWindow(wx.Frame):
             te.code_page = enc
             self.status_bar.SetStatusText(enc, 3)
         
+    def on_info(self, event):
+        _ = event
+        self.on_about(None)
+        for mnu, lbl in self.menu_bar.GetMenus():
+            print(lbl)
+            # d = wx.Menu()
+            # f = wx.MenuItem()
+            # f.GetItemLabel()
+            for mi in mnu.GetMenuItems():
+                print(mi.GetItemLabel(), mi.GetId())
 
 app = wx.App()
 MainWindow(None)

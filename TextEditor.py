@@ -202,10 +202,12 @@ class TextEditor(wx.stc.StyledTextCtrl):
         if lang == 'xml':
             self.lang = 'xml'
             self.lang_xml()
+        if lang == 'html':
+            self.lang = 'html'
+            self.lang_html()
         if lang == 'text':
             self.lang = 'text'
             self.lang_txt()
-        
 
     def set_folding(self, fold=False):
         if fold:
@@ -434,6 +436,55 @@ class TextEditor(wx.stc.StyledTextCtrl):
         # self.source.SetProperty("fold.html", "1") # not sure xml version of this
         self.set_folding(True)
 
+    def lang_html(self):
+        self.StyleClearAll()
+        self.SetLexer(stc.STC_LEX_HTML)
+        self.SetKeyWords(1, '!doctype ^data- a abbr accept accept-charset accesskey acronym action address align '
+                            'alink alt applet archive area article aside async audio autocomplete autofocus axis '
+                            'b background base basefont bdi bdo bgcolor bgsound big blink blockquote body border '
+                            'br button canvas caption cellpadding cellspacing center char charoff charset checkbox '
+                            'checked cite class classid clear code codebase codetype col colgroup color cols colspan '
+                            'command compact content contenteditable contextmenu coords data datafld dataformatas '
+                            'datalist datapagesize datasrc datetime dd declare defer del details dfn dialog dir '
+                            'disabled div dl draggable dropzone dt element em embed enctype event face fieldset '
+                            'figcaption figure file font footer for form formaction formenctype formmethod formnovalidate '
+                            'formtarget frame frameborder frameset h1 h2 h3 h4 h5 h6 head header headers height hgroup '
+                            'hidden hr href hreflang hspace html http-equiv i id iframe image img input ins isindex ismap '
+                            'kbd keygen label lang language leftmargin legend li link list listing longdesc main manifest '
+                            'map marginheight marginwidth mark marquee max maxlength media menu menuitem meta meter method '
+                            'min multicol multiple name nav nobr noembed noframes nohref noresize noscript noshade novalidate '
+                            'nowrap object ol onabort onafterprint onautocomplete onautocompleteerror onbeforeonload '
+                            'onbeforeprint onblur oncancel oncanplay oncanplaythrough onchange onclick onclose oncontextmenu '
+                            'oncuechange ondblclick ondrag ondragend ondragenter ondragleave ondragover ondragstart ondrop '
+                            'ondurationchange onemptied onended onerror onfocus onhashchange oninput oninvalid onkeydown '
+                            'onkeypress onkeyup onload onloadeddata onloadedmetadata onloadstart onmessage onmousedown '
+                            'onmouseenter onmouseleave onmousemove onmouseout onmouseover onmouseup onmousewheel onoffline '
+                            'ononline onpagehide onpageshow onpause onplay onplaying onpointercancel onpointerdown onpointerenter '
+                            'onpointerleave onpointerlockchange onpointerlockerror onpointermove onpointerout onpointerover '
+                            'onpointerup onpopstate onprogress onratechange onreadystatechange onredo onreset onresize onscroll '
+                            'onseeked onseeking onselect onshow onsort onstalled onstorage onsubmit onsuspend ontimeupdate ontoggle '
+                            'onundo onunload onvolumechange onwaiting optgroup option output p param password pattern picture placeholder '
+                            'plaintext pre profile progress prompt public q radio readonly rel required reset rev reversed role rows '
+                            'rowspan rp rt rtc ruby rules s samp sandbox scheme scope scoped script seamless section select selected '
+                            'shadow shape size sizes small source spacer span spellcheck src srcdoc standby start step strike strong '
+                            'style sub submit summary sup svg svg:svg tabindex table target tbody td template text textarea tfoot th '
+                            'thead time title topmargin tr track tt type u ul usemap valign value valuetype var version video '
+                            'vlink vspace wbr width xml xmlns xmp')   
+        self.StyleSetSpec(stc.STC_H_DEFAULT, 'fore:#000000,back:#FFFFFF,bold')
+        self.StyleSetSpec(stc.STC_H_COMMENT, 'fore:#008000,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_H_NUMBER, 'fore:#FF0000,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_H_DOUBLESTRING, 'fore:#8000FF,back:#FFFFFF,bold')
+        self.StyleSetSpec(stc.STC_H_SINGLESTRING, 'fore:#8000FF,back:#FFFFFF,bold')
+        self.StyleSetSpec(stc.STC_H_TAG, 'fore:#0000FF,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_H_TAGEND, 'fore:#0000FF,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_H_TAGUNKNOWN, 'fore:#000000,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_H_ATTRIBUTE, 'fore:#FF0000,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_H_ATTRIBUTEUNKNOWN, 'fore:#000000,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_H_SGML_DEFAULT, 'fore:#000000,back:#A6CAF0')
+        self.StyleSetSpec(stc.STC_H_CDATA, 'fore:#FF8000,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_H_VALUE, 'fore:#000000,back:#A6CAF0')
+        self.StyleSetSpec(stc.STC_H_ENTITY, 'fore:#000000,back:#FEFDE0,italic')
+        
     def set_styles(self):
         self.StyleSetSpec(4, 'back:TURQUOISE')  # style set 4 for compare matched line
         self.StyleSetSpec(5, 'back:WHEAT')  # style set 5 for compare unmatched line

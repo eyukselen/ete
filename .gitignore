@@ -10,6 +10,7 @@ __pycache__/
 .vscode/
 .Python
 build/
+cleanup/
 develop-eggs/
 dist/
 downloads/

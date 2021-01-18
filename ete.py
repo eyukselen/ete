@@ -1,18 +1,21 @@
 import os
-import sys
+import sys # from sys import platform can be cleaner
 import wx
 import wx.adv
 import wx.aui as aui
 import wx.stc as stc
 # import wx.lib.inspection # for debugging 
+from configs import *
 import FindReplaceDlg as Frd
 from TextEditor import TextEditor
 # region high dpi settings for windows
 if sys.platform == 'win32':
-    import ctypes
+    # import ctypes
+    from ctypes import OleDLL
     try:
         # ctypes.windll.shcore.SetProcessDpiAwareness(True)
-        ctypes.OleDLL('shcore').SetProcessDpiAwareness(1)
+        # ctypes.OleDLL('shcore').SetProcessDpiAwareness(1)
+        OleDLL('shcore').SetProcessDpiAwareness(1)
         pass
     except (AttributeError, OSError):
         pass
@@ -24,6 +27,7 @@ class MainWindow(wx.Frame):
         wx.Frame.__init__(self, parent, title='ete - ete text editor')
         self.SetSize((800, 600))
         self.compare_tabs = []
+        self.transparency = 255
         self.ID_SYNC_SCROLL_R = wx.ID_ANY
         self.ID_SYNC_SCROLL_L = wx.ID_ANY
         self.ID_SYNC_ZOOM_L = wx.ID_ANY
@@ -48,242 +52,122 @@ class MainWindow(wx.Frame):
         replace_ico = wx.ArtProvider.GetBitmap(wx.ART_FIND_AND_REPLACE, wx.ART_TOOLBAR, icon_size)
         about_ico = wx.ArtProvider.GetBitmap(wx.ART_HELP_BOOK, wx.ART_TOOLBAR, icon_size)
         # endregion
+        
+        menux = {
+            'file' : [
+                        [EID_FILE_NEW, '&New\tCTRL+N', new_ico,],
+                        [EID_FILE_OPEN, '&Open\tCTRL+O', open_ico,],
+                        [EID_FILE_SAVE, '&Save\tCTRL+S', save_ico,],
+                        [EID_FILE_SAVEAS, 'Save &As\tCTRL+SHIFT+S', save_as_ico,],
+                        [EID_SEP,],
+                        [EID_CLOSE, 'Close', ],
+                        [EID_FILE_EXIT, 'E&xit', exit_ico,],
+                     ],
+            'edit' : [
+                        [EID_EDIT_UNDO, '&Undo\tCTRL+Z', undo_ico,],
+                        [EID_EDIT_REDO, '&Redo\tCTRL+Y', redo_ico,],
+                        [EID_SEP,],
+                        [EID_EDIT_CUT, 'Cu&t\tCTRL+X', cut_ico,],
+                        [EID_EDIT_COPY, '&Copy\tCTRL+C', copy_ico,],
+                        [EID_EDIT_PASTE, '&Paste\tCTRL+V', paste_ico,],
+                        [EID_SEP,],
+                        [EID_EDIT_FIND, '&Find\tCTRL+F', find_ico,],
+                        [EID_EDIT_REPLACE, '&Replace\tCTRL+R', replace_ico,],
+                        [EID_EDIT_JUMPTO, 'Jump To\tCTRL+J', select_ico,],
+                        [EID_SEP,],
+                        [EID_EDIT_DELETE, 'Delete', delete_ico,],
+                        [EID_EDIT_SELECTALL, 'Select All', select_ico,],
+                        [EID_SEP,],
+                        [EID_EDIT_UPPER, 'Upper Case',],
+                        [EID_EDIT_LOWER, 'Lower Case',],
+                        [EID_SEP,],
+                        [EID_EDIT_CRLF, 'Change Eol to CRLF'],
+                        [EID_EDIT_LF, 'Change Eol to LF',],
+                        [EID_EDIT_CR, 'Change Eol to CR',],
+                      ],
+            'view' :  [
+                        [EID_VIEW_SPACE, 'Show White Space',],
+                        [EID_VIEW_EOL, 'Show End Of Line',],
+                        [EID_VIEW_INDENT, 'Show Indentation Guides',],
+                        [EID_SEP,],
+                        [EID_VIEW_WRAP, 'Wrap',],
+                        [EID_VIEW_TRANSPARENT, 'Transparent',],
 
-        # region menu definition
-
-        # region file menu
-        self.menu_file = wx.Menu()
-        self.menu_file_new = wx.MenuItem(parentMenu=self.menu_file, id=wx.ID_NEW, text='&New\tCTRL+N',
-                                         kind=wx.ITEM_NORMAL)
-        self.menu_file_new.SetBitmap(new_ico)
-        self.menu_file.Append(self.menu_file_new)
-
-        self.menu_file_open = wx.MenuItem(parentMenu=self.menu_file, id=wx.ID_OPEN, text='&Open\tCTRL+O',
-                                          kind=wx.ITEM_NORMAL)
-        self.menu_file_open.SetBitmap(open_ico)
-        self.menu_file.Append(self.menu_file_open)
-
-        self.menu_file_save = wx.MenuItem(parentMenu=self.menu_file, id=wx.ID_SAVE, text='&Save\tCTRL+S',
-                                          kind=wx.ITEM_NORMAL)
-        self.menu_file_save.SetBitmap(save_ico)
-        self.menu_file.Append(self.menu_file_save)
-
-        self.menu_file_save_as = wx.MenuItem(parentMenu=self.menu_file, id=wx.ID_SAVEAS, text='Save &As\tCTRL+SHIFT+S',
-                                             kind=wx.ITEM_NORMAL)
-        self.menu_file_save_as.SetBitmap(save_as_ico)
-        self.menu_file.Append(self.menu_file_save_as)
-
-        self.menu_file.AppendSeparator()
-
-        self.menu_file_exit = wx.MenuItem(parentMenu=self.menu_file, id=wx.ID_EXIT, text='E&xit', kind=wx.ITEM_NORMAL)
-        self.menu_file_exit.SetBitmap(exit_ico)
-        self.menu_file.Append(self.menu_file_exit)
-        # did not add \tCTRL+X as it is conflicting with 'Cut'
-
-        # endregion
-
-        # region edit menu
-        self.menu_edit = wx.Menu()
-        self.menu_edit_undo = wx.MenuItem(parentMenu=self.menu_edit,
-                                          id=wx.ID_UNDO, text='&Undo\tCTRL+Z',
-                                          kind=wx.ITEM_NORMAL)
-        self.menu_edit_undo.SetBitmap(undo_ico)
-        self.menu_edit.Append(self.menu_edit_undo)
-
-        self.menu_edit_redo = wx.MenuItem(parentMenu=self.menu_edit, id=wx.ID_REDO, text='&Redo\tCTRL+Y',
-                                          kind=wx.ITEM_NORMAL)
-        self.menu_edit_redo.SetBitmap(redo_ico)
-        self.menu_edit.Append(self.menu_edit_redo)
-
-        self.menu_edit.AppendSeparator()
-
-        self.menu_edit_cut = wx.MenuItem(parentMenu=self.menu_edit, id=wx.ID_CUT, text='Cu&t\tCTRL+X',
-                                         kind=wx.ITEM_NORMAL)
-        self.menu_edit_cut.SetBitmap(cut_ico)
-        self.menu_edit.Append(self.menu_edit_cut)
-
-        self.menu_edit_copy = wx.MenuItem(parentMenu=self.menu_edit, id=wx.ID_COPY, text='&Copy\tCTRL+C',
-                                          kind=wx.ITEM_NORMAL)
-        self.menu_edit_copy.SetBitmap(copy_ico)
-        self.menu_edit.Append(self.menu_edit_copy)
-
-        self.menu_edit_paste = wx.MenuItem(parentMenu=self.menu_edit, id=wx.ID_PASTE, text='&Paste\tCTRL+V',
-                                           kind=wx.ITEM_NORMAL)
-        self.menu_edit_paste.SetBitmap(paste_ico)
-        self.menu_edit.Append(self.menu_edit_paste)
-
-        self.menu_edit.AppendSeparator()
-
-        self.menu_edit_find = wx.MenuItem(parentMenu=self.menu_edit, id=wx.ID_FIND, text='&Find\tCTRL+F',
-                                          kind=wx.ITEM_NORMAL)
-        self.menu_edit_find.SetBitmap(find_ico)
-        self.menu_edit.Append(self.menu_edit_find)
-
-        self.menu_edit_replace = wx.MenuItem(parentMenu=self.menu_edit, id=wx.ID_REPLACE, text='&Replace\tCTRL+R',
-                                             kind=wx.ITEM_NORMAL)
-        self.menu_edit_replace.SetBitmap(replace_ico)
-        self.menu_edit.Append(self.menu_edit_replace)
-
-        self.menu_edit_jump_to = wx.MenuItem(parentMenu=self.menu_edit, id=wx.ID_JUMP_TO, text='Jump To\tCTRL+J',
-                                             kind=wx.ITEM_NORMAL)
-        self.menu_edit_jump_to.SetBitmap(select_ico)
-        self.menu_edit.Append(self.menu_edit_jump_to)
-
-        self.menu_edit.AppendSeparator()
-
-        self.menu_edit_delete = wx.MenuItem(parentMenu=self.menu_edit, id=wx.ID_DELETE, text='Delete',
-                                            kind=wx.ITEM_NORMAL)
-        self.menu_edit_delete.SetBitmap(delete_ico)
-        self.menu_edit.Append(self.menu_edit_delete)
-
-        self.menu_edit_select_all = wx.MenuItem(parentMenu=self.menu_edit, id=wx.ID_SELECTALL, text='Select All',
-                                                kind=wx.ITEM_NORMAL)
-        self.menu_edit_select_all.SetBitmap(select_ico)
-        self.menu_edit.Append(self.menu_edit_select_all)
-
-        self.menu_edit.AppendSeparator()
-
-        self.menu_edit_uppercase = wx.MenuItem(parentMenu=self.menu_edit, id=wx.ID_ANY, text='Upper Case',
-                                               kind=wx.ITEM_NORMAL)
-        self.menu_edit.Append(self.menu_edit_uppercase)
-
-        self.menu_edit_lowercase = wx.MenuItem(parentMenu=self.menu_edit, id=wx.ID_ANY, text='Lower Case',
-                                               kind=wx.ITEM_NORMAL)
-        self.menu_edit.Append(self.menu_edit_lowercase)
-
-        self.menu_edit_eol = wx.Menu()
-        self.menu_edit_eol_crlf = wx.MenuItem(parentMenu=self.menu_edit, id=wx.ID_ANY, text='CRLF', kind=wx.ITEM_NORMAL)
-        self.menu_edit_eol.Append(self.menu_edit_eol_crlf)
-        self.menu_edit_eol_lf = wx.MenuItem(parentMenu=self.menu_edit, id=wx.ID_ANY, text='LF', kind=wx.ITEM_NORMAL)
-        self.menu_edit_eol.Append(self.menu_edit_eol_lf)
-        self.menu_edit_eol_cr = wx.MenuItem(parentMenu=self.menu_edit, id=wx.ID_ANY, text='CR', kind=wx.ITEM_NORMAL)
-        self.menu_edit_eol.Append(self.menu_edit_eol_cr)
-        self.menu_edit.AppendSubMenu(self.menu_edit_eol, 'Change Eol')
-        # endregion
-
-        # region view menu
-        self.menu_view = wx.Menu()
-        self.menu_view_whitespace = wx.MenuItem(parentMenu=self.menu_view, id=wx.ID_ANY, text='Show White Space',
-                                                kind=wx.ITEM_NORMAL)
-        self.menu_view.Append(self.menu_view_whitespace)
-
-        self.menu_view_eol = wx.MenuItem(parentMenu=self.menu_view, id=wx.ID_ANY, text='Show End Of Line',
-                                         kind=wx.ITEM_NORMAL)
-        self.menu_view.Append(self.menu_view_eol)
-
-        self.menu_view_indentguide = wx.MenuItem(parentMenu=self.menu_view, id=wx.ID_ANY,
-                                                 text='Show Indentation Guides', kind=wx.ITEM_NORMAL)
-        self.menu_view.Append(self.menu_view_indentguide)
-
-        self.menu_view.AppendSeparator()
-
-        self.menu_view_wrap = wx.MenuItem(parentMenu=self.menu_view, id=wx.ID_ANY, text='Wrap', kind=wx.ITEM_NORMAL)
-        self.menu_view.Append(self.menu_view_wrap)
-
-        self.menu_view.AppendSeparator()
-
-        self.menu_view_transparent = wx.MenuItem(parentMenu=self.menu_view, id=wx.ID_ANY, text='Transparent',
-                                                 kind=wx.ITEM_CHECK)
-        self.menu_view.Append(self.menu_view_transparent)
-        # endregion
-
-        # region language menu
-        self.menu_language = wx.Menu()
-        self.menu_language_txt = wx.MenuItem(parentMenu=self.menu_language, id=wx.ID_ANY, text='Text',
-                                             kind=wx.ITEM_NORMAL)
-        self.menu_language.Append(self.menu_language_txt)
-
-        self.menu_language_python = wx.MenuItem(parentMenu=self.menu_language, id=wx.ID_ANY, text='Python',
-                                                kind=wx.ITEM_NORMAL)
-        self.menu_language.Append(self.menu_language_python)
-
-        self.menu_language_sql = wx.MenuItem(parentMenu=self.menu_language, id=wx.ID_ANY, text='SQL',
-                                             kind=wx.ITEM_NORMAL)
-        self.menu_language.Append(self.menu_language_sql)
-        self.menu_language_bash = wx.MenuItem(parentMenu=self.menu_language, id=wx.ID_ANY, text='Bash',
-                                              kind=wx.ITEM_NORMAL)
-        self.menu_language.Append(self.menu_language_bash)
-        self.menu_language_ps = wx.MenuItem(parentMenu=self.menu_language, id=wx.ID_ANY, text='PowerShell',
-                                            kind=wx.ITEM_NORMAL)
-        self.menu_language.Append(self.menu_language_ps)
-        self.menu_language_xml = wx.MenuItem(parentMenu=self.menu_language, id=wx.ID_ANY, text='XML',
-                                            kind=wx.ITEM_NORMAL)
-        self.menu_language.Append(self.menu_language_xml)
-        self.menu_language_html = wx.MenuItem(parentMenu=self.menu_language, id=wx.ID_ANY, text='HTML',
-                                            kind=wx.ITEM_NORMAL)
-        self.menu_language.Append(self.menu_language_html)
-        # endregion
-
-        # region encodings menu
-        self.menu_encode = wx.Menu()
-        self.menu_encode_utf8 = wx.MenuItem(parentMenu=self.menu_encode, id=wx.ID_ANY, text='UTF-8', kind=wx.ITEM_NORMAL)
-        self.menu_encode.Append(self.menu_encode_utf8)
-        self.menu_encode_win1252 = wx.MenuItem(parentMenu=self.menu_encode, id=wx.ID_ANY, text='Win1252', kind=wx.ITEM_NORMAL)
-        self.menu_encode.Append(self.menu_encode_win1252)
-        self.menu_encode_win1254 = wx.MenuItem(parentMenu=self.menu_encode, id=wx.ID_ANY, text='Win1254', kind=wx.ITEM_NORMAL)
-        self.menu_encode.Append(self.menu_encode_win1254)
-        # endregion
-
-        # region tools menu
-        self.menu_tools = wx.Menu()
-        self.menu_tool_compare = wx.MenuItem(parentMenu=self.menu_tools, id=wx.ID_ANY, text='&Compare',
-                                             kind=wx.ITEM_NORMAL)
-        self.menu_tools.Append(self.menu_tool_compare)
-        self.menu_tools_clear_compare = wx.MenuItem(parentMenu=self.menu_tools, id=wx.ID_ANY, text='Clea&r Compare',
-                                                    kind=wx.ITEM_NORMAL)
-        self.menu_tools.Append(self.menu_tools_clear_compare)
-        # endregion
-
-        # region about menu
-        self.menu_about = wx.Menu()
-        self.menu_about_about = wx.MenuItem(parentMenu=self.menu_about, id=wx.ID_ABOUT, text='About',
-                                            kind=wx.ITEM_NORMAL)
-        self.menu_about_about.SetBitmap(about_ico)
-        self.menu_about.Append(self.menu_about_about)
-        # endregion
+                      ],
+            'lang' :  [
+                        [EID_LANG_TXT, 'Text',],
+                        [EID_LANG_PYTHON, 'Python',],
+                        [EID_LANG_MSSQL, 'MSSQL',],
+                        [EID_LANG_BASH, 'Bash',], 
+                        [EID_LANG_POWERSHELL, 'PowerShell',],
+                        [EID_LANG_XML, 'XML',],
+                        [EID_LANG_HTML, 'HTML',],
+                      ],
+            'encoding' : [
+                            [EID_ENCODE_UTF8, 'UTF-8',],
+                            [EID_ENCODE_WIN1252, 'Windows-1252',],
+                            [EID_ENCODE_WIN1254, 'Windows-1254',],
+                         ],
+            'tools' : [
+                         [EID_TOOLS_COMPARE, '&Compare',],
+                         [EID_TOOLS_CLEARCOMP, 'Clea&r Compare',],
+                      ],
+            'about' : [
+                         [EID_ABOUT_INFO, 'About', about_ico,], 
+                      ],
+            }
 
         self.menu_bar = wx.MenuBar()
 
-        self.menu_bar.Append(self.menu_file, '&File')
-        self.menu_bar.Append(self.menu_edit, '&Edit')
-        self.menu_bar.Append(self.menu_view, '&View')
-        self.menu_bar.Append(self.menu_language, '&Language')
-        self.menu_bar.Append(self.menu_encode, 'Encode')
-        self.menu_bar.Append(self.menu_tools, '&Tools')
-        self.menu_bar.Append(self.menu_about, '&About')
+        for item in menux:
+            m = wx.Menu()
+            for i in menux[item]:
+                if i[0] == EID_SEP:
+                    m.AppendSeparator()
+                else:
+                    try:
+                        mi = wx.MenuItem(parentMenu=m, id=i[0], text=i[1], kind=wx.ITEM_NORMAL)
+                    except:
+                        pass
+
+                    if len(i)>2:
+                        try:
+                            mi.SetBitmap(i[2])
+                        except:
+                            print(i[2], i)
+                    m.Append(mi)
+            self.menu_bar.Append(m, item)
 
         self.SetMenuBar(self.menu_bar)
-
         # endregion
 
         # region toolbar definition
         self.tool_bar = wx.ToolBar(self)
 
-        self.tool_bar.AddTool(toolId=wx.ID_NEW, label='New', bitmap=new_ico, bmpDisabled=new_ico, kind=wx.ITEM_NORMAL,
+        self.tool_bar.AddTool(toolId=EID_FILE_NEW, label='New', bitmap=new_ico, bmpDisabled=new_ico, kind=wx.ITEM_NORMAL,
                               shortHelp='New File', longHelp='', clientData=None)
-        self.tool_bar.AddTool(toolId=wx.ID_OPEN, label='Open', bitmap=open_ico, bmpDisabled=open_ico,
+        self.tool_bar.AddTool(toolId=EID_FILE_OPEN, label='Open', bitmap=open_ico, bmpDisabled=open_ico,
                               kind=wx.ITEM_NORMAL, shortHelp='Open File', longHelp='', clientData=None)
-        self.tool_bar.AddTool(toolId=wx.ID_SAVE, label='Save', bitmap=save_ico, bmpDisabled=save_ico,
+        self.tool_bar.AddTool(toolId=EID_FILE_SAVE, label='Save', bitmap=save_ico, bmpDisabled=save_ico,
                               kind=wx.ITEM_NORMAL, shortHelp='Save File', longHelp='', clientData=None)
-        self.tool_bar.AddTool(toolId=wx.ID_SAVEAS, label='Save As', bitmap=save_as_ico, bmpDisabled=new_ico,
+        self.tool_bar.AddTool(toolId=EID_FILE_SAVEAS, label='Save As', bitmap=save_as_ico, bmpDisabled=new_ico,
                               kind=wx.ITEM_NORMAL, shortHelp='Save File As', longHelp='', clientData=None)
         self.tool_bar.AddSeparator()
-        self.tool_bar.AddTool(toolId=wx.ID_CUT, label='Cut', bitmap=cut_ico, bmpDisabled=cut_ico, kind=wx.ITEM_NORMAL,
+        self.tool_bar.AddTool(toolId=EID_EDIT_CUT, label='Cut', bitmap=cut_ico, bmpDisabled=cut_ico, kind=wx.ITEM_NORMAL,
                               shortHelp='Cut', longHelp='Cut Text', clientData=None)
-        self.tool_bar.AddTool(toolId=wx.ID_COPY, label='Copy', bitmap=copy_ico, bmpDisabled=copy_ico,
+        self.tool_bar.AddTool(toolId=EID_EDIT_COPY, label='Copy', bitmap=copy_ico, bmpDisabled=copy_ico,
                               kind=wx.ITEM_NORMAL, shortHelp='Copy', longHelp='Copy Text', clientData=None)
-        self.tool_bar.AddTool(toolId=wx.ID_PASTE, label='Paste', bitmap=paste_ico, bmpDisabled=paste_ico,
+        self.tool_bar.AddTool(toolId=EID_EDIT_PASTE, label='Paste', bitmap=paste_ico, bmpDisabled=paste_ico,
                               kind=wx.ITEM_NORMAL, shortHelp='Paste', longHelp='Paste Text', clientData=None)
         self.tool_bar.AddSeparator()
-        self.tool_bar.AddTool(toolId=wx.ID_FIND, label='Find', bitmap=find_ico, bmpDisabled=find_ico,
+        self.tool_bar.AddTool(toolId=EID_EDIT_FIND, label='Find', bitmap=find_ico, bmpDisabled=find_ico,
                               kind=wx.ITEM_NORMAL, shortHelp='Find', longHelp='Find Text', clientData=None)
-        self.tool_bar.AddTool(toolId=wx.ID_REPLACE, label='Replace Text', bitmap=replace_ico, bmpDisabled=replace_ico,
-                              kind=wx.ITEM_NORMAL,
-                              shortHelp='Replace', longHelp='Replace Text', clientData=None)
+        self.tool_bar.AddTool(toolId=EID_EDIT_REPLACE, label='Replace Text', bitmap=replace_ico, bmpDisabled=replace_ico,
+                              kind=wx.ITEM_NORMAL, shortHelp='Replace', longHelp='Replace Text', clientData=None)
         self.tool_bar.AddSeparator()
-        self.tool_bar.AddTool(toolId=wx.ID_INFO, label='Info', bitmap=info_ico, bmpDisabled=info_ico,
+        self.tool_bar.AddTool(toolId=EID_ABOUT_INFO, label='Info', bitmap=info_ico, bmpDisabled=info_ico,
                               kind=wx.ITEM_NORMAL, shortHelp='Information', longHelp='', clientData=None)
-        self.tool_bar.AddTool(toolId=wx.ID_EXIT, label='Exit', bitmap=exit_ico, bmpDisabled=exit_ico,
+        self.tool_bar.AddTool(toolId=EID_FILE_EXIT, label='Exit', bitmap=exit_ico, bmpDisabled=exit_ico,
                               kind=wx.ITEM_NORMAL, shortHelp='Exit Application', longHelp='', clientData=None)
 
         self.SetToolBar(self.tool_bar)
@@ -310,6 +194,12 @@ class MainWindow(wx.Frame):
 
         # endregion
 
+        # region status bar
+        self.status_bar = wx.StatusBar(self)
+        self.status_bar.SetFieldsCount(4, [-2, -1, -1, -1])
+        self.SetStatusBar(self.status_bar)
+        # endregion
+
         # region tab_popup
         self.tab_popup = wx.Menu()
         self.tab_popup_close = wx.MenuItem(self.tab_popup, wx.ID_ANY, "Close")
@@ -318,63 +208,55 @@ class MainWindow(wx.Frame):
         self.tab_popup_close_all_others = wx.MenuItem(self.tab_popup, wx.ID_ANY, "Close All others")
         self.tab_popup.Append(self.tab_popup_close_all_others)
         self.Bind(wx.EVT_MENU, self.on_tab_popup_action, self.tab_popup_close_all_others)
-
-        # endregion
-
-        # region status bar
-
-        self.status_bar = wx.StatusBar(self)
-        self.status_bar.SetFieldsCount(4, [-2, -1, -1, -1])
-        self.SetStatusBar(self.status_bar)
-
         # endregion
 
         # region event bindings
 
-        self.Bind(wx.EVT_MENU, self.new_page, id=wx.ID_NEW)
-        self.Bind(wx.EVT_MENU, self.open_page, id=wx.ID_OPEN)
-        self.Bind(wx.EVT_MENU, self.save_page, id=wx.ID_SAVE)
-        self.Bind(wx.EVT_MENU, self.save_as_page, id=wx.ID_SAVEAS)
-        self.Bind(wx.EVT_MENU, self.on_info, id=wx.ID_INFO)
-        self.Bind(wx.EVT_MENU, self.onexit, id=wx.ID_EXIT)
+        self.Bind(wx.EVT_MENU, self.new_page, id=EID_FILE_NEW)
+        self.Bind(wx.EVT_MENU, self.open_page, id=EID_FILE_OPEN)
+        self.Bind(wx.EVT_MENU, self.save_page, id=EID_FILE_SAVE)
+        self.Bind(wx.EVT_MENU, self.save_as_page, id=EID_FILE_SAVEAS)
+        self.Bind(wx.EVT_MENU, self.close_page, id=EID_CLOSE)
+        self.Bind(wx.EVT_MENU, self.on_info, id=EID_ABOUT_INFO)
+        self.Bind(wx.EVT_MENU, self.onexit, id=EID_FILE_EXIT)
 
-        self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=wx.ID_UNDO)
-        self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=wx.ID_REDO)
-        self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=wx.ID_CUT)
-        self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=wx.ID_COPY)
-        self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=wx.ID_PASTE)
-        self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=wx.ID_DELETE)
-        self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=wx.ID_SELECTALL)
-        self.Bind(wx.EVT_MENU, self.on_find, id=wx.ID_FIND)
-        self.Bind(wx.EVT_MENU, self.on_find, id=wx.ID_REPLACE)  # using the same dialog as find for now.
-        self.Bind(wx.EVT_MENU, self.on_jump_to, id=wx.ID_JUMP_TO)
-        self.Bind(wx.EVT_MENU, self.on_about, id=wx.ID_ABOUT)
-        self.Bind(wx.EVT_MENU, self.on_language, self.menu_language_txt)
-        self.Bind(wx.EVT_MENU, self.on_language, self.menu_language_python)
-        self.Bind(wx.EVT_MENU, self.on_language, self.menu_language_sql)
-        self.Bind(wx.EVT_MENU, self.on_language, self.menu_language_bash)
-        self.Bind(wx.EVT_MENU, self.on_language, self.menu_language_ps)
-        self.Bind(wx.EVT_MENU, self.on_language, self.menu_language_xml)
-        self.Bind(wx.EVT_MENU, self.on_language, self.menu_language_html)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID_EDIT_UNDO)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID_EDIT_REDO)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID_EDIT_CUT)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID_EDIT_COPY)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID_EDIT_PASTE)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID_EDIT_DELETE)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID_EDIT_SELECTALL)
+        self.Bind(wx.EVT_MENU, self.on_find, id=EID_EDIT_FIND)
+        self.Bind(wx.EVT_MENU, self.on_find, id=EID_EDIT_REPLACE)  # using the same dialog as find for now.
+        self.Bind(wx.EVT_MENU, self.on_jump_to, id=EID_EDIT_JUMPTO)
+        self.Bind(wx.EVT_MENU, self.on_about, id=EID_ABOUT_INFO)
+        self.Bind(wx.EVT_MENU, self.on_language, id=EID_LANG_TXT)
+        self.Bind(wx.EVT_MENU, self.on_language, id=EID_LANG_PYTHON)
+        self.Bind(wx.EVT_MENU, self.on_language, id=EID_LANG_MSSQL)
+        self.Bind(wx.EVT_MENU, self.on_language, id=EID_LANG_BASH)
+        self.Bind(wx.EVT_MENU, self.on_language, id=EID_LANG_POWERSHELL)
+        self.Bind(wx.EVT_MENU, self.on_language, id=EID_LANG_XML)
+        self.Bind(wx.EVT_MENU, self.on_language, id=EID_LANG_HTML)
 
-        self.Bind(wx.EVT_MENU, self.on_view_whitespace, self.menu_view_whitespace)
-        self.Bind(wx.EVT_MENU, self.on_view_eol, self.menu_view_eol)
-        self.Bind(wx.EVT_MENU, self.on_view_indent_guide, self.menu_view_indentguide)
-        self.Bind(wx.EVT_MENU, self.on_view_wrap, self.menu_view_wrap)
-        self.Bind(wx.EVT_MENU, self.on_view_transparent, self.menu_view_transparent)
+        self.Bind(wx.EVT_MENU, self.on_view_whitespace, id=EID_VIEW_SPACE)
+        self.Bind(wx.EVT_MENU, self.on_view_eol, id=EID_VIEW_EOL)
+        self.Bind(wx.EVT_MENU, self.on_view_indent_guide, id=EID_VIEW_INDENT)
+        self.Bind(wx.EVT_MENU, self.on_view_wrap, id=EID_VIEW_WRAP)
+        self.Bind(wx.EVT_MENU, self.on_view_transparent, id=EID_VIEW_TRANSPARENT)
 
-        self.Bind(wx.EVT_MENU, self.on_menu_tools_compare, self.menu_tool_compare)
-        self.Bind(wx.EVT_MENU, self.on_menu_tools_clear_compare, self.menu_tools_clear_compare)
-        self.Bind(wx.EVT_MENU, self.on_menu_edit_case, self.menu_edit_uppercase)
-        self.Bind(wx.EVT_MENU, self.on_menu_edit_case, self.menu_edit_lowercase)
+        self.Bind(wx.EVT_MENU, self.on_menu_tools_compare, id=EID_TOOLS_COMPARE)
+        self.Bind(wx.EVT_MENU, self.on_menu_tools_clear_compare, id=EID_TOOLS_CLEARCOMP)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_case, id=EID_EDIT_UPPER)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_case, id=EID_EDIT_LOWER)
 
-        self.Bind(wx.EVT_MENU, self.on_menu_edit_eol, self.menu_edit_eol_crlf)
-        self.Bind(wx.EVT_MENU, self.on_menu_edit_eol, self.menu_edit_eol_lf)
-        self.Bind(wx.EVT_MENU, self.on_menu_edit_eol, self.menu_edit_eol_cr)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_eol, id=EID_EDIT_CRLF)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_eol, id=EID_EDIT_LF)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_eol, id=EID_EDIT_CR)
 
-        self.Bind(wx.EVT_MENU, self.on_menu_encode, self.menu_encode_utf8)
-        self.Bind(wx.EVT_MENU, self.on_menu_encode, self.menu_encode_win1252)
-        self.Bind(wx.EVT_MENU, self.on_menu_encode, self.menu_encode_win1254)
+        self.Bind(wx.EVT_MENU, self.on_menu_encode, id=EID_ENCODE_UTF8)
+        self.Bind(wx.EVT_MENU, self.on_menu_encode, id=EID_ENCODE_WIN1252)
+        self.Bind(wx.EVT_MENU, self.on_menu_encode, id=EID_ENCODE_WIN1254)
 
         # detect double click on tab bar empty space
         self.Bind(aui.EVT_AUINOTEBOOK_BG_DCLICK, self.new_page, id=wx.ID_ANY)
@@ -388,6 +270,7 @@ class MainWindow(wx.Frame):
         self.search_dlg = Frd.FindReplaceDlg(parent=self, notebook=self.notebook)
         self.info = wx.adv.AboutDialogInfo()
         self.Show()
+        
 
     def get_text_editor_from_page(self, page_idx):
         page = self.notebook.GetPage(page_idx)
@@ -398,15 +281,9 @@ class MainWindow(wx.Frame):
                 else:
                     return None
 
-    def on_view_transparent(self, _):
-        if self.menu_view_transparent.IsChecked():
-            self.SetTransparent(128)
-        else:
-            self.SetTransparent(255)
-
     def on_about(self, _):
         self.info.SetName("ete text editor")
-        self.info.SetVersion('0.2.a')
+        self.info.SetVersion('0.3.a')
         self.info.SetDescription('Text editor using wxpython')
         self.info.SetDevelopers(['Emre Yukselen'])
         self.info.SetWebSite('https://github.com/eyukselen/ete')
@@ -428,7 +305,7 @@ class MainWindow(wx.Frame):
     def open_page(self, event):
         if hasattr(event, 'Files'):
             files = event.GetFiles()
-        elif event.GetId() == wx.ID_OPEN:
+        elif event.GetId() == EID_FILE_OPEN:
             with wx.FileDialog(self, "Open file", wildcard="text files (*.txt)|*.txt|All files (*.*)|*.*",
                                style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_MULTIPLE) as fileDialog:
                 if fileDialog.ShowModal() == wx.ID_CANCEL:
@@ -508,6 +385,11 @@ class MainWindow(wx.Frame):
                 if x != active_tab:
                     self.close_tab(x)
 
+    def close_page(self, event):
+        if self.notebook.GetPageCount() > 0:
+            page_idx = self.notebook.GetPageIndex(self.notebook.GetCurrentPage())
+            self.close_tab(page_idx)
+
     def close_tab(self, page):
         self.notebook.SetSelection(page)
         te = self.get_text_editor_from_page(page)
@@ -578,6 +460,9 @@ class MainWindow(wx.Frame):
         else:
             return
 
+    def on_info(self, event):
+        _ = event
+        self.on_about(None)
 
     def on_menu_tools_compare(self, _):
         if len(self.compare_tabs) == 2:  # already in compare so do nothing
@@ -823,25 +708,29 @@ class MainWindow(wx.Frame):
         else:
             te.SetWrapMode(True)
 
+    def on_view_transparent(self, _):
+        tp = TransparencyDlg(self)
+        tp.Show()
+
     def on_language(self, event):
         if self.notebook.GetPageCount() == 0:
             return
-        if event.GetId() == self.menu_language_python.GetId():
+        if event.GetId() == EID_LANG_PYTHON:
             lang = 'python'
-        elif event.GetId() == self.menu_language_sql.GetId():
+        elif event.GetId() == EID_LANG_MSSQL:
             lang = 'mssql'
-        elif event.GetId() == self.menu_language_txt.GetId():
-            lang = 'text'
-        elif event.GetId() == self.menu_language_bash.GetId():
+        elif event.GetId() == EID_LANG_TXT:
+            lang = 'txt'
+        elif event.GetId() == EID_LANG_BASH:
             lang = 'bash'
-        elif event.GetId() == self.menu_language_ps.GetId():
+        elif event.GetId() == EID_LANG_POWERSHELL:
             lang = 'ps'
-        elif event.GetId() == self.menu_language_xml.GetId():
+        elif event.GetId() == EID_LANG_XML:
             lang = 'xml'
-        elif event.GetId() == self.menu_language_html.GetId():
+        elif event.GetId() == EID_LANG_HTML:
             lang = 'html'
         else:
-            lang = 'text'
+            lang = 'txt'
         cp = self.notebook.GetCurrentPage()
         te = self.get_text_editor_from_page(self.notebook.GetPageIndex(cp))
         te.set_lang(lang)
@@ -850,9 +739,9 @@ class MainWindow(wx.Frame):
         if self.notebook.GetPageCount() == 0:
             return
         cs = None
-        if event.GetId() == self.menu_edit_uppercase.GetId():
+        if event.GetId() == 2011:
             cs = 'upper'
-        elif event.GetId() == self.menu_edit_lowercase.GetId():
+        elif event.GetId() == 2012:
             cs = 'lower'
         cp = self.notebook.GetCurrentPage()
         te = self.get_text_editor_from_page(self.notebook.GetPageIndex(cp))
@@ -862,11 +751,11 @@ class MainWindow(wx.Frame):
         if self.notebook.GetPageCount() == 0:
             return
         eol_mode = 0
-        if event.GetId() == self.menu_edit_eol_crlf.GetId():
+        if event.GetId() == 2013:
             eol_mode = wx.stc.STC_EOL_CRLF
-        elif event.GetId() == self.menu_edit_eol_lf.GetId():
+        elif event.GetId() == 2014:
             eol_mode = wx.stc.STC_EOL_LF
-        elif event.GetId() == self.menu_edit_eol_cr.GetId():
+        elif event.GetId() == 2015:
             eol_mode = wx.stc.STC_EOL_CR
         cp = self.notebook.GetCurrentPage()
         te = self.get_text_editor_from_page(self.notebook.GetPageIndex(cp))
@@ -913,16 +802,26 @@ class MainWindow(wx.Frame):
             te.code_page = enc
             self.status_bar.SetStatusText(enc, 3)
         
-    def on_info(self, event):
-        _ = event
-        self.on_about(None)
-        for mnu, lbl in self.menu_bar.GetMenus():
-            print(lbl)
-            # d = wx.Menu()
-            # f = wx.MenuItem()
-            # f.GetItemLabel()
-            for mi in mnu.GetMenuItems():
-                print(mi.GetItemLabel(), mi.GetId())
+
+class TransparencyDlg(wx.Dialog):
+    def __init__(self, parent):
+        self.parent = parent
+        wx.Dialog.__init__(self, parent, id=wx.ID_ANY, title="Set Transparency", pos=wx.DefaultPosition,
+                           size=(300, 150), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER | wx.STAY_ON_TOP)
+        slider = wx.Slider(self, 100, 100, 0, 255, size=(250, 100),
+                           style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS | wx.SL_LABELS)
+        slider.SetTickFreq(10)
+        slider.SetValue(self.parent.transparency)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(slider, 0, wx.LEFT, 10)
+        self.SetSizer(sizer)
+        self.Bind(wx.EVT_SLIDER, self.on_slide)
+
+    def on_slide(self, event):
+        x = event.Selection
+        self.parent.transparency = x
+        self.parent.SetTransparent(max(x, 10))  # unexpectedly printing alpha on console with DeprecationWarning
+
 
 app = wx.App()
 MainWindow(None)

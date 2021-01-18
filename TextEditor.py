@@ -53,35 +53,36 @@ class TextEditor(wx.stc.StyledTextCtrl):
 
         # region context menu
         self.menu_popup = wx.Menu()
-        menu_popup_undo = wx.MenuItem(self.menu_popup, wx.ID_UNDO, "Undo")
+        menu_popup_undo = wx.MenuItem(self.menu_popup, 2001, "Undo")
         self.menu_popup.Append(menu_popup_undo)
         self.Bind(wx.EVT_MENU, self.undo, menu_popup_undo)
 
-        menu_popup_redo = wx.MenuItem(self.menu_popup, wx.ID_REDO, "Redo")
+        menu_popup_redo = wx.MenuItem(self.menu_popup, 2002, "Redo")
         self.menu_popup.Append(menu_popup_redo)
         self.Bind(wx.EVT_MENU, self.redo, menu_popup_redo)
 
         self.menu_popup.AppendSeparator()
 
-        menu_popup_cut = wx.MenuItem(self.menu_popup, wx.ID_CUT, "Cut")
+        menu_popup_cut = wx.MenuItem(self.menu_popup, 2003, "Cut")
         self.menu_popup.Append(menu_popup_cut)
         self.Bind(wx.EVT_MENU, self.oncut, menu_popup_cut)
 
-        menu_popup_copy = wx.MenuItem(self.menu_popup, wx.ID_COPY, "Copy")
+        menu_popup_copy = wx.MenuItem(self.menu_popup, 2004, "Copy")
         self.menu_popup.Append(menu_popup_copy)
         self.Bind(wx.EVT_MENU, self.copy, menu_popup_copy)
 
-        menu_popup_paste = wx.MenuItem(self.menu_popup, wx.ID_PASTE, "Paste")
+        menu_popup_paste = wx.MenuItem(self.menu_popup, 2005, "Paste")
         self.menu_popup.Append(menu_popup_paste)
         self.Bind(wx.EVT_MENU, self.paste, menu_popup_paste)
+        self.Bind(wx.EVT_MENU, self.paste, id=5033)
 
-        menu_popup_delete = wx.MenuItem(self.menu_popup, wx.ID_DELETE, "Delete")
+        menu_popup_delete = wx.MenuItem(self.menu_popup, 2009, "Delete")
         self.menu_popup.Append(menu_popup_delete)
         self.Bind(wx.EVT_MENU, self.delete, menu_popup_delete)
 
         self.menu_popup.AppendSeparator()
 
-        menu_popup_select_all = wx.MenuItem(self.menu_popup, wx.ID_SELECTALL, "Select All")
+        menu_popup_select_all = wx.MenuItem(self.menu_popup, 2010, "Select All")
         self.menu_popup.Append(menu_popup_select_all)
         self.Bind(wx.EVT_MENU, self.select_all, menu_popup_select_all)
 
@@ -205,8 +206,8 @@ class TextEditor(wx.stc.StyledTextCtrl):
         if lang == 'html':
             self.lang = 'html'
             self.lang_html()
-        if lang == 'text':
-            self.lang = 'text'
+        if lang == 'txt':
+            self.lang = 'txt'
             self.lang_txt()
 
     def set_folding(self, fold=False):
@@ -517,10 +518,12 @@ class TextEditor(wx.stc.StyledTextCtrl):
             self.code_page = 'utf-8'
             self.SetTextRaw(f)
             self.status_bar.SetStatusText('utf-8', 3)
+            self.SetModified(False)
         else:
             self.code_page = 'windows-1252'
             self.SetText(f.decode('windows-1252'))
             self.status_bar.SetStatusText('windows-1252', 3)
+            self.SetModified(False)
 
     def save_file(self, file):
         f = open(file,'w', encoding=self.code_page, newline='')

@@ -1,6 +1,6 @@
 # ete text editor 
 
-V 0.2.a
+V 0.3.a
 
 Ete is my experiment with wxPython library - styled text control in particular.
 
@@ -25,6 +25,9 @@ Features:
   * windows-1254
 
 
+V 0.3.a
+-code cleanup
+-set transparency dialog
 
 v 0.2.a
 python 3.9.0

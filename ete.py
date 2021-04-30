@@ -1,10 +1,12 @@
 import os
-import sys # from sys import platform can be cleaner
+import sys  # from sys import platform can be cleaner
 import wx
 import wx.adv
 import wx.aui as aui
 import wx.stc as stc
-# import wx.lib.inspection # for debugging 
+import wx.svg
+
+# import wx.lib.inspection # for debugging
 from configs import *
 import FindReplaceDlg as Frd
 from TextEditor import TextEditor
@@ -32,88 +34,110 @@ class MainWindow(wx.Frame):
         self.ID_SYNC_SCROLL_L = wx.ID_ANY
         self.ID_SYNC_ZOOM_L = wx.ID_ANY
         self.ID_SYNC_ZOOM_R = wx.ID_ANY
+        app_ico = wx.Icon()
+        app_ico.LoadFile('icons/ete.png', wx.BITMAP_TYPE_PNG, 32, 32)
+        self.SetIcon(app_ico)
+
 
         # region icon set
-        icon_size = (32, 32)
-        new_ico = wx.ArtProvider.GetBitmap(wx.ART_NEW, wx.ART_TOOLBAR, icon_size)
-        open_ico = wx.ArtProvider.GetBitmap(wx.ART_FILE_OPEN, wx.ART_TOOLBAR, icon_size)
-        save_ico = wx.ArtProvider.GetBitmap(wx.ART_FILE_SAVE, wx.ART_TOOLBAR, icon_size)
-        save_as_ico = wx.ArtProvider.GetBitmap(wx.ART_FILE_SAVE_AS, wx.ART_TOOLBAR, icon_size)
-        exit_ico = wx.ArtProvider.GetBitmap(wx.ART_QUIT, wx.ART_TOOLBAR, icon_size)
-        info_ico = wx.ArtProvider.GetBitmap(wx.ART_INFORMATION, wx.ART_TOOLBAR, icon_size)
-        undo_ico = wx.ArtProvider.GetBitmap(wx.ART_UNDO, wx.ART_TOOLBAR, icon_size)
-        redo_ico = wx.ArtProvider.GetBitmap(wx.ART_REDO, wx.ART_TOOLBAR, icon_size)
-        cut_ico = wx.ArtProvider.GetBitmap(wx.ART_CUT, wx.ART_TOOLBAR, icon_size)
-        copy_ico = wx.ArtProvider.GetBitmap(wx.ART_COPY, wx.ART_TOOLBAR, icon_size)
-        paste_ico = wx.ArtProvider.GetBitmap(wx.ART_PASTE, wx.ART_TOOLBAR, icon_size)
-        delete_ico = wx.ArtProvider.GetBitmap(wx.ART_DELETE, wx.ART_TOOLBAR, icon_size)
-        select_ico = wx.ArtProvider.GetBitmap(wx.ART_LIST_VIEW, wx.ART_TOOLBAR, icon_size)
-        find_ico = wx.ArtProvider.GetBitmap(wx.ART_FIND, wx.ART_TOOLBAR, icon_size)
-        replace_ico = wx.ArtProvider.GetBitmap(wx.ART_FIND_AND_REPLACE, wx.ART_TOOLBAR, icon_size)
-        about_ico = wx.ArtProvider.GetBitmap(wx.ART_HELP_BOOK, wx.ART_TOOLBAR, icon_size)
+        icon_size = (64, 64)
+        # new_ico = wx.ArtProvider.GetBitmap(wx.ART_NEW, wx.ART_TOOLBAR, icon_size)
+        new_ico = wx.svg.SVGimage.CreateFromFile('icons/document-new.svg').ConvertToScaledBitmap(icon_size, self)
+        # open_ico = wx.ArtProvider.GetBitmap(wx.ART_FILE_OPEN, wx.ART_TOOLBAR, icon_size)
+        open_ico = wx.svg.SVGimage.CreateFromFile('icons/document-open.svg').ConvertToScaledBitmap(icon_size, self)
+        # save_ico = wx.ArtProvider.GetBitmap(wx.ART_FILE_SAVE, wx.ART_TOOLBAR, icon_size)
+        save_ico = wx.svg.SVGimage.CreateFromFile('icons/document-save.svg').ConvertToScaledBitmap(icon_size, self)
+        # save_as_ico = wx.ArtProvider.GetBitmap(wx.ART_FILE_SAVE_AS, wx.ART_TOOLBAR, icon_size)
+        save_as_ico = wx.svg.SVGimage.CreateFromFile('icons/document-save-as.svg').ConvertToScaledBitmap(icon_size, self)
+        # exit_ico = wx.ArtProvider.GetBitmap(wx.ART_QUIT, wx.ART_TOOLBAR, icon_size)
+        exit_ico = wx.svg.SVGimage.CreateFromFile('icons/system-shutdown.svg').ConvertToScaledBitmap(icon_size, self)
+        # info_ico = wx.ArtProvider.GetBitmap(wx.ART_INFORMATION, wx.ART_TOOLBAR, icon_size)
+        info_ico = wx.svg.SVGimage.CreateFromFile('icons/dialog-information.svg').ConvertToScaledBitmap(icon_size, self)
+        # undo_ico = wx.ArtProvider.GetBitmap(wx.ART_UNDO, wx.ART_TOOLBAR, icon_size)
+        undo_ico = wx.svg.SVGimage.CreateFromFile('icons/edit-undo.svg').ConvertToScaledBitmap(icon_size, self)
+        # redo_ico = wx.ArtProvider.GetBitmap(wx.ART_REDO, wx.ART_TOOLBAR, icon_size)
+        redo_ico = wx.svg.SVGimage.CreateFromFile('icons/edit-redo.svg').ConvertToScaledBitmap(icon_size, self)
+        # cut_ico = wx.ArtProvider.GetBitmap(wx.ART_CUT, wx.ART_TOOLBAR, icon_size)
+        cut_ico = wx.svg.SVGimage.CreateFromFile('icons/edit-cut.svg').ConvertToScaledBitmap(icon_size, self)
+        # copy_ico = wx.ArtProvider.GetBitmap(wx.ART_COPY, wx.ART_TOOLBAR, icon_size)
+        copy_ico = wx.svg.SVGimage.CreateFromFile('icons/edit-copy.svg').ConvertToScaledBitmap(icon_size, self)
+        #paste_ico = wx.ArtProvider.GetBitmap(wx.ART_PASTE, wx.ART_TOOLBAR, icon_size)
+        paste_ico = wx.svg.SVGimage.CreateFromFile('icons/edit-paste.svg').ConvertToScaledBitmap(icon_size, self)
+        # delete_ico = wx.ArtProvider.GetBitmap(wx.ART_DELETE, wx.ART_TOOLBAR, icon_size)
+        delete_ico = wx.svg.SVGimage.CreateFromFile('icons/edit-delete.svg').ConvertToScaledBitmap(icon_size, self)
+        # select_ico = wx.ArtProvider.GetBitmap(wx.ART_LIST_VIEW, wx.ART_TOOLBAR, icon_size)
+        select_ico = wx.svg.SVGimage.CreateFromFile('icons/edit-select-all.svg').ConvertToScaledBitmap(icon_size, self)
+        # find_ico = wx.ArtProvider.GetBitmap(wx.ART_FIND, wx.ART_TOOLBAR, icon_size)
+        find_ico = wx.svg.SVGimage.CreateFromFile('icons/edit-find.svg').ConvertToScaledBitmap(icon_size, self)
+        # replace_ico = wx.ArtProvider.GetBitmap(wx.ART_FIND_AND_REPLACE, wx.ART_TOOLBAR, icon_size)
+        replace_ico = wx.svg.SVGimage.CreateFromFile('icons/edit-find-replace.svg').ConvertToScaledBitmap(icon_size, self)
+        # about_ico = wx.ArtProvider.GetBitmap(wx.ART_HELP_BOOK, wx.ART_TOOLBAR, icon_size)
+        about_ico = wx.svg.SVGimage.CreateFromFile('icons/help-contents.svg').ConvertToScaledBitmap(icon_size, self)
+        compare_ico = wx.svg.SVGimage.CreateFromFile('icons/tools-compare.svg').ConvertToScaledBitmap(icon_size, self)
+        clear_compare_ico = wx.svg.SVGimage.CreateFromFile('icons/tools-clear-compare.svg').ConvertToScaledBitmap(icon_size, self)
         # endregion
         
         menux = {
-            'file' : [
-                        [EID_FILE_NEW, '&New\tCTRL+N', new_ico,],
-                        [EID_FILE_OPEN, '&Open\tCTRL+O', open_ico,],
-                        [EID_FILE_SAVE, '&Save\tCTRL+S', save_ico,],
-                        [EID_FILE_SAVEAS, 'Save &As\tCTRL+SHIFT+S', save_as_ico,],
-                        [EID_SEP,],
-                        [EID_CLOSE, 'Close', ],
-                        [EID_FILE_EXIT, 'E&xit', exit_ico,],
+            'file': [
+                        [EID_FILE_NEW, '&New\tCTRL+N', new_ico, ],
+                        [EID_FILE_OPEN, '&Open\tCTRL+O', open_ico, ],
+                        [EID_FILE_SAVE, '&Save\tCTRL+S', save_ico, ],
+                        [EID_FILE_SAVEAS, 'Save &As\tCTRL+SHIFT+S', save_as_ico, ],
+                        [EID_SEP, ],
+                        [EID_CLOSE_TAB, 'Close', ],
+                        [EID_FILE_EXIT, 'E&xit', exit_ico, ],
                      ],
-            'edit' : [
-                        [EID_EDIT_UNDO, '&Undo\tCTRL+Z', undo_ico,],
-                        [EID_EDIT_REDO, '&Redo\tCTRL+Y', redo_ico,],
-                        [EID_SEP,],
-                        [EID_EDIT_CUT, 'Cu&t\tCTRL+X', cut_ico,],
-                        [EID_EDIT_COPY, '&Copy\tCTRL+C', copy_ico,],
-                        [EID_EDIT_PASTE, '&Paste\tCTRL+V', paste_ico,],
-                        [EID_SEP,],
-                        [EID_EDIT_FIND, '&Find\tCTRL+F', find_ico,],
-                        [EID_EDIT_REPLACE, '&Replace\tCTRL+R', replace_ico,],
-                        [EID_EDIT_JUMPTO, 'Jump To\tCTRL+J', select_ico,],
-                        [EID_SEP,],
-                        [EID_EDIT_DELETE, 'Delete', delete_ico,],
-                        [EID_EDIT_SELECTALL, 'Select All', select_ico,],
-                        [EID_SEP,],
-                        [EID_EDIT_UPPER, 'Upper Case',],
-                        [EID_EDIT_LOWER, 'Lower Case',],
-                        [EID_SEP,],
-                        [EID_EDIT_CRLF, 'Change Eol to CRLF'],
-                        [EID_EDIT_LF, 'Change Eol to LF',],
-                        [EID_EDIT_CR, 'Change Eol to CR',],
+            'edit': [
+                        [EID_EDIT_UNDO, '&Undo\tCTRL+Z', undo_ico, ],
+                        [EID_EDIT_REDO, '&Redo\tCTRL+Y', redo_ico, ],
+                        [EID_SEP, ],
+                        [EID_EDIT_CUT, 'Cu&t\tCTRL+X', cut_ico, ],
+                        [EID_EDIT_COPY, '&Copy\tCTRL+C', copy_ico, ],
+                        [EID_EDIT_PASTE, '&Paste\tCTRL+V', paste_ico, ],
+                        [EID_SEP, ],
+                        [EID_EDIT_FIND, '&Find\tCTRL+F', find_ico, ],
+                        [EID_EDIT_REPLACE, '&Replace\tCTRL+R', replace_ico, ],
+                        [EID_EDIT_JUMPTO, 'Jump To\tCTRL+J', select_ico, ],
+                        [EID_SEP, ],
+                        [EID_EDIT_DELETE, 'Delete', delete_ico, ],
+                        [EID_EDIT_SELECTALL, 'Select All', select_ico, ],
+                        [EID_SEP, ],
+                        [EID_EDIT_UPPER, 'Upper Case', ],
+                        [EID_EDIT_LOWER, 'Lower Case', ],
+                        [EID_SEP, ],
+                        [EID_EDIT_CRLF, 'Change Eol to CRLF', ],
+                        [EID_EDIT_LF, 'Change Eol to LF', ],
+                        [EID_EDIT_CR, 'Change Eol to CR', ],
                       ],
-            'view' :  [
-                        [EID_VIEW_SPACE, 'Show White Space',],
-                        [EID_VIEW_EOL, 'Show End Of Line',],
-                        [EID_VIEW_INDENT, 'Show Indentation Guides',],
-                        [EID_SEP,],
-                        [EID_VIEW_WRAP, 'Wrap',],
-                        [EID_VIEW_TRANSPARENT, 'Transparent',],
+            'view':  [
+                        [EID_VIEW_SPACE, 'Show White Space', ],
+                        [EID_VIEW_EOL, 'Show End Of Line', ],
+                        [EID_VIEW_INDENT, 'Show Indentation Guides', ],
+                        [EID_SEP, ],
+                        [EID_VIEW_WRAP, 'Wrap', ],
+                        [EID_VIEW_TRANSPARENT, 'Transparent', ],
 
                       ],
-            'lang' :  [
-                        [EID_LANG_TXT, 'Text',],
-                        [EID_LANG_PYTHON, 'Python',],
-                        [EID_LANG_MSSQL, 'MSSQL',],
-                        [EID_LANG_BASH, 'Bash',], 
-                        [EID_LANG_POWERSHELL, 'PowerShell',],
-                        [EID_LANG_XML, 'XML',],
-                        [EID_LANG_HTML, 'HTML',],
+            'lang':  [
+                        [EID_LANG_TXT, 'Text', ],
+                        [EID_LANG_PYTHON, 'Python', ],
+                        [EID_LANG_MSSQL, 'MSSQL', ],
+                        [EID_LANG_BASH, 'Bash', ],
+                        [EID_LANG_POWERSHELL, 'PowerShell', ],
+                        [EID_LANG_XML, 'XML', ],
+                        [EID_LANG_HTML, 'HTML', ],
                       ],
-            'encoding' : [
-                            [EID_ENCODE_UTF8, 'UTF-8',],
-                            [EID_ENCODE_WIN1252, 'Windows-1252',],
-                            [EID_ENCODE_WIN1254, 'Windows-1254',],
+            'encoding': [
+                            [EID_ENCODE_UTF8, 'UTF-8', ],
+                            [EID_ENCODE_WIN1252, 'Windows-1252', ],
+                            [EID_ENCODE_WIN1254, 'Windows-1254', ],
                          ],
-            'tools' : [
-                         [EID_TOOLS_COMPARE, '&Compare',],
-                         [EID_TOOLS_CLEARCOMP, 'Clea&r Compare',],
+            'tools': [
+                         [EID_TOOLS_COMPARE, '&Compare', compare_ico, ],
+                         [EID_TOOLS_CLEARCOMP, 'Clea&r Compare', clear_compare_ico, ],
                       ],
-            'about' : [
-                         [EID_ABOUT_INFO, 'About', about_ico,], 
+            'about': [
+                         [EID_ABOUT_INFO, 'About', about_ico, ],
                       ],
             }
 
@@ -127,15 +151,15 @@ class MainWindow(wx.Frame):
                 else:
                     try:
                         mi = wx.MenuItem(parentMenu=m, id=i[0], text=i[1], kind=wx.ITEM_NORMAL)
-                    except:
+                        if len(i) > 2:
+                            bmp = i[2]
+                            img = bmp.ConvertToImage()
+                            mi.SetBitmap(wx.Bitmap(img.Scale(24, 24, wx.IMAGE_QUALITY_HIGH)))
+                            # TODO: this call is only for mac os - windows handles this fine
+                            # entire try block should be only mi.SetBitmap(i[2]) for windows
+                        m.Append(mi)
+                    finally:
                         pass
-
-                    if len(i)>2:
-                        try:
-                            mi.SetBitmap(i[2])
-                        except:
-                            print(i[2], i)
-                    m.Append(mi)
             self.menu_bar.Append(m, item)
 
         self.SetMenuBar(self.menu_bar)
@@ -144,8 +168,8 @@ class MainWindow(wx.Frame):
         # region toolbar definition
         self.tool_bar = wx.ToolBar(self)
 
-        self.tool_bar.AddTool(toolId=EID_FILE_NEW, label='New', bitmap=new_ico, bmpDisabled=new_ico, kind=wx.ITEM_NORMAL,
-                              shortHelp='New File', longHelp='', clientData=None)
+        self.tool_bar.AddTool(toolId=EID_FILE_NEW, label='New', bitmap=new_ico, bmpDisabled=new_ico,
+                              kind=wx.ITEM_NORMAL, shortHelp='New File', longHelp='', clientData=None)
         self.tool_bar.AddTool(toolId=EID_FILE_OPEN, label='Open', bitmap=open_ico, bmpDisabled=open_ico,
                               kind=wx.ITEM_NORMAL, shortHelp='Open File', longHelp='', clientData=None)
         self.tool_bar.AddTool(toolId=EID_FILE_SAVE, label='Save', bitmap=save_ico, bmpDisabled=save_ico,
@@ -153,8 +177,8 @@ class MainWindow(wx.Frame):
         self.tool_bar.AddTool(toolId=EID_FILE_SAVEAS, label='Save As', bitmap=save_as_ico, bmpDisabled=new_ico,
                               kind=wx.ITEM_NORMAL, shortHelp='Save File As', longHelp='', clientData=None)
         self.tool_bar.AddSeparator()
-        self.tool_bar.AddTool(toolId=EID_EDIT_CUT, label='Cut', bitmap=cut_ico, bmpDisabled=cut_ico, kind=wx.ITEM_NORMAL,
-                              shortHelp='Cut', longHelp='Cut Text', clientData=None)
+        self.tool_bar.AddTool(toolId=EID_EDIT_CUT, label='Cut', bitmap=cut_ico, bmpDisabled=cut_ico,
+                              kind=wx.ITEM_NORMAL, shortHelp='Cut', longHelp='Cut Text', clientData=None)
         self.tool_bar.AddTool(toolId=EID_EDIT_COPY, label='Copy', bitmap=copy_ico, bmpDisabled=copy_ico,
                               kind=wx.ITEM_NORMAL, shortHelp='Copy', longHelp='Copy Text', clientData=None)
         self.tool_bar.AddTool(toolId=EID_EDIT_PASTE, label='Paste', bitmap=paste_ico, bmpDisabled=paste_ico,
@@ -162,13 +186,20 @@ class MainWindow(wx.Frame):
         self.tool_bar.AddSeparator()
         self.tool_bar.AddTool(toolId=EID_EDIT_FIND, label='Find', bitmap=find_ico, bmpDisabled=find_ico,
                               kind=wx.ITEM_NORMAL, shortHelp='Find', longHelp='Find Text', clientData=None)
-        self.tool_bar.AddTool(toolId=EID_EDIT_REPLACE, label='Replace Text', bitmap=replace_ico, bmpDisabled=replace_ico,
-                              kind=wx.ITEM_NORMAL, shortHelp='Replace', longHelp='Replace Text', clientData=None)
+        self.tool_bar.AddTool(toolId=EID_EDIT_REPLACE, label='Replace Text', bitmap=replace_ico,
+                              bmpDisabled=replace_ico, kind=wx.ITEM_NORMAL, shortHelp='Replace',
+                              longHelp='Replace Text', clientData=None)
         self.tool_bar.AddSeparator()
         self.tool_bar.AddTool(toolId=EID_ABOUT_INFO, label='Info', bitmap=info_ico, bmpDisabled=info_ico,
                               kind=wx.ITEM_NORMAL, shortHelp='Information', longHelp='', clientData=None)
         self.tool_bar.AddTool(toolId=EID_FILE_EXIT, label='Exit', bitmap=exit_ico, bmpDisabled=exit_ico,
                               kind=wx.ITEM_NORMAL, shortHelp='Exit Application', longHelp='', clientData=None)
+        self.tool_bar.AddSeparator()
+        self.tool_bar.AddTool(toolId=EID_TOOLS_COMPARE, label='Compare', bitmap=compare_ico, bmpDisabled=compare_ico,
+                              kind=wx.ITEM_NORMAL, shortHelp='Compare', longHelp='', clientData=None)
+        self.tool_bar.AddTool(toolId=EID_TOOLS_CLEARCOMP, label='Clear Compare', bitmap=clear_compare_ico,
+                              bmpDisabled=clear_compare_ico, kind=wx.ITEM_NORMAL, shortHelp='Clear Compare',
+                              longHelp='', clientData=None)
 
         self.SetToolBar(self.tool_bar)
         self.tool_bar.Realize()
@@ -190,8 +221,11 @@ class MainWindow(wx.Frame):
                                         style=aui.AUI_NB_CLOSE_ON_ALL_TABS |
                                         aui.AUI_NB_DEFAULT_STYLE |
                                         aui.AUI_NB_WINDOWLIST_BUTTON)
+        # TODO: later to play with colours in tabs a little
+        # asta = self.notebook.GetArtProvider()
+        # asta.SetActiveColour(wx.Colour(77, 184, 255))
+        # asta.SetColour(wx.Colour(153, 214, 255))
         self.main_sizer.Add(self.notebook, 1, wx.EXPAND)
-
         # endregion
 
         # region status bar
@@ -216,7 +250,7 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.open_page, id=EID_FILE_OPEN)
         self.Bind(wx.EVT_MENU, self.save_page, id=EID_FILE_SAVE)
         self.Bind(wx.EVT_MENU, self.save_as_page, id=EID_FILE_SAVEAS)
-        self.Bind(wx.EVT_MENU, self.close_page, id=EID_CLOSE)
+        self.Bind(wx.EVT_MENU, self.close_page, id=EID_CLOSE_TAB)
         self.Bind(wx.EVT_MENU, self.on_info, id=EID_ABOUT_INFO)
         self.Bind(wx.EVT_MENU, self.onexit, id=EID_FILE_EXIT)
 
@@ -263,14 +297,13 @@ class MainWindow(wx.Frame):
         self.Bind(aui.EVT_AUINOTEBOOK_TAB_RIGHT_UP, self.on_tab_popup, id=wx.ID_ANY)
 
         self.notebook.Bind(aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.on_tab_close, id=wx.ID_ANY)
-        self.Bind(wx.EVT_CLOSE, self.onclose)
-
+        # self.notebook.Bind(aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.on_tab_close, id=EID_CLOSE_TAB)
+        # self.notebook.Bind(aui.EVT_AUINOTEBOOK_PAGE_CLOSED, self.on_tab_close, id=EID_CLOSE_TAB)
         # endregion
 
         self.search_dlg = Frd.FindReplaceDlg(parent=self, notebook=self.notebook)
         self.info = wx.adv.AboutDialogInfo()
         self.Show()
-        
 
     def get_text_editor_from_page(self, page_idx):
         page = self.notebook.GetPage(page_idx)
@@ -282,11 +315,16 @@ class MainWindow(wx.Frame):
                     return None
 
     def on_about(self, _):
+        displays = ((i, wx.Display(i)) for i in range(wx.Display.GetCount()))
+        desc = [str(i) + ':' + str(display.GetGeometry().GetSize()) for i, display in displays]
+        desc.append('Content Scale factor:' + str(self.GetContentScaleFactor()))
+        desc.append('DPI scale factor:' + str(self.GetDPIScaleFactor()))
         self.info.SetName("ete text editor")
         self.info.SetVersion('0.3.a')
         self.info.SetDescription('Text editor using wxpython')
         self.info.SetDevelopers(['Emre Yukselen'])
         self.info.SetWebSite('https://github.com/eyukselen/ete')
+        self.info.SetDescription('\n'.join(desc))
         wx.adv.AboutBox(self.info)
 
     def new_page(self, _):
@@ -385,7 +423,7 @@ class MainWindow(wx.Frame):
                 if x != active_tab:
                     self.close_tab(x)
 
-    def close_page(self, event):
+    def close_page(self, _):
         if self.notebook.GetPageCount() > 0:
             page_idx = self.notebook.GetPageIndex(self.notebook.GetCurrentPage())
             self.close_tab(page_idx)
@@ -414,11 +452,13 @@ class MainWindow(wx.Frame):
     def on_tab_close(self, event):
         event.Veto()
         if len(self.compare_tabs) == 2:  # if its in compare mode first clear compare then close tab
-            e = wx.MenuEvent(wx.EVT_MENU.typeId, self.menu_tools_clear_compare.GetId())
-            wx.PostEvent(self, e)
-
+            self.on_menu_tools_clear_compare(None)
+            # for some reason with new IDs this is not picked correctly
+            # e = wx.MenuEvent(wx.EVT_MENU.typeId, EID_TOOLS_CLEARCOMP)
+            # wx.PostEvent(self, e)
         page_to_close = event.GetSelection()
         self.close_tab(page_to_close)
+        print('tabs in compare=' + str(len(self.compare_tabs)))
 
     def onexit(self, _):
         self.Close()
@@ -493,6 +533,7 @@ class MainWindow(wx.Frame):
             r_list.append(rstc.GetLineText(i))
 
         res = self.diff(l_list, r_list)
+        print(res)
 
         c = 0
         rstc.set_styles()
@@ -503,12 +544,21 @@ class MainWindow(wx.Frame):
                 if x[0] == '-':
                     lstc.StartStyling(lstc.XYToPosition(0, c))
                     lstc.SetStyling(lstc.GetLineLength(c) + 2, 5)
-                    pos = max(rstc.XYToPosition(0, c), 0)
-                    rstc.InsertText(pos, '\r\n')  # add empty line to right
+                    if c > rstc.GetLineCount() - 1:
+                        pos = rstc.GetTextLength()
+                    else:
+                        pos = max(rstc.XYToPosition(0, c), 0)
+                    pos = max(rstc.XYToPosition(0, min(c, rstc.GetLineCount() - 1)), 0)
+                    rstc.InsertText(pos, os.linesep)  # add empty line to right
+                    lstc.MarkerAdd(c, 5)  # this line is removed
                     rstc.SetLineState(c, 1)
                 if x[0] == '+':
-                    pos = max(lstc.XYToPosition(0, c), 0)
-                    lstc.InsertText(pos, '\r\n')  # add empty line to left
+                    if c > lstc.GetLineCount() - 1:
+                        pos = lstc.GetTextLength()
+                    else:
+                         pos = max(lstc.XYToPosition(0, c), 0)
+                    lstc.InsertText(pos, os.linesep)  # add empty line to left
+                    rstc.MarkerAdd(c, 4)  # this line is added
                     lstc.SetLineState(c, 1)
                     rstc.StartStyling(rstc.XYToPosition(0, c))
                     rstc.SetStyling(rstc.GetLineLength(c) + 2, 5)
@@ -781,13 +831,13 @@ class MainWindow(wx.Frame):
         xx = te.GetText()
 
         if enc == 'utf-8':
-            str_tr = bytes(xx, encoding=te.code_page).decode(te.code_page) # pseudo conversion
+            str_tr = bytes(xx, encoding=te.code_page).decode(te.code_page)  # pseudo conversion
             te.SetText(str_tr)
             te.code_page = enc
             self.status_bar.SetStatusText(enc, 3)
         elif enc == 'windows-1254':
             if te.code_page != 'utf-8':
-                str_tr = xx.encode('windows-1252').decode('windows-1254') # works for ansi2ansi not uni2ansi
+                str_tr = xx.encode('windows-1252').decode('windows-1254')  # works for ansi2ansi not uni2ansi
             else:
                 str_tr = bytes(xx, encoding='windows-1254').decode('windows-1254')
             te.SetText(str_tr)
@@ -795,7 +845,7 @@ class MainWindow(wx.Frame):
             self.status_bar.SetStatusText(enc, 3)
         elif enc == 'windows-1252':
             if te.code_page != 'utf-8':
-                str_tr = xx.encode(te.code_page).decode('windows-1252') # works for ansi2 ansi not uni2ansi
+                str_tr = xx.encode(te.code_page).decode('windows-1252')  # works for ansi2 ansi not uni2ansi
             else:
                 str_tr = bytes(xx, encoding='windows-1252').decode('windows-1252')
             te.SetText(str_tr)
@@ -825,5 +875,5 @@ class TransparencyDlg(wx.Dialog):
 
 app = wx.App()
 MainWindow(None)
-# wx.lib.inspection.InspectionTool().Show() # for debugging 
+# wx.lib.inspection.InspectionTool().Show() # for debugging
 app.MainLoop()

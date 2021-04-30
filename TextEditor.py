@@ -7,7 +7,9 @@ class TextEditor(wx.stc.StyledTextCtrl):
     def __init__(self, parent, filename=''):
         stc.StyledTextCtrl.__init__(self, parent, style=wx.SIMPLE_BORDER)
         self.ID_MARGIN_CLICK = wx.ID_ANY
-        self.FOLD_MARGIN = 2
+        self.FOLD_MARGIN = 0
+        self.LINE_NUMBERS_MARGIN = 1
+        self.MARKER_MARGIN = 2
         self.check_for_braces = False
         self.file_name = filename
         self.lang = ''
@@ -18,8 +20,7 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.Bind(stc.EVT_STC_UPDATEUI, self.on_update_ui)
         self.Bind(stc.EVT_STC_ZOOM, self.on_update_ui)
         self.Bind(wx.EVT_RIGHT_UP, self.on_popup)
-        self.UsePopUp(False)
-        self.SetMarginType(1, wx.stc.STC_MARGIN_NUMBER)
+        self.Bind(wx.stc.EVT_STC_MARGINCLICK, self.on_margin_click, id=self.ID_MARGIN_CLICK)
         self.set_styles()
         self.set_margins()
 
@@ -88,7 +89,15 @@ class TextEditor(wx.stc.StyledTextCtrl):
 
         # endregion
         self.SetUseAntiAliasing(True)  # this is new with wxPython 4.1
+        self.adjust_line_height()
         self.Refresh()
+
+    def adjust_line_height(self):
+        current_height = self.TextHeight(0)
+        display_height = wx.Display().GetGeometry().GetSize()[1]
+        screen_to_line_ratio = 0.015
+        text_height = int(display_height * screen_to_line_ratio)
+        self.SetZoom(text_height - current_height)
 
     def undo(self, _):
         self.Undo()
@@ -117,9 +126,29 @@ class TextEditor(wx.stc.StyledTextCtrl):
         event.Skip()
 
     def set_margins(self):
-        line_width = self.TextWidth(wx.stc.STC_STYLE_LINENUMBER,
-                                    '9' + '9' * len(str(self.GetFirstVisibleLine() + self.LinesOnScreen())))
-        self.SetMarginWidth(1, line_width)
+        # margins 0:markers, 1:line numbers, 2: folding options
+        # margin 0 and 1 defined below, 2 is defined in code folding function
+        # marker margin
+        self.SetMarginType(self.MARKER_MARGIN, wx.stc.STC_MARGIN_SYMBOL)
+        # self.SetMarginType(self.MARKER_MARGIN, wx.stc.STC_MARGIN_TEXT)
+        self.SetMarginWidth(self.MARKER_MARGIN, 16)
+        # self.SetMarginMask(self.MARKER_MARGIN, stc.STC_TE)
+        self.SetMarginSensitive(self.MARKER_MARGIN, True)
+
+        # diff markers
+        # self.MarkerDefine(4, stc.STC_MARK_CHARACTER + ord('+'), "WHEAT", "#808080")
+        # self.MarkerDefine(5, stc.STC_MARK_CHARACTER + ord('-'), "WHEAT", "#808080")
+        # self.MarkerDefine(6, stc.STC_MARK_CHARACTER + ord('='), "WHEAT", "#808080")
+        self.MarkerDefine(7, stc.STC_MARK_CIRCLE, "RED", "BLUE")
+
+        # Line Numbers
+        self.SetMarginType(self.LINE_NUMBERS_MARGIN, wx.stc.STC_MARGIN_NUMBER)
+        line_width = self.TextWidth(wx.stc.STC_STYLE_LINENUMBER, '9' + '9' * len(str(self.GetFirstVisibleLine()
+                                                                                     + self.LinesOnScreen())))
+        self.SetMarginWidth(self.LINE_NUMBERS_MARGIN, line_width)
+
+    def set_markers(self):
+        pass
 
     def on_receive_event(self, event):
         wx.PostEvent(self.GetEventHandler(), event)
@@ -214,10 +243,10 @@ class TextEditor(wx.stc.StyledTextCtrl):
         if fold:
             self.folding = True
             self.SetProperty('fold', '1')  # this needs to be send to stc
-            self.SetMarginType(2, wx.stc.STC_MARGIN_SYMBOL)
-            self.SetMarginMask(2, wx.stc.STC_MASK_FOLDERS)
+            self.SetMarginType(self.FOLD_MARGIN, wx.stc.STC_MARGIN_SYMBOL)
+            self.SetMarginMask(self.FOLD_MARGIN, wx.stc.STC_MASK_FOLDERS)
             self.SetMarginSensitive(self.FOLD_MARGIN, True)
-            self.SetMarginWidth(2, 16)
+            self.SetMarginWidth(self.FOLD_MARGIN, 16)
             self.MarkerDefine(stc.STC_MARKNUM_FOLDERMIDTAIL, stc.STC_MARK_TCORNERCURVE, "WHEAT", "#808080")
             self.MarkerDefine(stc.STC_MARKNUM_FOLDEROPEN, stc.STC_MARK_BOXMINUS, "WHEAT", "#808080")
             self.MarkerDefine(stc.STC_MARKNUM_FOLDER, stc.STC_MARK_BOXPLUS, "WHEAT", "#808080")
@@ -235,12 +264,13 @@ class TextEditor(wx.stc.StyledTextCtrl):
             self.Unbind(wx.stc.EVT_STC_MARGINCLICK, id=self.ID_MARGIN_CLICK)
 
     def on_margin_click(self, event):
-        print(' margin clicked')
-        print(event.GetMargin())
         if event.GetMargin() == self.FOLD_MARGIN:
             line_clicked = self.LineFromPosition(event.GetPosition())
-            print(line_clicked)
             self.ToggleFold(line_clicked)
+        elif event.GetMargin() == self.MARKER_MARGIN:
+            line_clicked = self.LineFromPosition(event.GetPosition())
+            self.MarkerAdd(line_clicked, 7)
+            print(line_clicked)
 
     def lang_python(self):
         self.StyleClearAll()
@@ -448,29 +478,32 @@ class TextEditor(wx.stc.StyledTextCtrl):
                             'command compact content contenteditable contextmenu coords data datafld dataformatas '
                             'datalist datapagesize datasrc datetime dd declare defer del details dfn dialog dir '
                             'disabled div dl draggable dropzone dt element em embed enctype event face fieldset '
-                            'figcaption figure file font footer for form formaction formenctype formmethod formnovalidate '
-                            'formtarget frame frameborder frameset h1 h2 h3 h4 h5 h6 head header headers height hgroup '
-                            'hidden hr href hreflang hspace html http-equiv i id iframe image img input ins isindex ismap '
-                            'kbd keygen label lang language leftmargin legend li link list listing longdesc main manifest '
-                            'map marginheight marginwidth mark marquee max maxlength media menu menuitem meta meter method '
-                            'min multicol multiple name nav nobr noembed noframes nohref noresize noscript noshade novalidate '
-                            'nowrap object ol onabort onafterprint onautocomplete onautocompleteerror onbeforeonload '
-                            'onbeforeprint onblur oncancel oncanplay oncanplaythrough onchange onclick onclose oncontextmenu '
-                            'oncuechange ondblclick ondrag ondragend ondragenter ondragleave ondragover ondragstart ondrop '
-                            'ondurationchange onemptied onended onerror onfocus onhashchange oninput oninvalid onkeydown '
-                            'onkeypress onkeyup onload onloadeddata onloadedmetadata onloadstart onmessage onmousedown '
-                            'onmouseenter onmouseleave onmousemove onmouseout onmouseover onmouseup onmousewheel onoffline '
-                            'ononline onpagehide onpageshow onpause onplay onplaying onpointercancel onpointerdown onpointerenter '
-                            'onpointerleave onpointerlockchange onpointerlockerror onpointermove onpointerout onpointerover '
-                            'onpointerup onpopstate onprogress onratechange onreadystatechange onredo onreset onresize onscroll '
-                            'onseeked onseeking onselect onshow onsort onstalled onstorage onsubmit onsuspend ontimeupdate ontoggle '
-                            'onundo onunload onvolumechange onwaiting optgroup option output p param password pattern picture placeholder '
-                            'plaintext pre profile progress prompt public q radio readonly rel required reset rev reversed role rows '
-                            'rowspan rp rt rtc ruby rules s samp sandbox scheme scope scoped script seamless section select selected '
-                            'shadow shape size sizes small source spacer span spellcheck src srcdoc standby start step strike strong '
-                            'style sub submit summary sup svg svg:svg tabindex table target tbody td template text textarea tfoot th '
-                            'thead time title topmargin tr track tt type u ul usemap valign value valuetype var version video '
-                            'vlink vspace wbr width xml xmlns xmp')   
+                            'figcaption figure file font footer for form formaction formenctype formmethod '
+                            'formnovalidate formtarget frame frameborder frameset h1 h2 h3 h4 h5 h6 head header '
+                            'headers height hgroup hidden hr href hreflang hspace html http-equiv i id iframe image '
+                            'img input ins isindex ismap kbd keygen label lang language leftmargin legend li link list '
+                            'listing longdesc main manifest map marginheight marginwidth mark marquee max maxlength '
+                            'media menu menuitem meta meter method min multicol multiple name nav nobr noembed '
+                            'noframes nohref noresize noscript noshade novalidate nowrap object ol onabort '
+                            'onafterprint onautocomplete onautocompleteerror onbeforeonload onbeforeprint onblur '
+                            'oncancel oncanplay oncanplaythrough onchange onclick onclose oncontextmenu oncuechange '
+                            'ondblclick ondrag ondragend ondragenter ondragleave ondragover ondragstart ondrop '
+                            'ondurationchange onemptied onended onerror onfocus onhashchange oninput oninvalid '
+                            'onkeydown onkeypress onkeyup onload onloadeddata onloadedmetadata onloadstart onmessage '
+                            'onmousedown onmouseenter onmouseleave onmousemove onmouseout onmouseover onmouseup '
+                            'onmousewheel onoffline ononline onpagehide onpageshow onpause onplay onplaying '
+                            'onpointercancel onpointerdown onpointerenter onpointerleave onpointerlockchange '
+                            'onpointerlockerror onpointermove onpointerout onpointerover onpointerup onpopstate '
+                            'onprogress onratechange onreadystatechange onredo onreset onresize onscroll '
+                            'onseeked onseeking onselect onshow onsort onstalled onstorage onsubmit onsuspend '
+                            'ontimeupdate ontoggle onundo onunload onvolumechange onwaiting optgroup option output p '
+                            'param password pattern picture placeholder plaintext pre profile progress prompt public q '
+                            'radio readonly rel required reset rev reversed role rows rowspan rp rt rtc ruby rules s '
+                            'samp sandbox scheme scope scoped script seamless section select selected shadow shape '
+                            'size sizes small source spacer span spellcheck src srcdoc standby start step strike '
+                            'strong style sub submit summary sup svg svg:svg tabindex table target tbody td template '
+                            'text textarea tfoot th thead time title topmargin tr track tt type u ul usemap valign '
+                            'value valuetype var version video vlink vspace wbr width xml xmlns xmp')
         self.StyleSetSpec(stc.STC_H_DEFAULT, 'fore:#000000,back:#FFFFFF,bold')
         self.StyleSetSpec(stc.STC_H_COMMENT, 'fore:#008000,back:#FFFFFF')
         self.StyleSetSpec(stc.STC_H_NUMBER, 'fore:#FF0000,back:#FFFFFF')
@@ -514,7 +547,7 @@ class TextEditor(wx.stc.StyledTextCtrl):
         with open(file, 'rb') as ff:
             f = ff.read()
 
-        if self.isUTF8(f):
+        if self.is_utf8(f):
             self.code_page = 'utf-8'
             self.SetTextRaw(f)
             self.status_bar.SetStatusText('utf-8', 3)
@@ -531,7 +564,7 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.SetSavePoint()
         f.close()
 
-    def isUTF8(self, data):
+    def is_utf8(self, data):
         try:
             data.decode('UTF-8')
         except UnicodeDecodeError:

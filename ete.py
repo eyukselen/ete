@@ -40,7 +40,7 @@ class MainWindow(wx.Frame):
 
 
         # region icon set
-        icon_size = (64, 64)
+        icon_size = (32, 32)
         # new_ico = wx.ArtProvider.GetBitmap(wx.ART_NEW, wx.ART_TOOLBAR, icon_size)
         new_ico = wx.svg.SVGimage.CreateFromFile('icons/document-new.svg').ConvertToScaledBitmap(icon_size, self)
         # open_ico = wx.ArtProvider.GetBitmap(wx.ART_FILE_OPEN, wx.ART_TOOLBAR, icon_size)
@@ -851,7 +851,7 @@ class MainWindow(wx.Frame):
             te.SetText(str_tr)
             te.code_page = enc
             self.status_bar.SetStatusText(enc, 3)
-        
+
 
 class TransparencyDlg(wx.Dialog):
     def __init__(self, parent):

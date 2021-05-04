@@ -7,9 +7,9 @@ class TextEditor(wx.stc.StyledTextCtrl):
     def __init__(self, parent, filename=''):
         stc.StyledTextCtrl.__init__(self, parent, style=wx.SIMPLE_BORDER)
         self.ID_MARGIN_CLICK = wx.ID_ANY
-        self.FOLD_MARGIN = 0
-        self.LINE_NUMBERS_MARGIN = 1
-        self.MARKER_MARGIN = 2
+        self.FOLD_MARGIN = 2
+        self.LINE_NUMBERS_MARGIN = 0
+        self.MARKER_MARGIN = 1
         self.check_for_braces = False
         self.file_name = filename
         self.lang = ''
@@ -130,10 +130,10 @@ class TextEditor(wx.stc.StyledTextCtrl):
         # margin 0 and 1 defined below, 2 is defined in code folding function
         # marker margin
         self.SetMarginType(self.MARKER_MARGIN, wx.stc.STC_MARGIN_SYMBOL)
-        # self.SetMarginType(self.MARKER_MARGIN, wx.stc.STC_MARGIN_TEXT)
-        self.SetMarginWidth(self.MARKER_MARGIN, 16)
-        # self.SetMarginMask(self.MARKER_MARGIN, stc.STC_TE)
+        self.SetMarginMask(self.MARKER_MARGIN,  ~wx.stc.STC_MASK_FOLDERS)
         self.SetMarginSensitive(self.MARKER_MARGIN, True)
+        self.SetMarginWidth(self.MARKER_MARGIN, 24)
+
 
         # diff markers
         # self.MarkerDefine(4, stc.STC_MARK_CHARACTER + ord('+'), "WHEAT", "#808080")

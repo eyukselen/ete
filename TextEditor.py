@@ -1,18 +1,19 @@
 import wx
 import wx.stc as stc
-
+import math
 
 class TextEditor(wx.stc.StyledTextCtrl):
 
     def __init__(self, parent, filename=''):
         stc.StyledTextCtrl.__init__(self, parent, style=wx.SIMPLE_BORDER)
         self.ID_MARGIN_CLICK = wx.ID_ANY
+        self.markers = {}
         self.FOLD_MARGIN = 2
         self.LINE_NUMBERS_MARGIN = 0
         self.MARKER_MARGIN = 1
-        self.MARKER_BOOKMARK = stc.STC_MARK_BOOKMARK
-        self.MARKER_PLUS = stc.STC_MARK_PLUS
-        self.MARKER_MINUS = stc.STC_MARK_MINUS
+        self.MARKER_BOOKMARK = 4
+        self.MARKER_PLUS = 5
+        self.MARKER_MINUS = 6
         self.check_for_braces = False
         self.file_name = filename
         self.lang = ''
@@ -276,22 +277,18 @@ class TextEditor(wx.stc.StyledTextCtrl):
             self.SetMarginSensitive(self.FOLD_MARGIN, False)
             self.Unbind(wx.stc.EVT_STC_MARGINCLICK, id=self.ID_MARGIN_CLICK)
 
-    def toggle_marker(self, marker, line):
-        if self.MarkerGet(line):
-            self.MarkerDelete(line, marker)
-        else:
-            self.MarkerAdd(line, marker)
-
     def on_margin_click(self, event):
         if event.GetMargin() == self.FOLD_MARGIN:
             line_clicked = self.LineFromPosition(event.GetPosition())
             self.ToggleFold(line_clicked)
         elif event.GetMargin() == self.MARKER_MARGIN:
             line_clicked = self.LineFromPosition(event.GetPosition())
-            if self.MarkerGet(line_clicked):
+            if (line_clicked, self.MARKER_BOOKMARK) in self.markers.items():
                 self.MarkerDelete(line_clicked, self.MARKER_BOOKMARK)
+                self.markers.pop(line_clicked)
             else:
                 self.MarkerAdd(line_clicked, self.MARKER_BOOKMARK)
+                self.markers[line_clicked] = self.MARKER_BOOKMARK
 
 
     def lang_python(self):

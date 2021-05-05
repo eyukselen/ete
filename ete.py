@@ -297,8 +297,8 @@ class MainWindow(wx.Frame):
         self.Bind(aui.EVT_AUINOTEBOOK_TAB_RIGHT_UP, self.on_tab_popup, id=wx.ID_ANY)
 
         self.notebook.Bind(aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.on_tab_close, id=wx.ID_ANY)
-        # self.notebook.Bind(aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.on_tab_close, id=EID_CLOSE_TAB)
-        # self.notebook.Bind(aui.EVT_AUINOTEBOOK_PAGE_CLOSED, self.on_tab_close, id=EID_CLOSE_TAB)
+        self.notebook.Bind(aui.EVT_AUINOTEBOOK_PAGE_CHANGED, self.on_page_select, id=wx.ID_ANY)
+
         # endregion
 
         self.search_dlg = Frd.FindReplaceDlg(parent=self, notebook=self.notebook)
@@ -339,6 +339,7 @@ class MainWindow(wx.Frame):
             te.Bind(wx.EVT_DROP_FILES, self.open_page)
         page_sizer.Add(te, 1, wx.EXPAND)
         self.notebook.AddPage(page, 'New *', select=True)
+        te.SetFocus()
 
     def open_page(self, event):
         if hasattr(event, 'Files'):
@@ -404,6 +405,12 @@ class MainWindow(wx.Frame):
             self.notebook.SetPageToolTip(self.notebook.GetPageIndex(self.notebook.GetCurrentPage()), filename)
             _, file = os.path.split(filename)
             self.notebook.SetPageText(self.notebook.GetPageIndex(self.notebook.GetCurrentPage()), file)
+
+    def on_page_select(self, event):
+        """set focus on text editor when a page selected"""
+        te = self.get_text_editor_from_page(event.Selection)
+        te.SetFocus()
+        event.Skip()
 
     def on_tab_popup(self, event):
         tab_id = event.GetSelection()
@@ -538,40 +545,31 @@ class MainWindow(wx.Frame):
         rstc.set_styles()
         lstc.set_styles()
         print(res)
-        line_left = 0
-        line_right = 0
+
         eol_left = lstc.get_eol_len()
         eol_right = rstc.get_eol_len()
 
+        curline = 0
         for x in res:
             for _ in x[1]:
                 if x[0] == '-':
-                    lstc.StartStyling(lstc.XYToPosition(0, c))
-                    lstc.SetStyling(lstc.GetLineLength(c) + eol_left, 5)
-                    if c > rstc.GetLineCount() - 1:
-                        pos = rstc.GetTextLength()
-                    else:
-                        pos = max(rstc.XYToPosition(0, c), 0)
-                    pos = max(rstc.XYToPosition(0, min(c, rstc.GetLineCount() - 1)), 0)
-                    rstc.InsertText(pos, os.linesep)  # add empty line to right
-                    lstc.MarkerAdd(c, lstc.MARKER_MINUS)  # this line is removed
-                    rstc.SetLineState(c, 1)
+                    rstc.InsertText(rstc.XYToPosition(0, curline), '\n')  # add empty line to left
+                    lstc.MarkerAdd(curline, lstc.MARKER_MINUS)  # this line is added
+                    rstc.SetLineState(curline, 1)
+                    lstc.StartStyling(lstc.XYToPosition(0, curline))
+                    lstc.SetStyling(lstc.GetLineLength(curline) + eol_right, 5)
                 if x[0] == '+':
-                    if c > lstc.GetLineCount() - 1:
-                        pos = lstc.GetTextLength()
-                    else:
-                        pos = max(lstc.XYToPosition(0, c), 0)
-                    lstc.InsertText(pos, '\n')  # add empty line to left
-                    rstc.MarkerAdd(c, rstc.MARKER_PLUS)  # this line is added
-                    lstc.SetLineState(c, 1)
-                    rstc.StartStyling(rstc.XYToPosition(0, c))
-                    rstc.SetStyling(rstc.GetLineLength(c) + eol_right, 5)
+                    lstc.InsertText(lstc.XYToPosition(0, curline), '\n')  # add empty line to left
+                    rstc.MarkerAdd(curline, rstc.MARKER_PLUS)  # this line is added
+                    lstc.SetLineState(curline, 1)
+                    rstc.StartStyling(rstc.XYToPosition(0, curline))
+                    rstc.SetStyling(rstc.GetLineLength(curline) + eol_right, 5)
                 if x[0] == '=':
-                    lstc.StartStyling(lstc.XYToPosition(0, c, ))
-                    lstc.SetStyling(lstc.GetLineLength(c) + eol_left, 4)
-                    rstc.StartStyling(rstc.XYToPosition(0, c, ))
-                    rstc.SetStyling(rstc.GetLineLength(c) + eol_right, 4)
-                c += 1
+                    lstc.StartStyling(lstc.XYToPosition(0, curline))
+                    lstc.SetStyling(lstc.GetLineLength(curline) + eol_left, 4)
+                    rstc.StartStyling(rstc.XYToPosition(0, curline))
+                    rstc.SetStyling(rstc.GetLineLength(curline) + eol_right, 4)
+                curline += 1
         self.set_tabs_in_sync(lstc, rstc, True)
         self.notebook.SetSelection(lpi)
         self.notebook.SetSelection(rpi)
@@ -585,11 +583,13 @@ class MainWindow(wx.Frame):
         for i in range(lstc.GetMaxLineState(), -1, -1):
             if lstc.GetLineState(i) == 1 and lstc.GetLineText(i) == '':
                 lstc.GotoLine(i)
+                rstc.MarkerDelete(i, rstc.MARKER_PLUS)
                 lstc.LineDelete()
 
         for i in range(rstc.GetMaxLineState(), -1, -1):
             if rstc.GetLineState(i) == 1 and rstc.GetLineText(i) == '':
                 rstc.GotoLine(i)
+                lstc.MarkerDelete(i, lstc.MARKER_MINUS)
                 rstc.LineDelete()
 
         lstc.StyleClearAll()

@@ -533,40 +533,44 @@ class MainWindow(wx.Frame):
             r_list.append(rstc.GetLineText(i))
 
         res = self.diff(l_list, r_list)
-        print(res)
 
         c = 0
         rstc.set_styles()
         lstc.set_styles()
+        print(res)
+        line_left = 0
+        line_right = 0
+        eol_left = lstc.get_eol_len()
+        eol_right = rstc.get_eol_len()
 
         for x in res:
             for _ in x[1]:
                 if x[0] == '-':
                     lstc.StartStyling(lstc.XYToPosition(0, c))
-                    lstc.SetStyling(lstc.GetLineLength(c) + 2, 5)
+                    lstc.SetStyling(lstc.GetLineLength(c) + eol_left, 5)
                     if c > rstc.GetLineCount() - 1:
                         pos = rstc.GetTextLength()
                     else:
                         pos = max(rstc.XYToPosition(0, c), 0)
                     pos = max(rstc.XYToPosition(0, min(c, rstc.GetLineCount() - 1)), 0)
                     rstc.InsertText(pos, os.linesep)  # add empty line to right
-                    lstc.MarkerAdd(c, 5)  # this line is removed
+                    lstc.MarkerAdd(c, lstc.MARKER_MINUS)  # this line is removed
                     rstc.SetLineState(c, 1)
                 if x[0] == '+':
                     if c > lstc.GetLineCount() - 1:
                         pos = lstc.GetTextLength()
                     else:
-                         pos = max(lstc.XYToPosition(0, c), 0)
-                    lstc.InsertText(pos, os.linesep)  # add empty line to left
-                    rstc.MarkerAdd(c, 4)  # this line is added
+                        pos = max(lstc.XYToPosition(0, c), 0)
+                    lstc.InsertText(pos, '\n')  # add empty line to left
+                    rstc.MarkerAdd(c, rstc.MARKER_PLUS)  # this line is added
                     lstc.SetLineState(c, 1)
                     rstc.StartStyling(rstc.XYToPosition(0, c))
-                    rstc.SetStyling(rstc.GetLineLength(c) + 2, 5)
+                    rstc.SetStyling(rstc.GetLineLength(c) + eol_right, 5)
                 if x[0] == '=':
-                    lstc.StartStyling(lstc.XYToPosition(0, c,))
-                    lstc.SetStyling(lstc.GetLineLength(c) + 2, 4)
+                    lstc.StartStyling(lstc.XYToPosition(0, c, ))
+                    lstc.SetStyling(lstc.GetLineLength(c) + eol_left, 4)
                     rstc.StartStyling(rstc.XYToPosition(0, c, ))
-                    rstc.SetStyling(rstc.GetLineLength(c) + 2, 4)
+                    rstc.SetStyling(rstc.GetLineLength(c) + eol_right, 4)
                 c += 1
         self.set_tabs_in_sync(lstc, rstc, True)
         self.notebook.SetSelection(lpi)

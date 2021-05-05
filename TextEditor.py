@@ -10,6 +10,9 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.FOLD_MARGIN = 2
         self.LINE_NUMBERS_MARGIN = 0
         self.MARKER_MARGIN = 1
+        self.MARKER_BOOKMARK = stc.STC_MARK_BOOKMARK
+        self.MARKER_PLUS = stc.STC_MARK_PLUS
+        self.MARKER_MINUS = stc.STC_MARK_MINUS
         self.check_for_braces = False
         self.file_name = filename
         self.lang = ''
@@ -139,7 +142,9 @@ class TextEditor(wx.stc.StyledTextCtrl):
         # self.MarkerDefine(4, stc.STC_MARK_CHARACTER + ord('+'), "WHEAT", "#808080")
         # self.MarkerDefine(5, stc.STC_MARK_CHARACTER + ord('-'), "WHEAT", "#808080")
         # self.MarkerDefine(6, stc.STC_MARK_CHARACTER + ord('='), "WHEAT", "#808080")
-        self.MarkerDefine(7, stc.STC_MARK_CIRCLE, "RED", "BLUE")
+        self.MarkerDefine(self.MARKER_BOOKMARK, stc.STC_MARK_BOOKMARK, 'black', 'red')
+        self.MarkerDefine(self.MARKER_PLUS, stc.STC_MARK_PLUS)
+        self.MarkerDefine(self.MARKER_MINUS, stc.STC_MARK_MINUS)
 
         # Line Numbers
         self.SetMarginType(self.LINE_NUMBERS_MARGIN, wx.stc.STC_MARGIN_NUMBER)
@@ -170,6 +175,14 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.get_eolmode()
         # TODO: get_eolmode only needs to be updated when changed from menu or newfile or tab changes.
         event.Skip()
+
+    def get_eol_len(self):
+        res = 0
+        if self.GetEOLMode() == stc.STC_EOL_CRLF:
+            res = 2
+        else:
+            res = 1
+        return res
 
     def get_eolmode(self):
         eolmode = 'None'
@@ -263,14 +276,23 @@ class TextEditor(wx.stc.StyledTextCtrl):
             self.SetMarginSensitive(self.FOLD_MARGIN, False)
             self.Unbind(wx.stc.EVT_STC_MARGINCLICK, id=self.ID_MARGIN_CLICK)
 
+    def toggle_marker(self, marker, line):
+        if self.MarkerGet(line):
+            self.MarkerDelete(line, marker)
+        else:
+            self.MarkerAdd(line, marker)
+
     def on_margin_click(self, event):
         if event.GetMargin() == self.FOLD_MARGIN:
             line_clicked = self.LineFromPosition(event.GetPosition())
             self.ToggleFold(line_clicked)
         elif event.GetMargin() == self.MARKER_MARGIN:
             line_clicked = self.LineFromPosition(event.GetPosition())
-            self.MarkerAdd(line_clicked, 7)
-            print(line_clicked)
+            if self.MarkerGet(line_clicked):
+                self.MarkerDelete(line_clicked, self.MARKER_BOOKMARK)
+            else:
+                self.MarkerAdd(line_clicked, self.MARKER_BOOKMARK)
+
 
     def lang_python(self):
         self.StyleClearAll()

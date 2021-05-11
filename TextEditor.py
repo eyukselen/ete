@@ -50,7 +50,8 @@ class TextEditor(wx.stc.StyledTextCtrl):
         # selection style and current line coloring
         selection_color = wx.Colour(red=128, green=219, blue=255, alpha=wx.ALPHA_OPAQUE)
         current_line_color = wx.Colour(red=216, green=255, blue=255, alpha=wx.ALPHA_OPAQUE)
-        self.SetSelBackground(True, selection_color)
+        self.SetSelBackground(False, selection_color)
+        self.SetSelEOLFilled(False)
         self.SetCaretLineBackground(current_line_color)
         self.SetCaretLineVisible(True)
 
@@ -152,9 +153,6 @@ class TextEditor(wx.stc.StyledTextCtrl):
         line_width = self.TextWidth(wx.stc.STC_STYLE_LINENUMBER, '9' + '9' * len(str(self.GetFirstVisibleLine()
                                                                                      + self.LinesOnScreen())))
         self.SetMarginWidth(self.LINE_NUMBERS_MARGIN, line_width)
-
-    def set_markers(self):
-        pass
 
     def on_receive_event(self, event):
         wx.PostEvent(self.GetEventHandler(), event)
@@ -289,7 +287,6 @@ class TextEditor(wx.stc.StyledTextCtrl):
             else:
                 self.MarkerAdd(line_clicked, self.MARKER_BOOKMARK)
                 self.markers[line_clicked] = self.MARKER_BOOKMARK
-
 
     def lang_python(self):
         self.StyleClearAll()

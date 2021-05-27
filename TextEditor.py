@@ -1,9 +1,8 @@
 import wx
 import wx.stc as stc
-import math
+
 
 class TextEditor(wx.stc.StyledTextCtrl):
-
     def __init__(self, parent, filename=''):
         stc.StyledTextCtrl.__init__(self, parent, style=wx.SIMPLE_BORDER)
         self.ID_MARGIN_CLICK = wx.ID_ANY
@@ -50,7 +49,7 @@ class TextEditor(wx.stc.StyledTextCtrl):
         # selection style and current line coloring
         selection_color = wx.Colour(red=128, green=219, blue=255, alpha=wx.ALPHA_OPAQUE)
         current_line_color = wx.Colour(red=216, green=255, blue=255, alpha=wx.ALPHA_OPAQUE)
-        self.SetSelBackground(False, selection_color)
+        self.SetSelBackground(True, selection_color)
         self.SetSelEOLFilled(False)
         self.SetCaretLineBackground(current_line_color)
         self.SetCaretLineVisible(True)
@@ -547,7 +546,7 @@ class TextEditor(wx.stc.StyledTextCtrl):
     def indicate_words(self, word, clear=False):
         start = self.XYToPosition(0, self.GetFirstVisibleLine())
         length = self.GetLineEndPosition(self.GetFirstVisibleLine() + self.LinesOnScreen()) - start
-        self.IndicatorClearRange(0, self.GetTextLength() - 1)
+        self.IndicatorClearRange(0, self.GetTextLength())
         if clear:
             return
         fin = True

@@ -138,7 +138,6 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.SetMarginSensitive(self.MARKER_MARGIN, True)
         self.SetMarginWidth(self.MARKER_MARGIN, 24)
 
-
         # diff markers
         # self.MarkerDefine(4, stc.STC_MARK_CHARACTER + ord('+'), "WHEAT", "#808080")
         # self.MarkerDefine(5, stc.STC_MARK_CHARACTER + ord('-'), "WHEAT", "#808080")
@@ -169,31 +168,20 @@ class TextEditor(wx.stc.StyledTextCtrl):
         else:
             self.indicate_words('', True)
         self.set_margins()
+        self.update_toolbar_eol_mode()
         self.check_braces()
-        self.get_eolmode()
-        # TODO: get_eolmode only needs to be updated when changed from menu or newfile or tab changes.
         event.Skip()
 
     def get_eol_len(self):
-        res = 0
+        res = 1
         if self.GetEOLMode() == stc.STC_EOL_CRLF:
             res = 2
-        else:
-            res = 1
         return res
 
-    def get_eolmode(self):
-        eolmode = 'None'
-        eolmode_int = self.GetEOLMode()
-        if eolmode_int == wx.stc.STC_EOL_CRLF:
-            eolmode = 'CRLF'
-        elif eolmode_int == wx.stc.STC_EOL_LF:
-            eolmode = 'LF'
-        elif eolmode_int == wx.stc.STC_EOL_CR:
-            eolmode = 'CR'
-        else:
-            pass
-        self.status_bar.SetStatusText(str(eolmode), 2)
+    def update_toolbar_eol_mode(self):
+        eol_dict = {0: 'CRLF', 1: 'CR', 2: 'LF'}
+        eol_mode = eol_dict.get(self.GetEOLMode(), 'N/A')
+        self.status_bar.SetStatusText(str(eol_mode), 2)
 
     def check_braces(self):
         cp = self.GetCurrentPos()

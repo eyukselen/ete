@@ -38,7 +38,6 @@ class MainWindow(wx.Frame):
         app_ico.LoadFile('icons/ete.png', wx.BITMAP_TYPE_PNG, 32, 32)
         self.SetIcon(app_ico)
 
-
         # region icon set
         icon_size = (32, 32)
         # new_ico = wx.ArtProvider.GetBitmap(wx.ART_NEW, wx.ART_TOOLBAR, icon_size)
@@ -373,6 +372,7 @@ class MainWindow(wx.Frame):
                 _, f = os.path.split(file)
                 self.notebook.SetPageText(self.notebook.GetPageIndex(self.notebook.GetCurrentPage()), f)
                 te.Refresh()
+
         self.Raise()  # get the focus to main frame from outside world after files are being dragged in
 
     def save_page(self, _):
@@ -805,22 +805,23 @@ class MainWindow(wx.Frame):
         if self.notebook.GetPageCount() == 0:
             return
         eol_mode = 0
-        if event.GetId() == 2013:
+        if event.GetId() == EID_EDIT_CRLF:
             eol_mode = wx.stc.STC_EOL_CRLF
-        elif event.GetId() == 2014:
+        elif event.GetId() == EID_EDIT_LF:
             eol_mode = wx.stc.STC_EOL_LF
-        elif event.GetId() == 2015:
+        elif event.GetId() == EID_EDIT_CR:
             eol_mode = wx.stc.STC_EOL_CR
         cp = self.notebook.GetCurrentPage()
         te = self.get_text_editor_from_page(self.notebook.GetPageIndex(cp))
         te.set_eol(eol_mode)
+        te.update_toolbar_eol_mode()
 
     def on_menu_encode(self, event):
-        if event.GetId() == self.menu_encode_utf8.GetId():
+        if event.GetId() == EID_ENCODE_UTF8:
             self.set_encoding('utf-8')
-        elif event.GetId() == self.menu_encode_win1252.GetId():
+        elif event.GetId() == EID_ENCODE_WIN1252:
             self.set_encoding('windows-1252')
-        elif event.GetId() == self.menu_encode_win1254.GetId():
+        elif event.GetId() == EID_ENCODE_WIN1254:
             self.set_encoding('windows-1254')
         else:
             return

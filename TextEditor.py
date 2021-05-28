@@ -14,6 +14,7 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.MARKER_PLUS = 5
         self.MARKER_MINUS = 6
         self.check_for_braces = False
+        self.SetMultipleSelection(False)
         self.file_name = filename
         self.lang = ''
         self.code_page = ''

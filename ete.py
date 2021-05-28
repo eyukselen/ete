@@ -107,6 +107,8 @@ class MainWindow(wx.Frame):
                         [EID_EDIT_CRLF, 'Change Eol to CRLF', ],
                         [EID_EDIT_LF, 'Change Eol to LF', ],
                         [EID_EDIT_CR, 'Change Eol to CR', ],
+                        [EID_SEP, ],
+                        [EID_EDIT_MULTISELECT, 'Multiple Selection', ],
                       ],
             'view':  [
                         [EID_VIEW_SPACE, 'Show White Space', ],
@@ -286,6 +288,8 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_menu_edit_eol, id=EID_EDIT_CRLF)
         self.Bind(wx.EVT_MENU, self.on_menu_edit_eol, id=EID_EDIT_LF)
         self.Bind(wx.EVT_MENU, self.on_menu_edit_eol, id=EID_EDIT_CR)
+
+        self.Bind(wx.EVT_MENU, self.on_select_mode, id=EID_EDIT_MULTISELECT)
 
         self.Bind(wx.EVT_MENU, self.on_menu_encode, id=EID_ENCODE_UTF8)
         self.Bind(wx.EVT_MENU, self.on_menu_encode, id=EID_ENCODE_WIN1252)
@@ -788,6 +792,16 @@ class MainWindow(wx.Frame):
         cp = self.notebook.GetCurrentPage()
         te = self.get_text_editor_from_page(self.notebook.GetPageIndex(cp))
         te.set_lang(lang)
+
+    def on_select_mode(self, event):
+        if self.notebook.GetPageCount() == 0:
+            return
+        cp = self.notebook.GetCurrentPage()
+        te = self.get_text_editor_from_page(self.notebook.GetPageIndex(cp))
+        if te.GetMultipleSelection():
+            te.SetMultipleSelection(False)
+        else:
+            te.SetMultipleSelection(True)
 
     def on_menu_edit_case(self, event):
         if self.notebook.GetPageCount() == 0:

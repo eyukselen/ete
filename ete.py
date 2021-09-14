@@ -126,7 +126,8 @@ class MainWindow(wx.Frame):
                             img = bmp.ConvertToImage()
                             mi.SetBitmap(wx.Bitmap(img.Scale(24, 24, wx.IMAGE_QUALITY_HIGH)))
                             # TODO: this call is only for mac os - windows handles this fine
-                            # entire try block should be only mi.SetBitmap(i[2]) for windows
+                            # mac os scaled same bitmap differently for toolbar and menu
+                            # entire if block should be only mi.SetBitmap(i[2]) for windows
                         m.Append(mi)
                     finally:
                         pass
@@ -136,7 +137,13 @@ class MainWindow(wx.Frame):
         # endregion
 
         # region toolbar definition
+        # cascaded toolbar on macos does not show icons so text added
+        # on windows adding text makes icons too big
         self.tool_bar = wx.ToolBar(self)
+        if sys.platform == 'win32':
+            self.tool_bar.SetWindowStyle(wx.TB_HORIZONTAL | wx.TB_FLAT | wx.NO_BORDER)
+        elif sys.platform == 'darwin':
+            self.tool_bar.SetWindowStyle(wx.TB_HORIZONTAL | wx.TB_FLAT | wx.TB_TEXT | wx.NO_BORDER)
 
         self.tool_bar.AddTool(toolId=EID_FILE_NEW, label='New', bitmap=get_icon('new_ico'),
                               bmpDisabled=get_icon('new_ico'), kind=wx.ITEM_NORMAL, shortHelp='New File',

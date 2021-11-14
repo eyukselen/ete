@@ -44,9 +44,11 @@ class MainWindow(wx.Frame):
             with io.BytesIO(zlib.decompress(base64.b64decode(icons[name]))) as stream:
                 icon = wx.Bitmap(wx.Image(stream))
             return icon
-        
+
+        # region menubar
+
         menux = {
-            'file': [
+            '&File': [
                         [EID_FILE_NEW, '&New\tCTRL+N', get_icon('new_ico'), ],
                         [EID_FILE_OPEN, '&Open\tCTRL+O', get_icon('open_ico'), ],
                         [EID_FILE_SAVE, '&Save\tCTRL+S', get_icon('save_ico'), ],
@@ -55,7 +57,7 @@ class MainWindow(wx.Frame):
                         [EID_CLOSE_TAB, 'Close', ],
                         [EID_FILE_EXIT, 'E&xit', get_icon('exit_ico'), ],
                      ],
-            'edit': [
+            '&Edit': [
                         [EID_EDIT_UNDO, '&Undo\tCTRL+Z', get_icon('undo_ico'), ],
                         [EID_EDIT_REDO, '&Redo\tCTRL+Y', get_icon('redo_ico'), ],
                         [EID_SEP, ],
@@ -79,7 +81,7 @@ class MainWindow(wx.Frame):
                         [EID_SEP, ],
                         [EID_EDIT_MULTISELECT, 'Multiple Selection', ],
                       ],
-            'view':  [
+            '&View':  [
                         [EID_VIEW_SPACE, 'Show White Space', ],
                         [EID_VIEW_EOL, 'Show End Of Line', ],
                         [EID_VIEW_INDENT, 'Show Indentation Guides', ],
@@ -88,7 +90,7 @@ class MainWindow(wx.Frame):
                         [EID_VIEW_TRANSPARENT, 'Transparent', ],
 
                       ],
-            'lang':  [
+            '&Lang':  [
                         [EID_LANG_TXT, 'Text', ],
                         [EID_LANG_PYTHON, 'Python', ],
                         [EID_LANG_MSSQL, 'MSSQL', ],
@@ -97,16 +99,16 @@ class MainWindow(wx.Frame):
                         [EID_LANG_XML, 'XML', ],
                         [EID_LANG_HTML, 'HTML', ],
                       ],
-            'encoding': [
+            'E&ncoding': [
                             [EID_ENCODE_UTF8, 'UTF-8', ],
                             [EID_ENCODE_WIN1252, 'Windows-1252', ],
                             [EID_ENCODE_WIN1254, 'Windows-1254', ],
                          ],
-            'tools': [
+            '&Tools': [
                          [EID_TOOLS_COMPARE, '&Compare', get_icon('compare_ico'), ],
                          [EID_TOOLS_CLEARCOMP, 'Clea&r Compare', get_icon('clear_compare_ico'), ],
                       ],
-            'about': [
+            '&About': [
                          [EID_ABOUT_INFO, 'About', get_icon('about_ico'), ],
                       ],
             }
@@ -289,11 +291,28 @@ class MainWindow(wx.Frame):
         self.notebook.Bind(aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.on_tab_close, id=wx.ID_ANY)
         self.notebook.Bind(aui.EVT_AUINOTEBOOK_PAGE_CHANGED, self.on_page_select, id=wx.ID_ANY)
 
+        self.Bind(wx.EVT_CHAR_HOOK, self.on_key_event)
+
         # endregion
 
         self.search_dlg = Frd.FindReplaceDlg(parent=self, notebook=self.notebook)
         self.info = wx.adv.AboutDialogInfo()
         self.Show()
+
+    def get_current_text_editor(self):
+        cp = self.notebook.GetCurrentPage()  # if tab is switched when dlg is open pick new tab
+        te = self.get_text_editor_from_page(self.notebook.GetPageIndex(cp))
+        return te
+
+    def on_key_event(self, event):
+        if event.AltDown() and event.ShiftDown() and event.GetKeyCode() == wx.WXK_DOWN:
+            print('key comb pressed')
+            cp = self.notebook.GetCurrentPage()  # if tab is switched when dlg is open pick new tab
+            te = self.get_text_editor_from_page(self.notebook.GetPageIndex(cp))
+            te.SetAdditionalSelectionTyping(True)
+            te.LineDownRectExtend()
+        else:
+            event.Skip()
 
     def get_text_editor_from_page(self, page_idx):
         page = self.notebook.GetPage(page_idx)

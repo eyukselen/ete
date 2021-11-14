@@ -27,7 +27,6 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.Bind(wx.stc.EVT_STC_MARGINCLICK, self.on_margin_click, id=self.ID_MARGIN_CLICK)
         self.set_styles()
         self.set_margins()
-
         # region styling
 
         self.txt_fore = 'BLACK'
@@ -94,15 +93,7 @@ class TextEditor(wx.stc.StyledTextCtrl):
 
         # endregion
         self.SetUseAntiAliasing(True)  # this is new with wxPython 4.1
-        self.adjust_line_height()
         self.Refresh()
-
-    def adjust_line_height(self):
-        current_height = self.TextHeight(0)
-        display_height = wx.Display().GetGeometry().GetSize()[1]
-        screen_to_line_ratio = 0.015
-        text_height = int(display_height * screen_to_line_ratio)
-        self.SetZoom(text_height - current_height)
 
     def undo(self, _):
         self.Undo()
@@ -163,11 +154,7 @@ class TextEditor(wx.stc.StyledTextCtrl):
         col_num = self.GetColumn(self.GetCurrentPos())
         sel_len = abs(cursor - anchor)
         self.status_bar.SetStatusText('line:' + str(line_num) + ' col :' + str(col_num) + ' Sel:' + str(sel_len), 1)
-        if cursor != anchor:
-            if self.IsRangeWord(cursor, anchor):
-                self.indicate_words(self.GetSelectedText())
-        else:
-            self.indicate_words('', True)
+        self.indicate_selection()
         self.set_margins()
         self.update_toolbar_eol_mode()
         self.check_braces()
@@ -532,20 +519,26 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.IndicatorSetStyle(9, stc.STC_INDIC_ROUNDBOX)  # style set 9 for matched search word indicator
         self.IndicatorSetForeground(9, 'BLUE')
 
-    def indicate_words(self, word, clear=False):
-        start = self.XYToPosition(0, self.GetFirstVisibleLine())
-        length = self.GetLineEndPosition(self.GetFirstVisibleLine() + self.LinesOnScreen()) - start
-        self.IndicatorClearRange(0, self.GetTextLength())
-        if clear:
-            return
-        fin = True
-        while fin:
-            res, find_end = self.FindText(start, start + length, word, stc.STC_FIND_WHOLEWORD)
-            if res == -1:
-                fin = False
+    def indicate_selection(self):
+        if self.GetSelectionEmpty():
+            self.IndicatorClearRange(0, self.GetTextLength())
+        else:
+            sel_start, sel_end = self.GetSelection()  # get selection range
+            sel_len = sel_end - sel_start
+            self.IndicatorClearRange(0, self.GetTextLength())
+            if self.IsRangeWord(sel_start, sel_end):
+                vis_start = self.XYToPosition(0, self.GetFirstVisibleLine())
+                vis_end = self.GetLineEndPosition(self.GetFirstVisibleLine() + self.LinesOnScreen())
+                chk = True
+                while chk:
+                    found_start, found_end = self.FindText(vis_start, vis_end, self.GetSelectedText(), stc.STC_FIND_WHOLEWORD)
+                    if found_start == -1:
+                        break
+                    else:
+                        self.IndicatorFillRange(found_start, found_end - found_start)
+                        vis_start += found_end - found_start
             else:
-                self.IndicatorFillRange(res, len(word))
-                start = res + len(word)
+                self.IndicatorFillRange(sel_start, sel_end)
     
     def load_file(self, file):
         with open(file, 'rb') as ff:

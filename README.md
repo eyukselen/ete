@@ -1,5 +1,9 @@
 # ete text editor 
 
+## V 0.3.a.2
+
+* added Sniplets panel. only tree working no save no text for now
+
 ## V 0.3.a.1
 
 Ete is my experiment with wxPython library - styled text control in particular.

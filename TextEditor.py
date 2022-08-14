@@ -20,7 +20,7 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.code_page = ''
         self.style_no = 0
         self.folding = False
-        self.status_bar = self.GetParent().GetParent().GetParent().GetParent().status_bar
+        self.status_bar = self.GetParent().GetParent().GetParent().GetParent().GetParent().status_bar
         self.Bind(stc.EVT_STC_UPDATEUI, self.on_update_ui)
         self.Bind(stc.EVT_STC_ZOOM, self.on_update_ui)
         self.Bind(wx.EVT_RIGHT_UP, self.on_popup)

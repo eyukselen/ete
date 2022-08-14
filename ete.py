@@ -6,12 +6,13 @@ import wx.aui as aui
 import wx.stc as stc
 import wx.svg
 import io
-# import wx.lib.inspection # for debugging
+import wx.lib.inspection  # for debugging
 import zlib
 import base64
 from configs import *
 import FindReplaceDlg as Frd
 from TextEditor import TextEditor
+from sniplets import Sniplet_Control
 # region high dpi settings for windows
 if sys.platform == 'win32':
     # import ctypes
@@ -195,19 +196,28 @@ class MainWindow(wx.Frame):
         self.tool_bar.Realize()
         # endregion
 
-        # region main panel definition
-
+        # region main panel 
         self.main_panel = wx.Panel(parent=self)
-        self.main_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.main_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.main_panel.SetSizer(self.main_sizer)
-        self.main_panel.DragAcceptFiles(True)
-        self.main_panel.Bind(wx.EVT_DROP_FILES, self.open_page)
+        
+        self.editor_panel = wx.Panel(parent=self.main_panel)
+        self.editor_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.editor_panel.SetSizer(self.editor_sizer)
+        self.editor_panel.DragAcceptFiles(True)
+        self.editor_panel.Bind(wx.EVT_DROP_FILES, self.open_page)
+
+        self.sniplets_panel = Sniplet_Control(parent=self.main_panel)
+
+        
+        self.main_sizer.Add(self.editor_panel, 3, wx.EXPAND)
+        self.main_sizer.Add(self.sniplets_panel,1,wx.EXPAND)
 
         # endregion
 
         # region tabbed notebook definition
 
-        self.notebook = aui.AuiNotebook(parent=self.main_panel,
+        self.notebook = aui.AuiNotebook(parent=self.editor_panel,
                                         style=aui.AUI_NB_CLOSE_ON_ALL_TABS |
                                         aui.AUI_NB_DEFAULT_STYLE |
                                         aui.AUI_NB_WINDOWLIST_BUTTON)
@@ -215,7 +225,7 @@ class MainWindow(wx.Frame):
         # asta = self.notebook.GetArtProvider()
         # asta.SetActiveColour(wx.Colour(77, 184, 255))
         # asta.SetColour(wx.Colour(153, 214, 255))
-        self.main_sizer.Add(self.notebook, 1, wx.EXPAND)
+        self.editor_sizer.Add(self.notebook, 1, wx.EXPAND)
         # endregion
 
         # region status bar

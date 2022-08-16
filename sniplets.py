@@ -1,9 +1,11 @@
-from logging import root
-from operator import itemgetter
+from typing import DefaultDict
 import wx
 from wx import TreeCtrl
 import os.path
-import pickle
+import json
+from sniplet_edit import Sniplet_Editor
+from collections import defaultdict
+
 
 app_dummy = wx.App()
 add_ico = wx.ArtProvider.GetBitmap(wx.ART_PLUS, wx.ART_TOOLBAR, (32, 32))
@@ -21,15 +23,17 @@ class Sniplet_Tree(TreeCtrl):
                           wx.TR_SINGLE |
                           wx.TR_TWIST_BUTTONS |
                           wx.TR_EDIT_LABELS)
-        self.root = self.AddRoot(text='Sniplets', data=[0, None])
+        self.root = self.AddRoot(text='Sniplets', data=0)
+        self.node_notes: dict[int: str] = DefaultDict(lambda:'')  # int: node id, str: text note
         self.node_counter = 0  # for keeping an Id for all nodes
-        self.file = 'sniplets.pkl'
+        self.file = 'sniplets.json'
         self.load_tree()  # node_counter should be before this
         self.node_list = []  # used for load and save tree
         
+
         self.dragging_node = None
         self.dummy_list = []
-        
+
         self.current_node = self.root
         self.Bind(wx.EVT_TREE_BEGIN_DRAG, self.on_begin_drag)
         self.Bind(wx.EVT_TREE_END_DRAG, self.on_end_drag)
@@ -39,11 +43,12 @@ class Sniplet_Tree(TreeCtrl):
         child, cookie = self.GetFirstChild(nod)
         while child.IsOk():
             parent = self.GetItemParent(child)
-            parent_id = self.GetItemData(parent)[0]
-            node_dic = {'id': self.GetItemData(child)[0],  # id
+            parent_id = self.GetItemData(parent)
+            snip_id = self.GetItemData(child)
+            node_dic = {'id': snip_id,  # id
                         'parent_id': parent_id,  # parent d
                         'text': self.GetItemText(child),  # label
-                        'data': self.GetItemData(child),  # data - data is [id, data]
+                        'data': self.node_notes[snip_id],  # associated note
                         'is_expanded': self.IsExpanded(child),  # if it is expanded
                         }
             self.node_list.append(node_dic)
@@ -52,10 +57,11 @@ class Sniplet_Tree(TreeCtrl):
             child, cookie = self.GetNextChild(nod, cookie)
 
     def build_tree(self, nod):
-        node_dic = {'id': self.GetItemData(nod)[0],  # id
+        snip_id = self.GetItemData(nod)
+        node_dic = {'id': snip_id,  # id
                     'parent_id': 0,  # root parent_id
                     'text': self.GetItemText(nod),  # label
-                    'data': self.GetItemData(nod),  # data - data is [id, data]
+                    'data': self.node_notes[snip_id],  # associated note
                     'is_expanded': self.IsExpanded(nod),  # if it is expanded
                     }
         self.node_list = []
@@ -146,9 +152,9 @@ class Sniplet_Tree(TreeCtrl):
     def add_node(self):
         node = self.get_current_node()
         self.node_counter += 1
-        new_node = self.AppendItem(parent=node, text='New'
+        new_node = self.AppendItem(parent=node, text='New '
                                    + str(self.node_counter),
-                                   data=[self.node_counter, ''])
+                                   data=self.node_counter)
         self.SelectItem(new_node, True)
         self.SetFocusedItem(new_node)
         self.SetFocus()
@@ -161,23 +167,33 @@ class Sniplet_Tree(TreeCtrl):
 
     def edit_node(self):
         item = self.GetFocusedItem()
+        snip_id = self.GetItemData(item)
+        snip_name = self.GetItemText(item)
+        snip_body = self.node_notes[snip_id]
         if item.IsOk():
-            print(self.GetItemText(item))
-            print(item.GetID())
-            print(item.__hash__)
-            print('done')
+            se = Sniplet_Editor(self, snip_name=snip_name, snip_body=snip_body)
+            res = se.ShowModal()
+            if res == wx.ID_OK:
+                snip_name = se.snip_name
+                snip_body = se.snip_body
+                self.SetItemText(item, snip_name)
+                self.node_notes[snip_id] = snip_body
+                print(self.node_notes)
+            if res == wx.ID_CANCEL:
+                print('cancelled')
+            se.Destroy()
 
     def save_tree(self):
         dumptree = self.build_tree(self.GetRootItem())
-        with open(self.file, "wb") as file:
-            pickle.dump(dumptree, file)
+        with open(self.file, "w") as file:
+            json.dump(dumptree, file)
 
     def load_find_node(self, search_id, root_item):
         if search_id == 0:
             return self.GetRootItem()
         item, cookie = self.GetFirstChild(root_item)
         while item.IsOk():
-            node_id = self.GetItemData(item)[0]
+            node_id = self.GetItemData(item)
             if node_id == search_id:
                 return item
             if self.ItemHasChildren(item):
@@ -191,20 +207,23 @@ class Sniplet_Tree(TreeCtrl):
     def load_tree(self):
         if not os.path.exists(self.file):
             return
-        with open(self.file, 'rb') as file:
-            node_list = pickle.load(file)
+        with open(self.file, 'r') as file:
+            node_list = json.load(file)
+                
         for d in node_list:
             print(d)
         self.DeleteAllItems()
         root_node = node_list[0]
         node_list.pop(0)  # remove root
-        self.AddRoot(text=root_node['text'], data=root_node['data'])
+        self.AddRoot(text=root_node['text'], data=root_node['id'])
         max_counter = 0
         for node in node_list:
-            self.AppendItem(parent=self.load_find_node(node['parent_id'], self.GetRootItem()),
+            self.AppendItem(parent=self.load_find_node(node['parent_id'],
+                                                       self.GetRootItem()),
                             text=node['text'],
-                            data=node['data']
+                            data=node['id']
                             )
+            self.node_notes[node['id']] = node['data']
             max_counter = max(node['id'], max_counter)
         
         self.node_counter = max_counter
@@ -213,10 +232,6 @@ class Sniplet_Tree(TreeCtrl):
             if node['is_expanded']:
                 self.Expand(self.load_find_node(node['id'], self.GetRootItem()))
             max_counter = max(node['id'], max_counter)
-
-        
-        
-
 
 
 class Sniplet_Control(wx.Panel):
@@ -262,5 +277,3 @@ class Sniplet_Control(wx.Panel):
 
     def on_edit_node(self, _):
         self.sniplets.edit_node()
-        # print(self.sniplets.get_current_node())
-            

@@ -2,7 +2,7 @@
 
 ## V 0.3.a.2
 
-* added Sniplets panel. only tree working save and load ok but no text for now
+* added Sniplets panel. working sniplets tree, save, edit, auto load
 
 ## V 0.3.a.1
 

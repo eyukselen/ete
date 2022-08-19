@@ -197,21 +197,27 @@ class MainWindow(wx.Frame):
         # endregion
 
         # region main panel 
-        self.main_panel = wx.Panel(parent=self)
-        self.main_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.main_panel.SetSizer(self.main_sizer)
+        # self.main_panel = wx.Panel(parent=self)
+        self.main_panel_window = wx.SplitterWindow(self, id=wx.ID_ANY, style=wx.SP_3D | wx.SP_LIVE_UPDATE)
+        # self.main_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        # self.main_panel.SetSizer(self.main_sizer)
         
-        self.editor_panel = wx.Panel(parent=self.main_panel)
+        self.editor_panel = wx.Panel(parent=self.main_panel_window)
         self.editor_sizer = wx.BoxSizer(wx.VERTICAL)
         self.editor_panel.SetSizer(self.editor_sizer)
         self.editor_panel.DragAcceptFiles(True)
         self.editor_panel.Bind(wx.EVT_DROP_FILES, self.open_page)
 
-        self.sniplets_panel = Sniplet_Control(parent=self.main_panel)
-
+        self.sniplets_panel = Sniplet_Control(parent=self.main_panel_window)
         
-        self.main_sizer.Add(self.editor_panel, 3, wx.EXPAND)
-        self.main_sizer.Add(self.sniplets_panel,1,wx.EXPAND)
+        # self.main_sizer.Add(self.editor_panel, 3, wx.EXPAND)
+        # self.main_sizer.Add(self.sniplets_panel,1,wx.EXPAND)
+        self.main_panel_window.SplitVertically(self.editor_panel, self.sniplets_panel, -250)
+        self.main_panel_window.SetSashGravity(1)  
+        # sash gravity
+        # 1.0: only left/top window grows on resize
+        # 0.0: only the bottom/right window is automatically resized
+        # 0.5: both windows grow by equal size
 
         # endregion
 

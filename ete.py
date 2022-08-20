@@ -38,7 +38,7 @@ class MainWindow(wx.Frame):
         self.ID_SYNC_ZOOM_L = wx.ID_ANY
         self.ID_SYNC_ZOOM_R = wx.ID_ANY
         app_ico = wx.Icon()
-        app_ico.LoadFile('icons/ete.png', wx.BITMAP_TYPE_PNG, 32, 32)
+        app_ico.LoadFile('ete.png', wx.BITMAP_TYPE_PNG, 32, 32)
         self.SetIcon(app_ico)
 
         def get_icon(name):

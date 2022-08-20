@@ -25,12 +25,12 @@ class Sniplet_Tree(TreeCtrl):
                           wx.TR_TWIST_BUTTONS |
                           wx.TR_EDIT_LABELS)
         self.root = self.AddRoot(text='Sniplets', data=0)
-        self.node_notes: dict[int: str] = DefaultDict(lambda:'')  # int: node id, str: text note
+        # node_notes int: node id, str: text note
+        self.node_notes: dict[int: str] = DefaultDict(lambda: '')
         self.node_counter = 0  # for keeping an Id for all nodes
         self.file = 'sniplets.json'
         self.load_tree()  # node_counter should be before this
         self.node_list = []  # used for load and save tree
-        
 
         self.dragging_node = None
         self.dummy_list = []
@@ -50,7 +50,7 @@ class Sniplet_Tree(TreeCtrl):
                         'parent_id': parent_id,  # parent d
                         'text': self.GetItemText(child),  # label
                         'data': self.node_notes[snip_id],  # associated note
-                        'is_expanded': self.IsExpanded(child),  # if it is expanded
+                        'is_expanded': self.IsExpanded(child),  # if expanded
                         }
             self.node_list.append(node_dic)
             if self.GetChildrenCount(child) > 0:
@@ -80,11 +80,9 @@ class Sniplet_Tree(TreeCtrl):
         self.Refresh()
 
     def get_children(self, search_node):
-        # print('searching node:' + self.GetItemText(search_node))
         node, cookie = self.GetFirstChild(search_node)
         while node.IsOk():
             self.dummy_list.append(node)
-            # print('found: ' + self.GetItemText(node))
             if self.GetChildrenCount(node) > 0:
                 self.get_children(node)
             node, cookie = self.GetNextChild(search_node, cookie)
@@ -94,7 +92,6 @@ class Sniplet_Tree(TreeCtrl):
         res = True
         childs = self.get_children(source_node)
         if target_node in childs:
-            # print('cannot move ' + self.GetItemText(source_node) + ' ' + self.GetItemText(target_node))
             res = False
         self.dummy_list = []
         return res
@@ -103,9 +100,6 @@ class Sniplet_Tree(TreeCtrl):
         if not self.dragging_node:
             self.dragging_node = event.GetItem()
         if self.dragging_node:
-            # print("Beginning Drag...")
-            # print("dragging" + self.GetItemText(self.dragging_node))
-            # print("Beginning Drag...")
             event.Allow()
 
     def copy_node(self, source_node, target_node):
@@ -116,9 +110,7 @@ class Sniplet_Tree(TreeCtrl):
         expand_collapse.append((new_node, self.IsExpanded(source_node)))
         if self.GetChildrenCount(source_node) > 0:
             childs = self.get_children(source_node)
-            print('childs are ' + str(childs))
             for child in childs:
-                print('child is ' + self.GetItemText(child))
                 self.copy_node(child, new_node)
         for node, state in expand_collapse:
             if state:
@@ -129,10 +121,6 @@ class Sniplet_Tree(TreeCtrl):
         if self.check_can_move(self.dragging_node, self.target_node):
             if self.dragging_node:
                 if self.target_node:
-                    # print("End Drag...")
-                    # print(self.GetItemText(self.dragging_node))
-                    # print(self.GetItemText(self.target_node))
-                    # print("End Drag...")
                     event.Allow()
                     self.copy_node(self.dragging_node, self.target_node)
                     self.Delete(self.dragging_node)
@@ -179,9 +167,8 @@ class Sniplet_Tree(TreeCtrl):
                 snip_body = se.snip_body
                 self.SetItemText(item, snip_name)
                 self.node_notes[snip_id] = snip_body
-                print(self.node_notes)
             if res == wx.ID_CANCEL:
-                print('cancelled')
+                pass
             se.Destroy()
 
     def save_tree(self):
@@ -210,9 +197,7 @@ class Sniplet_Tree(TreeCtrl):
             return
         with open(self.file, 'r') as file:
             node_list = json.load(file)
-                
-        for d in node_list:
-            print(d)
+
         self.DeleteAllItems()
         root_node = node_list[0]
         node_list.pop(0)  # remove root
@@ -226,12 +211,13 @@ class Sniplet_Tree(TreeCtrl):
                             )
             self.node_notes[node['id']] = node['data']
             max_counter = max(node['id'], max_counter)
-        
+
         self.node_counter = max_counter
         self.Expand(self.GetRootItem())
         for node in node_list:
             if node['is_expanded']:
-                self.Expand(self.load_find_node(node['id'], self.GetRootItem()))
+                self.Expand(self.load_find_node(node['id'],
+                            self.GetRootItem()))
             max_counter = max(node['id'], max_counter)
 
 

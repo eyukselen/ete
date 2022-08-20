@@ -5,13 +5,14 @@ import os.path
 import json
 from sniplet_edit import Sniplet_Editor
 from collections import defaultdict
+from configs import icons
+import io, zlib, base64
 
 
-app_dummy = wx.App()
-add_ico = wx.ArtProvider.GetBitmap(wx.ART_PLUS, wx.ART_TOOLBAR, (32, 32))
-del_ico = wx.ArtProvider.GetBitmap(wx.ART_DELETE, wx.ART_TOOLBAR, (32, 32))
-edit_ico = wx.ArtProvider.GetBitmap(wx.ART_REPORT_VIEW, wx.ART_TOOLBAR, (32, 32))
-save_ico = wx.ArtProvider.GetBitmap(wx.ART_FILE_SAVE, wx.ART_TOOLBAR, (32, 32))
+def get_icon(name):
+    with io.BytesIO(zlib.decompress(base64.b64decode(icons[name]))) as stream:
+        icon = wx.Bitmap(wx.Image(stream))
+    return icon
 
 
 class Sniplet_Tree(TreeCtrl):
@@ -241,17 +242,25 @@ class Sniplet_Control(wx.Panel):
         self.SetSizer(self.main_sizer)
 
         self.tool_bar = wx.ToolBar(parent=self)
-        self.tool_bar.AddTool(toolId=wx.ID_ADD, label='Add', bitmap=add_ico,
-                              bmpDisabled=add_ico, kind=wx.ITEM_NORMAL, shortHelp='Add',
+        self.tool_bar.AddTool(toolId=wx.ID_ADD, label='Add', 
+                              bitmap=get_icon('snip_add'),
+                              bmpDisabled=get_icon('snip_add'),
+                              kind=wx.ITEM_NORMAL, shortHelp='Add',
                               longHelp='', clientData=None)
-        self.tool_bar.AddTool(toolId=wx.ID_DELETE, label='Del', bitmap=del_ico,
-                              bmpDisabled=del_ico, kind=wx.ITEM_NORMAL, shortHelp='Dell',
+        self.tool_bar.AddTool(toolId=wx.ID_DELETE, label='Del', 
+                              bitmap=get_icon('snip_del'),
+                              bmpDisabled=get_icon('snip_del'),
+                              kind=wx.ITEM_NORMAL, shortHelp='Delete',
                               longHelp='', clientData=None)
-        self.tool_bar.AddTool(toolId=wx.ID_EDIT, label='Edit', bitmap=edit_ico,
-                              bmpDisabled=edit_ico, kind=wx.ITEM_NORMAL, shortHelp='Edit',
+        self.tool_bar.AddTool(toolId=wx.ID_EDIT, label='Edit',
+                              bitmap=get_icon('snip_edit'),
+                              bmpDisabled=get_icon('snip_edit'),
+                              kind=wx.ITEM_NORMAL, shortHelp='Edit',
                               longHelp='', clientData=None)
-        self.tool_bar.AddTool(toolId=wx.ID_SAVE, label='Save', bitmap=save_ico,
-                              bmpDisabled=save_ico, kind=wx.ITEM_NORMAL, shortHelp='Save',
+        self.tool_bar.AddTool(toolId=wx.ID_SAVE, label='Save', 
+                              bitmap=get_icon('save_ico'),
+                              bmpDisabled=get_icon('save_ico'),
+                              kind=wx.ITEM_NORMAL, shortHelp='Save',
                               longHelp='', clientData=None)
 
         self.sniplets = Sniplet_Tree(parent=self)

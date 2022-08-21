@@ -30,5 +30,5 @@ def png2str(svg_file):
     return res
 
 
-svg_file = "icons\\snip_trash.svg"
+svg_file = "sniplets.svg"
 print(png2str(svg_file))

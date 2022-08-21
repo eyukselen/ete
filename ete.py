@@ -1,3 +1,4 @@
+from cProfile import label
 import os
 import sys  # from sys import platform can be cleaner
 import wx
@@ -191,6 +192,10 @@ class MainWindow(wx.Frame):
         self.tool_bar.AddTool(toolId=EID_TOOLS_CLEARCOMP, label='Clear Compare', bitmap=get_icon('clear_compare_ico'),
                               bmpDisabled=get_icon('clear_compare_ico'), kind=wx.ITEM_NORMAL, shortHelp='Clear Compare',
                               longHelp='', clientData=None)
+        self.tool_bar.AddSeparator()
+        self.tool_bar.AddTool(toolId=EID_TOOLS_SNIPLETS, label="Sniplets", bitmap=get_icon('sniplets'),
+                              bmpDisabled=get_icon('sniplets'), kind=wx.ITEM_NORMAL, shortHelp='Sniplets',
+                              longHelp='', clientData=None)
 
         self.SetToolBar(self.tool_bar)
         self.tool_bar.Realize()
@@ -213,7 +218,7 @@ class MainWindow(wx.Frame):
         # self.main_sizer.Add(self.editor_panel, 3, wx.EXPAND)
         # self.main_sizer.Add(self.sniplets_panel,1,wx.EXPAND)
         self.main_panel_window.SplitVertically(self.editor_panel, self.sniplets_panel, -250)
-        self.main_panel_window.SetSashGravity(1)  
+        self.main_panel_window.SetSashGravity(1)
         # sash gravity
         # 1.0: only left/top window grows on resize
         # 0.0: only the bottom/right window is automatically resized
@@ -287,6 +292,7 @@ class MainWindow(wx.Frame):
 
         self.Bind(wx.EVT_MENU, self.on_menu_tools_compare, id=EID_TOOLS_COMPARE)
         self.Bind(wx.EVT_MENU, self.on_menu_tools_clear_compare, id=EID_TOOLS_CLEARCOMP)
+        self.Bind(wx.EVT_MENU, self.on_menu_tools_sniplets, id=EID_TOOLS_SNIPLETS)
         self.Bind(wx.EVT_MENU, self.on_menu_edit_case, id=EID_EDIT_UPPER)
         self.Bind(wx.EVT_MENU, self.on_menu_edit_case, id=EID_EDIT_LOWER)
 
@@ -314,6 +320,15 @@ class MainWindow(wx.Frame):
         self.search_dlg = Frd.FindReplaceDlg(parent=self, notebook=self.notebook)
         self.info = wx.adv.AboutDialogInfo()
         self.Show()
+
+    def on_menu_tools_sniplets(self, event):
+        if self.main_panel_window.IsSplit():
+            self.sniplets_panel.on_save_tree(event)
+            self.main_panel_window.Unsplit()
+        else:
+            self.sniplets_panel = Sniplet_Control(parent=self.main_panel_window)
+            self.main_panel_window.SplitVertically(self.editor_panel, self.sniplets_panel, -250)
+            self.main_panel_window.SetSashGravity(1)
 
     def get_current_text_editor(self):
         cp = self.notebook.GetCurrentPage()  # if tab is switched when dlg is open pick new tab

@@ -28,6 +28,19 @@ if sys.platform == 'win32':
 # endregion
 
 
+class FileDropTarget(wx.FileDropTarget):
+    def __init__(self, window, main_window):
+        wx.FileDropTarget.__init__(self)
+        self.window = window
+        self.main_window = main_window  # to call back open method
+
+    def OnDropFiles(self, x, y, filenames):
+        # txt = "\n%d file(s) dropped at %d,%d:\n" % (len(filenames), x, y)
+        # txt += '\n'.join(filenames)
+        self.main_window.open_file(filenames)
+        return True
+
+
 class MainWindow(wx.Frame):
     def __init__(self, parent):
         wx.Frame.__init__(self, parent, title='ete - ete text editor')
@@ -390,6 +403,9 @@ class MainWindow(wx.Frame):
                 if fileDialog.ShowModal() == wx.ID_CANCEL:
                     return
                 files = fileDialog.GetPaths()
+        self.open_file(files)
+
+    def open_file(self, files):
         open_files = []
         for idx in range(self.notebook.GetPageCount()):
             te = self.get_text_editor_from_page(idx)
@@ -404,6 +420,9 @@ class MainWindow(wx.Frame):
                 if sys.platform == 'win32':
                     te.DragAcceptFiles(True)
                     te.Bind(wx.EVT_DROP_FILES, self.open_page)
+                elif sys.platform == 'linux':
+                    dt = FileDropTarget(te, self)
+                    te.SetDropTarget(dt)
                 page_sizer.Add(te, 1, wx.EXPAND)
                 self.notebook.AddPage(page, select=True, caption=file_name)
                 # te.LoadFile(file) # adding my method to replace builtin

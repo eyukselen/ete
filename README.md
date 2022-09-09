@@ -2,6 +2,10 @@
 
 ## V 0.3.a.2
 
+* updated drop file to open for linux  
+
+## V 0.3.a.2
+
 * added Sniplets panel. working sniplets tree, save, edit, auto load
 
 ## V 0.3.a.1

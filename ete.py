@@ -398,7 +398,7 @@ class MainWindow(wx.Frame):
         if hasattr(event, 'Files'):
             files = event.GetFiles()
         elif event.GetId() == EID_FILE_OPEN:
-            with wx.FileDialog(self, "Open file", wildcard="text files (*.txt)|*.txt|All files (*.*)|*.*",
+            with wx.FileDialog(self, "Open file", wildcard="All files (*)|*|text files (*.txt)|*.txt",
                                style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_MULTIPLE) as fileDialog:
                 if fileDialog.ShowModal() == wx.ID_CANCEL:
                     return

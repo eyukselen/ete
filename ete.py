@@ -276,7 +276,7 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.save_as_page, id=EID_FILE_SAVEAS)
         self.Bind(wx.EVT_MENU, self.close_page, id=EID_CLOSE_TAB)
         self.Bind(wx.EVT_MENU, self.on_info, id=EID_ABOUT_INFO)
-        self.Bind(wx.EVT_MENU, self.onexit, id=EID_FILE_EXIT)
+        self.Bind(wx.EVT_MENU, self.onclose, id=EID_FILE_EXIT)
 
         self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID_EDIT_UNDO)
         self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID_EDIT_REDO)
@@ -327,6 +327,7 @@ class MainWindow(wx.Frame):
         self.notebook.Bind(aui.EVT_AUINOTEBOOK_PAGE_CHANGED, self.on_page_select, id=wx.ID_ANY)
 
         self.Bind(wx.EVT_CHAR_HOOK, self.on_key_event)
+        self.Bind(wx.EVT_CLOSE,self.onclose)
 
         # endregion
 
@@ -525,9 +526,6 @@ class MainWindow(wx.Frame):
             # wx.PostEvent(self, e)
         page_to_close = event.GetSelection()
         self.close_tab(page_to_close)
-
-    def onexit(self, _):
-        self.Close()
 
     def onclose(self, event):
         if event.CanVeto():

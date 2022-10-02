@@ -161,6 +161,8 @@ class MainWindow(wx.Frame):
             self.tool_bar.SetWindowStyle(wx.TB_HORIZONTAL | wx.TB_FLAT | wx.NO_BORDER)
         elif sys.platform == 'darwin':
             self.tool_bar.SetWindowStyle(wx.TB_HORIZONTAL | wx.TB_FLAT | wx.TB_TEXT | wx.NO_BORDER)
+        else:
+            self.tool_bar.SetWindowStyle(wx.TB_HORIZONTAL | wx.TB_FLAT | wx.NO_BORDER)
 
         self.tool_bar.AddTool(toolId=EID_FILE_NEW, label='New', bitmap=get_icon('new_ico'),
                               bmpDisabled=get_icon('new_ico'), kind=wx.ITEM_NORMAL, shortHelp='New File',

@@ -27,6 +27,8 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.Bind(wx.stc.EVT_STC_MARGINCLICK, self.on_margin_click, id=self.ID_MARGIN_CLICK)
         self.set_styles()
         self.set_margins()
+        self.SetAdditionalSelectionTyping(True)
+        self.SetMultipleSelection(True)
         # region styling
 
         self.txt_fore = 'BLACK'

@@ -224,6 +224,9 @@ class TextEditor(wx.stc.StyledTextCtrl):
         if lang == 'html':
             self.lang = 'html'
             self.lang_html()
+        if lang == 'json':
+            self.lang = 'json'
+            self.lang_json()
         if lang == 'txt':
             self.lang = 'txt'
             self.lang_txt()
@@ -395,6 +398,30 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.StyleSetSpec(stc.STC_STYLE_BRACELIGHT, "fore:RED,back:MEDIUM TURQUOISE,bold")
         self.StyleSetSpec(stc.STC_STYLE_BRACEBAD, "fore:RED,back:THISTLE,bold")
         self.set_folding(False)
+
+    def lang_json(self):
+        self.StyleClearAll()
+        self.SetLexer(stc.STC_LEX_JSON)
+        self.StyleSetSpec(stc.STC_STYLE_BRACELIGHT, "fore:RED,back:MEDIUM TURQUOISE,bold")
+        self.StyleSetSpec(stc.STC_STYLE_BRACEBAD, "fore:RED,back:THISTLE,bold")
+        self.set_folding(True)
+        self.StyleSetSpec(stc.STC_JSON_BLOCKCOMMENT,"fore:#008000,back:#FFFFFF")
+        self.StyleSetSpec(stc.STC_JSON_COMPACTIRI,"fore:#0000FF,back:#FFFFFF")
+        self.StyleSetSpec(stc.STC_JSON_DEFAULT,"fore:#000000,back:#FFFFFF")
+        self.StyleSetSpec(stc.STC_JSON_ERROR,"fore:#FFFF80,back:#FF0000")
+        self.StyleSetSpec(stc.STC_JSON_ESCAPESEQUENCE,"fore:#0000FF,back:#FFFFFF")
+        self.StyleSetSpec(stc.STC_JSON_KEYWORD,"fore:#18AF8A,back:#FFFFFF")
+        self.StyleSetSpec(stc.STC_JSON_PROPERTYNAME,"fore:#8000FF,back:#FFFFFF,bold")
+        self.StyleSetSpec(stc.STC_JSON_LDKEYWORD,"fore:#FF0000,back:#FFFFFF")
+        self.StyleSetSpec(stc.STC_JSON_LINECOMMENT,"fore:#008000,back:#FFFFFF")
+        self.StyleSetSpec(stc.STC_JSON_URI,"fore:#0000FF,back:#FFFFFF")
+        self.StyleSetSpec(stc.STC_JSON_STRINGEOL,"fore=#808080,back:#FFFFFF")
+        self.StyleSetSpec(stc.STC_JSON_NUMBER,"fore:#FF8000,back:#FFFFFF")
+        self.StyleSetSpec(stc.STC_JSON_STRING,"fore:#800000,back:#FFFFFF")
+        self.StyleSetSpec(stc.STC_JSON_OPERATOR,"fore:#000000,back:#FFFFFF")
+        self.SetKeyWords(0, "null false true")
+        self.SetKeyWords(1, "@id @context @type @value @language @container @list @set @reverse @index @base @vocab @graph")
+        
 
     def lang_mssql(self):
         self.StyleClearAll()

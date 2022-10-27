@@ -113,6 +113,7 @@ class MainWindow(wx.Frame):
                         [EID_LANG_POWERSHELL, 'PowerShell', ],
                         [EID_LANG_XML, 'XML', ],
                         [EID_LANG_HTML, 'HTML', ],
+                        [EID_LANG_JSON, 'JSON', ],
                       ],
             'E&ncoding': [
                             [EID_ENCODE_UTF8, 'UTF-8', ],
@@ -298,6 +299,7 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_language, id=EID_LANG_POWERSHELL)
         self.Bind(wx.EVT_MENU, self.on_language, id=EID_LANG_XML)
         self.Bind(wx.EVT_MENU, self.on_language, id=EID_LANG_HTML)
+        self.Bind(wx.EVT_MENU, self.on_language, id=EID_LANG_JSON)
 
         self.Bind(wx.EVT_MENU, self.on_view_whitespace, id=EID_VIEW_SPACE)
         self.Bind(wx.EVT_MENU, self.on_view_eol, id=EID_VIEW_EOL)
@@ -842,6 +844,8 @@ class MainWindow(wx.Frame):
             lang = 'xml'
         elif event.GetId() == EID_LANG_HTML:
             lang = 'html'
+        elif event.GetId() == EID_LANG_JSON:
+            lang = 'json'
         else:
             lang = 'txt'
         cp = self.notebook.GetCurrentPage()

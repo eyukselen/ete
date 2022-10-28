@@ -257,7 +257,13 @@ class MainWindow(wx.Frame):
 
         # region status bar
         self.status_bar = wx.StatusBar(self)
-        self.status_bar.SetFieldsCount(4, [-2, -1, -1, -1])
+        self.status_bar.SetFieldsCount(5, [-4, -2, -1, -1, 50])
+        self.status_bar.SetStatusStyles([wx.SB_SUNKEN,wx.SB_SUNKEN,wx.SB_SUNKEN,wx.SB_SUNKEN,wx.SB_SUNKEN])
+        # 0 - empty
+        # 1 - cursor
+        # 2 - ?
+        # 3 - ?
+        # 4 - ?
         self.SetStatusBar(self.status_bar)
         # endregion
 

@@ -130,7 +130,7 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.SetMarginType(self.MARKER_MARGIN, wx.stc.STC_MARGIN_SYMBOL)
         self.SetMarginMask(self.MARKER_MARGIN,  ~wx.stc.STC_MASK_FOLDERS)
         self.SetMarginSensitive(self.MARKER_MARGIN, True)
-        self.SetMarginWidth(self.MARKER_MARGIN, 24)
+        self.SetMarginWidth(self.MARKER_MARGIN, 12)
 
         # diff markers
         # self.MarkerDefine(4, stc.STC_MARK_CHARACTER + ord('+'), "WHEAT", "#808080")
@@ -145,6 +145,7 @@ class TextEditor(wx.stc.StyledTextCtrl):
         line_width = self.TextWidth(wx.stc.STC_STYLE_LINENUMBER, '9' + '9' * len(str(self.GetFirstVisibleLine()
                                                                                      + self.LinesOnScreen())))
         self.SetMarginWidth(self.LINE_NUMBERS_MARGIN, line_width)
+        self.StyleSetSpec(wx.stc.STC_STYLE_LINENUMBER, 'fore:#FFFFFF,back:#5f74A1')
 
     def on_receive_event(self, event):
         wx.PostEvent(self.GetEventHandler(), event)
@@ -230,6 +231,7 @@ class TextEditor(wx.stc.StyledTextCtrl):
         if lang == 'txt':
             self.lang = 'txt'
             self.lang_txt()
+        self.status_bar.SetStatusText(self.lang, 4)
 
     def set_folding(self, fold=False):
         if fold:

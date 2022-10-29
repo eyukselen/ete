@@ -407,23 +407,23 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.StyleSetSpec(stc.STC_STYLE_BRACELIGHT, "fore:RED,back:MEDIUM TURQUOISE,bold")
         self.StyleSetSpec(stc.STC_STYLE_BRACEBAD, "fore:RED,back:THISTLE,bold")
         self.set_folding(True)
-        self.StyleSetSpec(stc.STC_JSON_BLOCKCOMMENT,"fore:#008000,back:#FFFFFF")
-        self.StyleSetSpec(stc.STC_JSON_COMPACTIRI,"fore:#0000FF,back:#FFFFFF")
-        self.StyleSetSpec(stc.STC_JSON_DEFAULT,"fore:#000000,back:#FFFFFF")
-        self.StyleSetSpec(stc.STC_JSON_ERROR,"fore:#FFFF80,back:#FF0000")
-        self.StyleSetSpec(stc.STC_JSON_ESCAPESEQUENCE,"fore:#0000FF,back:#FFFFFF")
-        self.StyleSetSpec(stc.STC_JSON_KEYWORD,"fore:#18AF8A,back:#FFFFFF")
-        self.StyleSetSpec(stc.STC_JSON_PROPERTYNAME,"fore:#8000FF,back:#FFFFFF,bold")
-        self.StyleSetSpec(stc.STC_JSON_LDKEYWORD,"fore:#FF0000,back:#FFFFFF")
-        self.StyleSetSpec(stc.STC_JSON_LINECOMMENT,"fore:#008000,back:#FFFFFF")
-        self.StyleSetSpec(stc.STC_JSON_URI,"fore:#0000FF,back:#FFFFFF")
-        self.StyleSetSpec(stc.STC_JSON_STRINGEOL,"fore=#808080,back:#FFFFFF")
-        self.StyleSetSpec(stc.STC_JSON_NUMBER,"fore:#FF8000,back:#FFFFFF")
-        self.StyleSetSpec(stc.STC_JSON_STRING,"fore:#800000,back:#FFFFFF")
-        self.StyleSetSpec(stc.STC_JSON_OPERATOR,"fore:#000000,back:#FFFFFF")
+        self.StyleSetSpec(stc.STC_JSON_BLOCKCOMMENT, "fore:#008000,back:#FFFFFF")
+        self.StyleSetSpec(stc.STC_JSON_COMPACTIRI, "fore:#0000FF,back:#FFFFFF")
+        self.StyleSetSpec(stc.STC_JSON_DEFAULT, "fore:#000000,back:#FFFFFF")
+        self.StyleSetSpec(stc.STC_JSON_ERROR, "fore:#FFFF80,back:#FF0000")
+        self.StyleSetSpec(stc.STC_JSON_ESCAPESEQUENCE, "fore:#0000FF,back:#FFFFFF")
+        self.StyleSetSpec(stc.STC_JSON_KEYWORD, "fore:#18AF8A,back:#FFFFFF")
+        self.StyleSetSpec(stc.STC_JSON_PROPERTYNAME, "fore:#8000FF,back:#FFFFFF,bold")
+        self.StyleSetSpec(stc.STC_JSON_LDKEYWORD, "fore:#FF0000,back:#FFFFFF")
+        self.StyleSetSpec(stc.STC_JSON_LINECOMMENT, "fore:#008000,back:#FFFFFF")
+        self.StyleSetSpec(stc.STC_JSON_URI, "fore:#0000FF,back:#FFFFFF")
+        self.StyleSetSpec(stc.STC_JSON_STRINGEOL, "fore=#808080,back:#FFFFFF")
+        self.StyleSetSpec(stc.STC_JSON_NUMBER, "fore:#FF8000,back:#FFFFFF")
+        self.StyleSetSpec(stc.STC_JSON_STRING, "fore:#800000,back:#FFFFFF")
+        self.StyleSetSpec(stc.STC_JSON_OPERATOR, "fore:#000000,back:#FFFFFF")
         self.SetKeyWords(0, "null false true")
-        self.SetKeyWords(1, "@id @context @type @value @language @container @list @set @reverse @index @base @vocab @graph")
-        
+        self.SetKeyWords(1, "@id @context @type @value @language @container @list "
+                            "@set @reverse @index @base @vocab @graph")
 
     def lang_mssql(self):
         self.StyleClearAll()
@@ -469,7 +469,8 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.StyleClearAll()
         self.SetLexer(stc.STC_LEX_XML)
         # setting keywords 0 has an unexpected behaviour such as tags and attributes are not styled as expected
-        self.SetKeyWords(1, 'xml xaml xsl xslt xsd xul kml svg mxml xsml wsdl xlf xliff xbl sxbl sitemap gml gpx plist ')
+        self.SetKeyWords(1, "xml xaml xsl xslt xsd xul kml svg mxml xsml wsdl xlf xliff xbl sxbl "
+                            "sitemap gml gpx plist ")
         self.StyleSetSpec(stc.STC_H_DEFAULT, 'fore:#000000,back:#FFFFFF,bold')
         self.StyleSetSpec(stc.STC_H_XMLSTART, 'fore:#FF0000,back:#FFFF00')
         self.StyleSetSpec(stc.STC_H_XMLEND, 'fore:#FF0000,back:#FFFF00')
@@ -540,7 +541,7 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.StyleSetSpec(stc.STC_H_CDATA, 'fore:#FF8000,back:#FFFFFF')
         self.StyleSetSpec(stc.STC_H_VALUE, 'fore:#000000,back:#A6CAF0')
         self.StyleSetSpec(stc.STC_H_ENTITY, 'fore:#000000,back:#FEFDE0,italic')
-        
+
     def set_styles(self):
         self.StyleSetSpec(4, 'back:TURQUOISE')  # style set 4 for compare matched line
         self.StyleSetSpec(5, 'back:WHEAT')  # style set 5 for compare unmatched line
@@ -555,14 +556,14 @@ class TextEditor(wx.stc.StyledTextCtrl):
             self.IndicatorClearRange(0, self.GetTextLength())
         else:
             sel_start, sel_end = self.GetSelection()  # get selection range
-            sel_len = sel_end - sel_start
             self.IndicatorClearRange(0, self.GetTextLength())
             if self.IsRangeWord(sel_start, sel_end):
                 vis_start = self.XYToPosition(0, self.GetFirstVisibleLine())
                 vis_end = self.GetLineEndPosition(self.GetFirstVisibleLine() + self.LinesOnScreen())
                 chk = True
                 while chk:
-                    found_start, found_end = self.FindText(vis_start, vis_end, self.GetSelectedText(), stc.STC_FIND_WHOLEWORD)
+                    found_start, found_end = self.FindText(vis_start, vis_end, self.GetSelectedText(),
+                                                           stc.STC_FIND_WHOLEWORD)
                     if found_start == -1:
                         break
                     else:
@@ -570,7 +571,7 @@ class TextEditor(wx.stc.StyledTextCtrl):
                         vis_start += found_end - found_start
             else:
                 self.IndicatorFillRange(sel_start, sel_end)
-    
+
     def load_file(self, file):
         with open(file, 'rb') as ff:
             f = ff.read()
@@ -587,7 +588,7 @@ class TextEditor(wx.stc.StyledTextCtrl):
             self.SetModified(False)
 
     def save_file(self, file):
-        f = open(file,'w', encoding=self.code_page, newline='')
+        f = open(file, 'w', encoding=self.code_page, newline='')
         f.write(self.GetText())
         self.SetSavePoint()
         f.close()

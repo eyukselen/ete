@@ -17,7 +17,7 @@ def get_icon(name):
 def png2str(svg_file):
     img = SVGimage.CreateFromFile(svg_file)
     # bmp = img.ConvertToScaledBitmap(wx.Size(32, 32), window=None)
-    # bmp = img.ConvertToBitmap(tx=0.0, ty=0.0, scale=1.0, 
+    # bmp = img.ConvertToBitmap(tx=0.0, ty=0.0, scale=1.0,
     #                           width=48, height=48, stride=-1)
     bmp = img.ConvertToScaledBitmap(wx.Size(32, 32), None)
     png_file = '.'.join(svg_file.split('.')[:-1]) + '.png'

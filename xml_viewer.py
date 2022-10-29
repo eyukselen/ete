@@ -32,5 +32,3 @@ for child in node.getchildren():
     print('== End ==')
 
 exit()
-
-

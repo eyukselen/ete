@@ -4,9 +4,10 @@ from wx import TreeCtrl
 import os.path
 import json
 from sniplet_edit import Sniplet_Editor
-from collections import defaultdict
 from configs import icons
-import io, zlib, base64
+import io
+import zlib
+import base64
 
 
 def get_icon(name):
@@ -228,12 +229,12 @@ class Sniplet_Control(wx.Panel):
         self.SetSizer(self.main_sizer)
 
         self.tool_bar = wx.ToolBar(parent=self)
-        self.tool_bar.AddTool(toolId=wx.ID_ADD, label='Add', 
+        self.tool_bar.AddTool(toolId=wx.ID_ADD, label='Add',
                               bitmap=get_icon('snip_add'),
                               bmpDisabled=get_icon('snip_add'),
                               kind=wx.ITEM_NORMAL, shortHelp='Add',
                               longHelp='', clientData=None)
-        self.tool_bar.AddTool(toolId=wx.ID_DELETE, label='Del', 
+        self.tool_bar.AddTool(toolId=wx.ID_DELETE, label='Del',
                               bitmap=get_icon('snip_del'),
                               bmpDisabled=get_icon('snip_del'),
                               kind=wx.ITEM_NORMAL, shortHelp='Delete',
@@ -243,7 +244,7 @@ class Sniplet_Control(wx.Panel):
                               bmpDisabled=get_icon('snip_edit'),
                               kind=wx.ITEM_NORMAL, shortHelp='Edit',
                               longHelp='', clientData=None)
-        self.tool_bar.AddTool(toolId=wx.ID_SAVE, label='Save', 
+        self.tool_bar.AddTool(toolId=wx.ID_SAVE, label='Save',
                               bitmap=get_icon('save_ico'),
                               bmpDisabled=get_icon('save_ico'),
                               kind=wx.ITEM_NORMAL, shortHelp='Save',

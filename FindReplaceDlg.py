@@ -1,5 +1,4 @@
 import wx
-import wx.stc as stc
 from TextEditor import TextEditor
 
 
@@ -33,6 +32,7 @@ class FindReplaceDlg(wx.Dialog):
         self.check_wraparound = wx.CheckBox(options_static_sizer.GetStaticBox(), wx.ID_ANY, u"Wrap Around",
                                             wx.DefaultPosition, wx.DefaultSize, 0)
         options_static_sizer.Add(self.check_wraparound, 0, wx.ALIGN_LEFT, 5)
+        self.check_wraparound.SetValue(True)
 
         left_sizer.Add(options_static_sizer, 1, wx.EXPAND, 5)
 

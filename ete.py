@@ -1,4 +1,3 @@
-from cProfile import label
 import os
 import sys  # from sys import platform can be cleaner
 import wx
@@ -10,7 +9,8 @@ import io
 import wx.lib.inspection  # for debugging
 import zlib
 import base64
-from configs import *
+from configs import icons
+from configs import EID
 import FindReplaceDlg as Frd
 from TextEditor import TextEditor
 from sniplets import Sniplet_Control
@@ -56,7 +56,8 @@ class MainWindow(wx.Frame):
         self.SetIcon(app_ico)
 
         def get_icon(name):
-            with io.BytesIO(zlib.decompress(base64.b64decode(icons[name]))) as stream:
+            with io.BytesIO(zlib.decompress(
+                    base64.b64decode(icons[name]))) as stream:
                 icon = wx.Bitmap(wx.Image(stream))
             return icon
 
@@ -64,68 +65,68 @@ class MainWindow(wx.Frame):
 
         menux = {
             '&File': [
-                        [EID_FILE_NEW, '&New\tCTRL+N', get_icon('new_ico'), ],
-                        [EID_FILE_OPEN, '&Open\tCTRL+O', get_icon('open_ico'), ],
-                        [EID_FILE_SAVE, '&Save\tCTRL+S', get_icon('save_ico'), ],
-                        [EID_FILE_SAVEAS, 'Save &As\tCTRL+SHIFT+S', get_icon('save_as_ico'), ],
-                        [EID_SEP, ],
-                        [EID_CLOSE_TAB, 'Close', ],
-                        [EID_FILE_EXIT, 'E&xit', get_icon('exit_ico'), ],
+                        [EID.FILE_NEW, '&New\tCTRL+N', get_icon('new_ico'), ],
+                        [EID.FILE_OPEN, '&Open\tCTRL+O', get_icon('open_ico'), ],
+                        [EID.FILE_SAVE, '&Save\tCTRL+S', get_icon('save_ico'), ],
+                        [EID.FILE_SAVEAS, 'Save &As\tCTRL+SHIFT+S', get_icon('save_as_ico'), ],
+                        [EID.SEP, ],
+                        [EID.CLOSE_TAB, 'Close', ],
+                        [EID.FILE_EXIT, 'E&xit', get_icon('exit_ico'), ],
                      ],
             '&Edit': [
-                        [EID_EDIT_UNDO, '&Undo\tCTRL+Z', get_icon('undo_ico'), ],
-                        [EID_EDIT_REDO, '&Redo\tCTRL+Y', get_icon('redo_ico'), ],
-                        [EID_SEP, ],
-                        [EID_EDIT_CUT, 'Cu&t\tCTRL+X', get_icon('cut_ico'), ],
-                        [EID_EDIT_COPY, '&Copy\tCTRL+C', get_icon('copy_ico'), ],
-                        [EID_EDIT_PASTE, '&Paste\tCTRL+V', get_icon('paste_ico'), ],
-                        [EID_SEP, ],
-                        [EID_EDIT_FIND, '&Find\tCTRL+F', get_icon('find_ico'), ],
-                        [EID_EDIT_REPLACE, '&Replace\tCTRL+R', get_icon('replace_ico'), ],
-                        [EID_EDIT_JUMPTO, 'Jump To\tCTRL+J', get_icon('select_ico'), ],
-                        [EID_SEP, ],
-                        [EID_EDIT_DELETE, 'Delete', get_icon('delete_ico'), ],
-                        [EID_EDIT_SELECTALL, 'Select All', get_icon('select_ico'), ],
-                        [EID_SEP, ],
-                        [EID_EDIT_UPPER, 'Upper Case', ],
-                        [EID_EDIT_LOWER, 'Lower Case', ],
-                        [EID_SEP, ],
-                        [EID_EDIT_CRLF, 'Change Eol to CRLF', ],
-                        [EID_EDIT_LF, 'Change Eol to LF', ],
-                        [EID_EDIT_CR, 'Change Eol to CR', ],
-                        [EID_SEP, ],
-                        [EID_EDIT_MULTISELECT, 'Multiple Selection', ],
+                        [EID.EDIT_UNDO, '&Undo\tCTRL+Z', get_icon('undo_ico'), ],
+                        [EID.EDIT_REDO, '&Redo\tCTRL+Y', get_icon('redo_ico'), ],
+                        [EID.SEP, ],
+                        [EID.EDIT_CUT, 'Cu&t\tCTRL+X', get_icon('cut_ico'), ],
+                        [EID.EDIT_COPY, '&Copy\tCTRL+C', get_icon('copy_ico'), ],
+                        [EID.EDIT_PASTE, '&Paste\tCTRL+V', get_icon('paste_ico'), ],
+                        [EID.SEP, ],
+                        [EID.EDIT_FIND, '&Find\tCTRL+F', get_icon('find_ico'), ],
+                        [EID.EDIT_REPLACE, '&Replace\tCTRL+R', get_icon('replace_ico'), ],
+                        [EID.EDIT_JUMPTO, 'Jump To\tCTRL+J', get_icon('select_ico'), ],
+                        [EID.SEP, ],
+                        [EID.EDIT_DELETE, 'Delete', get_icon('delete_ico'), ],
+                        [EID.EDIT_SELECTALL, 'Select All', get_icon('select_ico'), ],
+                        [EID.SEP, ],
+                        [EID.EDIT_UPPER, 'Upper Case', ],
+                        [EID.EDIT_LOWER, 'Lower Case', ],
+                        [EID.SEP, ],
+                        [EID.EDIT_CRLF, 'Change Eol to CRLF', ],
+                        [EID.EDIT_LF, 'Change Eol to LF', ],
+                        [EID.EDIT_CR, 'Change Eol to CR', ],
+                        [EID.SEP, ],
+                        [EID.EDIT_MULTISELECT, 'Multiple Selection', ],
                       ],
             '&View':  [
-                        [EID_VIEW_SPACE, 'Show White Space', ],
-                        [EID_VIEW_EOL, 'Show End Of Line', ],
-                        [EID_VIEW_INDENT, 'Show Indentation Guides', ],
-                        [EID_SEP, ],
-                        [EID_VIEW_WRAP, 'Wrap', ],
-                        [EID_VIEW_TRANSPARENT, 'Transparent', ],
+                        [EID.VIEW_SPACE, 'Show White Space', ],
+                        [EID.VIEW_EOL, 'Show End Of Line', ],
+                        [EID.VIEW_INDENT, 'Show Indentation Guides', ],
+                        [EID.SEP, ],
+                        [EID.VIEW_WRAP, 'Wrap', ],
+                        [EID.VIEW_TRANSPARENT, 'Transparent', ],
 
                       ],
             '&Lang':  [
-                        [EID_LANG_TXT, 'Text', ],
-                        [EID_LANG_PYTHON, 'Python', ],
-                        [EID_LANG_MSSQL, 'MSSQL', ],
-                        [EID_LANG_BASH, 'Bash', ],
-                        [EID_LANG_POWERSHELL, 'PowerShell', ],
-                        [EID_LANG_XML, 'XML', ],
-                        [EID_LANG_HTML, 'HTML', ],
-                        [EID_LANG_JSON, 'JSON', ],
+                        [EID.LANG_TXT, 'Text', ],
+                        [EID.LANG_PYTHON, 'Python', ],
+                        [EID.LANG_MSSQL, 'MSSQL', ],
+                        [EID.LANG_BASH, 'Bash', ],
+                        [EID.LANG_POWERSHELL, 'PowerShell', ],
+                        [EID.LANG_XML, 'XML', ],
+                        [EID.LANG_HTML, 'HTML', ],
+                        [EID.LANG_JSON, 'JSON', ],
                       ],
             'E&ncoding': [
-                            [EID_ENCODE_UTF8, 'UTF-8', ],
-                            [EID_ENCODE_WIN1252, 'Windows-1252', ],
-                            [EID_ENCODE_WIN1254, 'Windows-1254', ],
+                            [EID.ENCODE_UTF8, 'UTF-8', ],
+                            [EID.ENCODE_WIN1252, 'Windows-1252', ],
+                            [EID.ENCODE_WIN1254, 'Windows-1254', ],
                          ],
             '&Tools': [
-                         [EID_TOOLS_COMPARE, '&Compare', get_icon('compare_ico'), ],
-                         [EID_TOOLS_CLEARCOMP, 'Clea&r Compare', get_icon('clear_compare_ico'), ],
+                         [EID.TOOLS_COMPARE, '&Compare', get_icon('compare_ico'), ],
+                         [EID.TOOLS_CLEARCOMP, 'Clea&r Compare', get_icon('clear_compare_ico'), ],
                       ],
             '&About': [
-                         [EID_ABOUT_INFO, 'About', get_icon('about_ico'), ],
+                         [EID.ABOUT_INFO, 'About', get_icon('about_ico'), ],
                       ],
             }
 
@@ -134,7 +135,7 @@ class MainWindow(wx.Frame):
         for item in menux:
             m = wx.Menu()
             for i in menux[item]:
-                if i[0] == EID_SEP:
+                if i[0] == EID.SEP:
                     m.AppendSeparator()
                 else:
                     try:
@@ -165,51 +166,51 @@ class MainWindow(wx.Frame):
         else:
             self.tool_bar.SetWindowStyle(wx.TB_HORIZONTAL | wx.TB_FLAT | wx.NO_BORDER)
 
-        self.tool_bar.AddTool(toolId=EID_FILE_NEW, label='New', bitmap=get_icon('new_ico'),
+        self.tool_bar.AddTool(toolId=EID.FILE_NEW, label='New', bitmap=get_icon('new_ico'),
                               bmpDisabled=get_icon('new_ico'), kind=wx.ITEM_NORMAL, shortHelp='New File',
                               longHelp='', clientData=None)
-        self.tool_bar.AddTool(toolId=EID_FILE_OPEN, label='Open', bitmap=get_icon('open_ico'),
+        self.tool_bar.AddTool(toolId=EID.FILE_OPEN, label='Open', bitmap=get_icon('open_ico'),
                               bmpDisabled=get_icon('open_ico'), kind=wx.ITEM_NORMAL, shortHelp='Open File',
                               longHelp='', clientData=None)
-        self.tool_bar.AddTool(toolId=EID_FILE_SAVE, label='Save', bitmap=get_icon('save_ico'),
+        self.tool_bar.AddTool(toolId=EID.FILE_SAVE, label='Save', bitmap=get_icon('save_ico'),
                               bmpDisabled=get_icon('save_ico'), kind=wx.ITEM_NORMAL, shortHelp='Save File',
                               longHelp='', clientData=None)
-        self.tool_bar.AddTool(toolId=EID_FILE_SAVEAS, label='Save As', bitmap=get_icon('save_as_ico'),
+        self.tool_bar.AddTool(toolId=EID.FILE_SAVEAS, label='Save As', bitmap=get_icon('save_as_ico'),
                               bmpDisabled=get_icon('save_as_ico'), kind=wx.ITEM_NORMAL, shortHelp='Save File As',
                               longHelp='', clientData=None)
         self.tool_bar.AddSeparator()
-        self.tool_bar.AddTool(toolId=EID_EDIT_CUT, label='Cut', bitmap=get_icon('cut_ico'),
+        self.tool_bar.AddTool(toolId=EID.EDIT_CUT, label='Cut', bitmap=get_icon('cut_ico'),
                               bmpDisabled=get_icon('cut_ico'), kind=wx.ITEM_NORMAL, shortHelp='Cut',
                               longHelp='Cut Text', clientData=None)
-        self.tool_bar.AddTool(toolId=EID_EDIT_COPY, label='Copy', bitmap=get_icon('copy_ico'),
+        self.tool_bar.AddTool(toolId=EID.EDIT_COPY, label='Copy', bitmap=get_icon('copy_ico'),
                               bmpDisabled=get_icon('copy_ico'), kind=wx.ITEM_NORMAL, shortHelp='Copy',
                               longHelp='Copy Text', clientData=None)
-        self.tool_bar.AddTool(toolId=EID_EDIT_PASTE, label='Paste', bitmap=get_icon('paste_ico'),
+        self.tool_bar.AddTool(toolId=EID.EDIT_PASTE, label='Paste', bitmap=get_icon('paste_ico'),
                               bmpDisabled=get_icon('paste_ico'), kind=wx.ITEM_NORMAL, shortHelp='Paste',
                               longHelp='Paste Text', clientData=None)
         self.tool_bar.AddSeparator()
-        self.tool_bar.AddTool(toolId=EID_EDIT_FIND, label='Find', bitmap=get_icon('find_ico'),
+        self.tool_bar.AddTool(toolId=EID.EDIT_FIND, label='Find', bitmap=get_icon('find_ico'),
                               bmpDisabled=get_icon('find_ico'), kind=wx.ITEM_NORMAL, shortHelp='Find',
                               longHelp='Find Text', clientData=None)
-        self.tool_bar.AddTool(toolId=EID_EDIT_REPLACE, label='Replace Text', bitmap=get_icon('replace_ico'),
+        self.tool_bar.AddTool(toolId=EID.EDIT_REPLACE, label='Replace Text', bitmap=get_icon('replace_ico'),
                               bmpDisabled=get_icon('replace_ico'), kind=wx.ITEM_NORMAL, shortHelp='Replace',
                               longHelp='Replace Text', clientData=None)
         self.tool_bar.AddSeparator()
-        self.tool_bar.AddTool(toolId=EID_ABOUT_INFO, label='Info', bitmap=get_icon('info_ico'),
+        self.tool_bar.AddTool(toolId=EID.ABOUT_INFO, label='Info', bitmap=get_icon('info_ico'),
                               bmpDisabled=get_icon('info_ico'), kind=wx.ITEM_NORMAL, shortHelp='Information',
                               longHelp='', clientData=None)
-        self.tool_bar.AddTool(toolId=EID_FILE_EXIT, label='Exit', bitmap=get_icon('exit_ico'),
+        self.tool_bar.AddTool(toolId=EID.FILE_EXIT, label='Exit', bitmap=get_icon('exit_ico'),
                               bmpDisabled=get_icon('exit_ico'), kind=wx.ITEM_NORMAL, shortHelp='Exit Application',
                               longHelp='', clientData=None)
         self.tool_bar.AddSeparator()
-        self.tool_bar.AddTool(toolId=EID_TOOLS_COMPARE, label='Compare', bitmap=get_icon('compare_ico'),
+        self.tool_bar.AddTool(toolId=EID.TOOLS_COMPARE, label='Compare', bitmap=get_icon('compare_ico'),
                               bmpDisabled=get_icon('compare_ico'), kind=wx.ITEM_NORMAL, shortHelp='Compare',
                               longHelp='', clientData=None)
-        self.tool_bar.AddTool(toolId=EID_TOOLS_CLEARCOMP, label='Clear Compare', bitmap=get_icon('clear_compare_ico'),
+        self.tool_bar.AddTool(toolId=EID.TOOLS_CLEARCOMP, label='Clear Compare', bitmap=get_icon('clear_compare_ico'),
                               bmpDisabled=get_icon('clear_compare_ico'), kind=wx.ITEM_NORMAL, shortHelp='Clear Compare',
                               longHelp='', clientData=None)
         self.tool_bar.AddSeparator()
-        self.tool_bar.AddTool(toolId=EID_TOOLS_SNIPLETS, label="Sniplets", bitmap=get_icon('sniplets'),
+        self.tool_bar.AddTool(toolId=EID.TOOLS_SNIPLETS, label="Sniplets", bitmap=get_icon('sniplets'),
                               bmpDisabled=get_icon('sniplets'), kind=wx.ITEM_NORMAL, shortHelp='Sniplets',
                               longHelp='', clientData=None)
 
@@ -217,12 +218,12 @@ class MainWindow(wx.Frame):
         self.tool_bar.Realize()
         # endregion
 
-        # region main panel 
+        # region main panel
         # self.main_panel = wx.Panel(parent=self)
         self.main_panel_window = wx.SplitterWindow(self, id=wx.ID_ANY, style=wx.SP_3D | wx.SP_LIVE_UPDATE)
         # self.main_sizer = wx.BoxSizer(wx.HORIZONTAL)
         # self.main_panel.SetSizer(self.main_sizer)
-        
+
         self.editor_panel = wx.Panel(parent=self.main_panel_window)
         self.editor_sizer = wx.BoxSizer(wx.VERTICAL)
         self.editor_panel.SetSizer(self.editor_sizer)
@@ -230,7 +231,7 @@ class MainWindow(wx.Frame):
         self.editor_panel.Bind(wx.EVT_DROP_FILES, self.open_page)
 
         self.sniplets_panel = Sniplet_Control(parent=self.main_panel_window)
-        
+
         # self.main_sizer.Add(self.editor_panel, 3, wx.EXPAND)
         # self.main_sizer.Add(self.sniplets_panel,1,wx.EXPAND)
         self.main_panel_window.SplitVertically(self.editor_panel, self.sniplets_panel, -250)
@@ -258,7 +259,7 @@ class MainWindow(wx.Frame):
         # region status bar
         self.status_bar = wx.StatusBar(self)
         self.status_bar.SetFieldsCount(5, [-4, -2, -1, -1, 50])
-        self.status_bar.SetStatusStyles([wx.SB_SUNKEN,wx.SB_SUNKEN,wx.SB_SUNKEN,wx.SB_SUNKEN,wx.SB_SUNKEN])
+        self.status_bar.SetStatusStyles([wx.SB_SUNKEN, wx.SB_SUNKEN, wx.SB_SUNKEN, wx.SB_SUNKEN, wx.SB_SUNKEN])
         # 0 - empty
         # 1 - cursor
         # 2 - ?
@@ -279,55 +280,55 @@ class MainWindow(wx.Frame):
 
         # region event bindings
 
-        self.Bind(wx.EVT_MENU, self.new_page, id=EID_FILE_NEW)
-        self.Bind(wx.EVT_MENU, self.open_page, id=EID_FILE_OPEN)
-        self.Bind(wx.EVT_MENU, self.save_page, id=EID_FILE_SAVE)
-        self.Bind(wx.EVT_MENU, self.save_as_page, id=EID_FILE_SAVEAS)
-        self.Bind(wx.EVT_MENU, self.close_page, id=EID_CLOSE_TAB)
-        self.Bind(wx.EVT_MENU, self.on_info, id=EID_ABOUT_INFO)
-        self.Bind(wx.EVT_MENU, self.onclose, id=EID_FILE_EXIT)
+        self.Bind(wx.EVT_MENU, self.new_page, id=EID.FILE_NEW)
+        self.Bind(wx.EVT_MENU, self.open_page, id=EID.FILE_OPEN)
+        self.Bind(wx.EVT_MENU, self.save_page, id=EID.FILE_SAVE)
+        self.Bind(wx.EVT_MENU, self.save_as_page, id=EID.FILE_SAVEAS)
+        self.Bind(wx.EVT_MENU, self.close_page, id=EID.CLOSE_TAB)
+        self.Bind(wx.EVT_MENU, self.on_info, id=EID.ABOUT_INFO)
+        self.Bind(wx.EVT_MENU, self.onclose, id=EID.FILE_EXIT)
 
-        self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID_EDIT_UNDO)
-        self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID_EDIT_REDO)
-        self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID_EDIT_CUT)
-        self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID_EDIT_COPY)
-        self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID_EDIT_PASTE)
-        self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID_EDIT_DELETE)
-        self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID_EDIT_SELECTALL)
-        self.Bind(wx.EVT_MENU, self.on_find, id=EID_EDIT_FIND)
-        self.Bind(wx.EVT_MENU, self.on_find, id=EID_EDIT_REPLACE)  # using the same dialog as find for now.
-        self.Bind(wx.EVT_MENU, self.on_jump_to, id=EID_EDIT_JUMPTO)
-        self.Bind(wx.EVT_MENU, self.on_about, id=EID_ABOUT_INFO)
-        self.Bind(wx.EVT_MENU, self.on_language, id=EID_LANG_TXT)
-        self.Bind(wx.EVT_MENU, self.on_language, id=EID_LANG_PYTHON)
-        self.Bind(wx.EVT_MENU, self.on_language, id=EID_LANG_MSSQL)
-        self.Bind(wx.EVT_MENU, self.on_language, id=EID_LANG_BASH)
-        self.Bind(wx.EVT_MENU, self.on_language, id=EID_LANG_POWERSHELL)
-        self.Bind(wx.EVT_MENU, self.on_language, id=EID_LANG_XML)
-        self.Bind(wx.EVT_MENU, self.on_language, id=EID_LANG_HTML)
-        self.Bind(wx.EVT_MENU, self.on_language, id=EID_LANG_JSON)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID.EDIT_UNDO)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID.EDIT_REDO)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID.EDIT_CUT)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID.EDIT_COPY)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID.EDIT_PASTE)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID.EDIT_DELETE)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID.EDIT_SELECTALL)
+        self.Bind(wx.EVT_MENU, self.on_find, id=EID.EDIT_FIND)
+        self.Bind(wx.EVT_MENU, self.on_find, id=EID.EDIT_REPLACE)  # using the same dialog as find for now.
+        self.Bind(wx.EVT_MENU, self.on_jump_to, id=EID.EDIT_JUMPTO)
+        self.Bind(wx.EVT_MENU, self.on_about, id=EID.ABOUT_INFO)
+        self.Bind(wx.EVT_MENU, self.on_language, id=EID.LANG_TXT)
+        self.Bind(wx.EVT_MENU, self.on_language, id=EID.LANG_PYTHON)
+        self.Bind(wx.EVT_MENU, self.on_language, id=EID.LANG_MSSQL)
+        self.Bind(wx.EVT_MENU, self.on_language, id=EID.LANG_BASH)
+        self.Bind(wx.EVT_MENU, self.on_language, id=EID.LANG_POWERSHELL)
+        self.Bind(wx.EVT_MENU, self.on_language, id=EID.LANG_XML)
+        self.Bind(wx.EVT_MENU, self.on_language, id=EID.LANG_HTML)
+        self.Bind(wx.EVT_MENU, self.on_language, id=EID.LANG_JSON)
 
-        self.Bind(wx.EVT_MENU, self.on_view_whitespace, id=EID_VIEW_SPACE)
-        self.Bind(wx.EVT_MENU, self.on_view_eol, id=EID_VIEW_EOL)
-        self.Bind(wx.EVT_MENU, self.on_view_indent_guide, id=EID_VIEW_INDENT)
-        self.Bind(wx.EVT_MENU, self.on_view_wrap, id=EID_VIEW_WRAP)
-        self.Bind(wx.EVT_MENU, self.on_view_transparent, id=EID_VIEW_TRANSPARENT)
+        self.Bind(wx.EVT_MENU, self.on_view_whitespace, id=EID.VIEW_SPACE)
+        self.Bind(wx.EVT_MENU, self.on_view_eol, id=EID.VIEW_EOL)
+        self.Bind(wx.EVT_MENU, self.on_view_indent_guide, id=EID.VIEW_INDENT)
+        self.Bind(wx.EVT_MENU, self.on_view_wrap, id=EID.VIEW_WRAP)
+        self.Bind(wx.EVT_MENU, self.on_view_transparent, id=EID.VIEW_TRANSPARENT)
 
-        self.Bind(wx.EVT_MENU, self.on_menu_tools_compare, id=EID_TOOLS_COMPARE)
-        self.Bind(wx.EVT_MENU, self.on_menu_tools_clear_compare, id=EID_TOOLS_CLEARCOMP)
-        self.Bind(wx.EVT_MENU, self.on_menu_tools_sniplets, id=EID_TOOLS_SNIPLETS)
-        self.Bind(wx.EVT_MENU, self.on_menu_edit_case, id=EID_EDIT_UPPER)
-        self.Bind(wx.EVT_MENU, self.on_menu_edit_case, id=EID_EDIT_LOWER)
+        self.Bind(wx.EVT_MENU, self.on_menu_tools_compare, id=EID.TOOLS_COMPARE)
+        self.Bind(wx.EVT_MENU, self.on_menu_tools_clear_compare, id=EID.TOOLS_CLEARCOMP)
+        self.Bind(wx.EVT_MENU, self.on_menu_tools_sniplets, id=EID.TOOLS_SNIPLETS)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_case, id=EID.EDIT_UPPER)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_case, id=EID.EDIT_LOWER)
 
-        self.Bind(wx.EVT_MENU, self.on_menu_edit_eol, id=EID_EDIT_CRLF)
-        self.Bind(wx.EVT_MENU, self.on_menu_edit_eol, id=EID_EDIT_LF)
-        self.Bind(wx.EVT_MENU, self.on_menu_edit_eol, id=EID_EDIT_CR)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_eol, id=EID.EDIT_CRLF)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_eol, id=EID.EDIT_LF)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_eol, id=EID.EDIT_CR)
 
-        self.Bind(wx.EVT_MENU, self.on_select_mode, id=EID_EDIT_MULTISELECT)
+        self.Bind(wx.EVT_MENU, self.on_select_mode, id=EID.EDIT_MULTISELECT)
 
-        self.Bind(wx.EVT_MENU, self.on_menu_encode, id=EID_ENCODE_UTF8)
-        self.Bind(wx.EVT_MENU, self.on_menu_encode, id=EID_ENCODE_WIN1252)
-        self.Bind(wx.EVT_MENU, self.on_menu_encode, id=EID_ENCODE_WIN1254)
+        self.Bind(wx.EVT_MENU, self.on_menu_encode, id=EID.ENCODE_UTF8)
+        self.Bind(wx.EVT_MENU, self.on_menu_encode, id=EID.ENCODE_WIN1252)
+        self.Bind(wx.EVT_MENU, self.on_menu_encode, id=EID.ENCODE_WIN1254)
 
         # detect double click on tab bar empty space
         self.Bind(aui.EVT_AUINOTEBOOK_BG_DCLICK, self.new_page, id=wx.ID_ANY)
@@ -337,7 +338,7 @@ class MainWindow(wx.Frame):
         self.notebook.Bind(aui.EVT_AUINOTEBOOK_PAGE_CHANGED, self.on_page_select, id=wx.ID_ANY)
 
         self.Bind(wx.EVT_CHAR_HOOK, self.on_key_event)
-        self.Bind(wx.EVT_CLOSE,self.onclose)
+        self.Bind(wx.EVT_CLOSE, self.onclose)
 
         # endregion
 
@@ -408,7 +409,7 @@ class MainWindow(wx.Frame):
     def open_page(self, event):
         if hasattr(event, 'Files'):
             files = event.GetFiles()
-        elif event.GetId() == EID_FILE_OPEN:
+        elif event.GetId() == EID.FILE_OPEN:
             with wx.FileDialog(self, "Open file", wildcard="All files (*)|*|text files (*.txt)|*.txt",
                                style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_MULTIPLE) as fileDialog:
                 if fileDialog.ShowModal() == wx.ID_CANCEL:
@@ -438,7 +439,7 @@ class MainWindow(wx.Frame):
                 self.notebook.AddPage(page, select=True, caption=file_name)
                 # te.LoadFile(file) # adding my method to replace builtin
                 te.load_file(file)
-                
+
                 self.notebook.SetPageToolTip(self.notebook.GetPageIndex(self.notebook.GetCurrentPage()), file)
                 _, f = os.path.split(file)
                 self.notebook.SetPageText(self.notebook.GetPageIndex(self.notebook.GetCurrentPage()), f)
@@ -451,7 +452,7 @@ class MainWindow(wx.Frame):
             te = self.get_text_editor_from_page(self.notebook.GetPageIndex(self.notebook.GetCurrentPage()))
             filename = te.file_name
             if filename:
-                # te.SaveFile(filename) # adding my method to replace builtin 
+                # te.SaveFile(filename) # adding my method to replace builtin
                 te.save_file(filename)
             else:
                 self.save_as_page(None)
@@ -532,7 +533,7 @@ class MainWindow(wx.Frame):
         if len(self.compare_tabs) == 2:  # if its in compare mode first clear compare then close tab
             self.on_menu_tools_clear_compare(None)
             # for some reason with new IDs this is not picked correctly
-            # e = wx.MenuEvent(wx.EVT_MENU.typeId, EID_TOOLS_CLEARCOMP)
+            # e = wx.MenuEvent(wx.EVT_MENU.typeId, EID.TOOLS_CLEARCOMP)
             # wx.PostEvent(self, e)
         page_to_close = event.GetSelection()
         self.close_tab(page_to_close)
@@ -608,7 +609,6 @@ class MainWindow(wx.Frame):
 
         res = self.diff(l_list, r_list)
 
-        c = 0
         rstc.set_styles()
         lstc.set_styles()
         print(res)
@@ -836,21 +836,21 @@ class MainWindow(wx.Frame):
     def on_language(self, event):
         if self.notebook.GetPageCount() == 0:
             return
-        if event.GetId() == EID_LANG_PYTHON:
+        if event.GetId() == EID.LANG_PYTHON:
             lang = 'python'
-        elif event.GetId() == EID_LANG_MSSQL:
+        elif event.GetId() == EID.LANG_MSSQL:
             lang = 'mssql'
-        elif event.GetId() == EID_LANG_TXT:
+        elif event.GetId() == EID.LANG_TXT:
             lang = 'txt'
-        elif event.GetId() == EID_LANG_BASH:
+        elif event.GetId() == EID.LANG_BASH:
             lang = 'bash'
-        elif event.GetId() == EID_LANG_POWERSHELL:
+        elif event.GetId() == EID.LANG_POWERSHELL:
             lang = 'ps'
-        elif event.GetId() == EID_LANG_XML:
+        elif event.GetId() == EID.LANG_XML:
             lang = 'xml'
-        elif event.GetId() == EID_LANG_HTML:
+        elif event.GetId() == EID.LANG_HTML:
             lang = 'html'
-        elif event.GetId() == EID_LANG_JSON:
+        elif event.GetId() == EID.LANG_JSON:
             lang = 'json'
         else:
             lang = 'txt'
@@ -884,11 +884,11 @@ class MainWindow(wx.Frame):
         if self.notebook.GetPageCount() == 0:
             return
         eol_mode = 0
-        if event.GetId() == EID_EDIT_CRLF:
+        if event.GetId() == EID.EDIT_CRLF:
             eol_mode = wx.stc.STC_EOL_CRLF
-        elif event.GetId() == EID_EDIT_LF:
+        elif event.GetId() == EID.EDIT_LF:
             eol_mode = wx.stc.STC_EOL_LF
-        elif event.GetId() == EID_EDIT_CR:
+        elif event.GetId() == EID.EDIT_CR:
             eol_mode = wx.stc.STC_EOL_CR
         cp = self.notebook.GetCurrentPage()
         te = self.get_text_editor_from_page(self.notebook.GetPageIndex(cp))
@@ -896,15 +896,15 @@ class MainWindow(wx.Frame):
         te.update_toolbar_eol_mode()
 
     def on_menu_encode(self, event):
-        if event.GetId() == EID_ENCODE_UTF8:
+        if event.GetId() == EID.ENCODE_UTF8:
             self.set_encoding('utf-8')
-        elif event.GetId() == EID_ENCODE_WIN1252:
+        elif event.GetId() == EID.ENCODE_WIN1252:
             self.set_encoding('windows-1252')
-        elif event.GetId() == EID_ENCODE_WIN1254:
+        elif event.GetId() == EID.ENCODE_WIN1254:
             self.set_encoding('windows-1254')
         else:
             return
-    
+
     def set_encoding(self, enc):
         if self.notebook.GetPageCount() == 0:
             return

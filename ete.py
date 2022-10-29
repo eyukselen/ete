@@ -240,6 +240,7 @@ class MainWindow(wx.Frame):
         # 1.0: only left/top window grows on resize
         # 0.0: only the bottom/right window is automatically resized
         # 0.5: both windows grow by equal size
+        self.main_panel_window.Unsplit()  # start hidden
 
         # endregion
 

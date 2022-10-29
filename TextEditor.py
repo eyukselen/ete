@@ -1,5 +1,6 @@
 import wx
 import wx.stc as stc
+from configs import EID
 
 
 class TextEditor(wx.stc.StyledTextCtrl):
@@ -207,31 +208,20 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.SetEOLMode(eol_mode)
 
     def set_lang(self, lang):
-        if lang == 'python':
-            self.lang = 'python'
-            self.lang_python()
-        if lang == 'mssql':
-            self.lang = 'mssql'
-            self.lang_mssql()
-        if lang == 'bash':
-            self.lang = 'bash'
-            self.lang_bash()
-        if lang == 'ps':
-            self.lang = 'ps'
-            self.lang_ps()
-        if lang == 'xml':
-            self.lang = 'xml'
-            self.lang_xml()
-        if lang == 'html':
-            self.lang = 'html'
-            self.lang_html()
-        if lang == 'json':
-            self.lang = 'json'
-            self.lang_json()
-        if lang == 'txt':
-            self.lang = 'txt'
-            self.lang_txt()
-        self.status_bar.SetStatusText(self.lang, 4)
+
+        langs = {EID.LANG_PYTHON: self.lang_python,
+                 EID.LANG_BASH: self.lang_bash,
+                 EID.LANG_HTML: self.lang_html,
+                 EID.LANG_JSON: self.lang_json,
+                 EID.LANG_MSSQL: self.lang_mssql,
+                 EID.LANG_POWERSHELL: self.lang_ps,
+                 EID.LANG_XML: self.lang_xml,
+                 EID.LANG_TXT: self.lang_txt,
+                 }
+
+        f = langs[lang]
+        self.status_bar.SetStatusText(f.__name__[5:], 4)
+        f()
 
     def set_folding(self, fold=False):
         if fold:

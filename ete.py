@@ -836,27 +836,9 @@ class MainWindow(wx.Frame):
     def on_language(self, event):
         if self.notebook.GetPageCount() == 0:
             return
-        if event.GetId() == EID.LANG_PYTHON:
-            lang = 'python'
-        elif event.GetId() == EID.LANG_MSSQL:
-            lang = 'mssql'
-        elif event.GetId() == EID.LANG_TXT:
-            lang = 'txt'
-        elif event.GetId() == EID.LANG_BASH:
-            lang = 'bash'
-        elif event.GetId() == EID.LANG_POWERSHELL:
-            lang = 'ps'
-        elif event.GetId() == EID.LANG_XML:
-            lang = 'xml'
-        elif event.GetId() == EID.LANG_HTML:
-            lang = 'html'
-        elif event.GetId() == EID.LANG_JSON:
-            lang = 'json'
-        else:
-            lang = 'txt'
         cp = self.notebook.GetCurrentPage()
         te = self.get_text_editor_from_page(self.notebook.GetPageIndex(cp))
-        te.set_lang(lang)
+        te.set_lang(event.GetId())
 
     def on_select_mode(self, _):
         if self.notebook.GetPageCount() == 0:

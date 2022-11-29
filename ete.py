@@ -593,9 +593,6 @@ class MainWindow(wx.Frame):
         lstc = self.get_text_editor_from_page(lpi)
         rstc = self.get_text_editor_from_page(rpi)
 
-        lstc.set_lang('text')
-        rstc.set_lang('text')
-
         self.compare_tabs = [lstc, rstc]
         self.notebook.Split(rpi, wx.RIGHT)
         # endregion

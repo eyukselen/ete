@@ -227,6 +227,8 @@ class TextEditor(wx.stc.StyledTextCtrl):
         if fold:
             self.folding = True
             self.SetProperty('fold', '1')  # this needs to be send to stc
+            # TODO: below property needs to run only when lang=xml|html
+            self.SetProperty("fold.html", "1")  # this is needed for html and xml
             self.SetMarginType(self.FOLD_MARGIN, wx.stc.STC_MARGIN_SYMBOL)
             self.SetMarginMask(self.FOLD_MARGIN, wx.stc.STC_MASK_FOLDERS)
             self.SetMarginSensitive(self.FOLD_MARGIN, True)
@@ -477,7 +479,6 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.StyleSetSpec(stc.STC_H_CDATA, 'fore:#FF8000,back:#FFFFFF')
         self.StyleSetSpec(stc.STC_H_ENTITY, 'fore:#000000,back:#FEFDE0,italic')
         self.StyleSetSpec(stc.STC_H_VALUE, 'fore:#000000,back:#A6CAF0')
-        # self.source.SetProperty("fold.html", "1") # not sure xml version of this
         self.set_folding(True)
 
     def lang_html(self):

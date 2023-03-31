@@ -166,34 +166,52 @@ class MainWindow(wx.Frame):
         else:
             self.tool_bar.SetWindowStyle(wx.TB_HORIZONTAL | wx.TB_FLAT | wx.NO_BORDER)
 
-        self.tool_bar.AddTool(toolId=EID.FILE_NEW, label='New', bitmap=get_icon('new_ico'),
-                              bmpDisabled=get_icon('new_ico'), kind=wx.ITEM_NORMAL, shortHelp='New File',
+        self.tool_bar.AddTool(toolId=EID.FILE_NEW, label='New',
+                              bitmap=get_icon('new_ico'),
+                              bmpDisabled=get_icon('new_ico'),
+                              kind=wx.ITEM_NORMAL, shortHelp='New File',
                               longHelp='', clientData=None)
-        self.tool_bar.AddTool(toolId=EID.FILE_OPEN, label='Open', bitmap=get_icon('open_ico'),
-                              bmpDisabled=get_icon('open_ico'), kind=wx.ITEM_NORMAL, shortHelp='Open File',
+        self.tool_bar.AddTool(toolId=EID.FILE_OPEN, label='Open',
+                              bitmap=get_icon('open_ico'),
+                              bmpDisabled=get_icon('open_ico'),
+                              kind=wx.ITEM_NORMAL, shortHelp='Open File',
                               longHelp='', clientData=None)
-        self.tool_bar.AddTool(toolId=EID.FILE_SAVE, label='Save', bitmap=get_icon('save_ico'),
-                              bmpDisabled=get_icon('save_ico'), kind=wx.ITEM_NORMAL, shortHelp='Save File',
+        self.tool_bar.AddTool(toolId=EID.FILE_SAVE, label='Save',
+                              bitmap=get_icon('save_ico'),
+                              bmpDisabled=get_icon('save_ico'),
+                              kind=wx.ITEM_NORMAL, shortHelp='Save File',
                               longHelp='', clientData=None)
-        self.tool_bar.AddTool(toolId=EID.FILE_SAVEAS, label='Save As', bitmap=get_icon('save_as_ico'),
-                              bmpDisabled=get_icon('save_as_ico'), kind=wx.ITEM_NORMAL, shortHelp='Save File As',
+        self.tool_bar.AddTool(toolId=EID.FILE_SAVEAS, label='Save As',
+                              bitmap=get_icon('save_as_ico'),
+                              bmpDisabled=get_icon('save_as_ico'),
+                              kind=wx.ITEM_NORMAL, shortHelp='Save File As',
                               longHelp='', clientData=None)
         self.tool_bar.AddSeparator()
-        self.tool_bar.AddTool(toolId=EID.EDIT_CUT, label='Cut', bitmap=get_icon('cut_ico'),
-                              bmpDisabled=get_icon('cut_ico'), kind=wx.ITEM_NORMAL, shortHelp='Cut',
+        self.tool_bar.AddTool(toolId=EID.EDIT_CUT, label='Cut',
+                              bitmap=get_icon('cut_ico'),
+                              bmpDisabled=get_icon('cut_ico'),
+                              kind=wx.ITEM_NORMAL, shortHelp='Cut',
                               longHelp='Cut Text', clientData=None)
-        self.tool_bar.AddTool(toolId=EID.EDIT_COPY, label='Copy', bitmap=get_icon('copy_ico'),
-                              bmpDisabled=get_icon('copy_ico'), kind=wx.ITEM_NORMAL, shortHelp='Copy',
+        self.tool_bar.AddTool(toolId=EID.EDIT_COPY, label='Copy',
+                              bitmap=get_icon('copy_ico'),
+                              bmpDisabled=get_icon('copy_ico'),
+                              kind=wx.ITEM_NORMAL, shortHelp='Copy',
                               longHelp='Copy Text', clientData=None)
-        self.tool_bar.AddTool(toolId=EID.EDIT_PASTE, label='Paste', bitmap=get_icon('paste_ico'),
-                              bmpDisabled=get_icon('paste_ico'), kind=wx.ITEM_NORMAL, shortHelp='Paste',
+        self.tool_bar.AddTool(toolId=EID.EDIT_PASTE, label='Paste',
+                              bitmap=get_icon('paste_ico'),
+                              bmpDisabled=get_icon('paste_ico'),
+                              kind=wx.ITEM_NORMAL, shortHelp='Paste',
                               longHelp='Paste Text', clientData=None)
         self.tool_bar.AddSeparator()
-        self.tool_bar.AddTool(toolId=EID.EDIT_FIND, label='Find', bitmap=get_icon('find_ico'),
-                              bmpDisabled=get_icon('find_ico'), kind=wx.ITEM_NORMAL, shortHelp='Find',
+        self.tool_bar.AddTool(toolId=EID.EDIT_FIND, label='Find',
+                              bitmap=get_icon('find_ico'),
+                              bmpDisabled=get_icon('find_ico'),
+                              kind=wx.ITEM_NORMAL, shortHelp='Find',
                               longHelp='Find Text', clientData=None)
-        self.tool_bar.AddTool(toolId=EID.EDIT_REPLACE, label='Replace Text', bitmap=get_icon('replace_ico'),
-                              bmpDisabled=get_icon('replace_ico'), kind=wx.ITEM_NORMAL, shortHelp='Replace',
+        self.tool_bar.AddTool(toolId=EID.EDIT_REPLACE, label='Replace Text',
+                              bitmap=get_icon('replace_ico'),
+                              bmpDisabled=get_icon('replace_ico'),
+                              kind=wx.ITEM_NORMAL, shortHelp='Replace',
                               longHelp='Replace Text', clientData=None)
         self.tool_bar.AddSeparator()
         self.tool_bar.AddTool(toolId=EID.ABOUT_INFO, label='Info', bitmap=get_icon('info_ico'),
@@ -259,8 +277,12 @@ class MainWindow(wx.Frame):
 
         # region status bar
         self.status_bar = wx.StatusBar(self)
-        self.status_bar.SetFieldsCount(5, [-4, -2, -1, -1, 50])
-        self.status_bar.SetStatusStyles([wx.SB_SUNKEN, wx.SB_SUNKEN, wx.SB_SUNKEN, wx.SB_SUNKEN, wx.SB_SUNKEN])
+        self.status_bar.SetFieldsCount(5, [-4, -2, -1, -1, 100])
+        self.status_bar.SetStatusStyles([wx.SB_SUNKEN,
+                                         wx.SB_SUNKEN,
+                                         wx.SB_SUNKEN,
+                                         wx.SB_SUNKEN,
+                                         wx.SB_SUNKEN])
         # 0 - empty
         # 1 - cursor
         # 2 - ?
@@ -274,9 +296,12 @@ class MainWindow(wx.Frame):
         self.tab_popup_close = wx.MenuItem(self.tab_popup, wx.ID_ANY, "Close")
         self.tab_popup.Append(self.tab_popup_close)
         self.Bind(wx.EVT_MENU, self.on_tab_popup_action, self.tab_popup_close)
-        self.tab_popup_close_all_others = wx.MenuItem(self.tab_popup, wx.ID_ANY, "Close All others")
+        self.tab_popup_close_all_others = wx.MenuItem(self.tab_popup,
+                                                      wx.ID_ANY,
+                                                      "Close All others")
         self.tab_popup.Append(self.tab_popup_close_all_others)
-        self.Bind(wx.EVT_MENU, self.on_tab_popup_action, self.tab_popup_close_all_others)
+        self.Bind(wx.EVT_MENU, self.on_tab_popup_action,
+                  self.tab_popup_close_all_others)
         # endregion
 
         # region event bindings
@@ -618,14 +643,14 @@ class MainWindow(wx.Frame):
         for x in res:
             for _ in x[1]:
                 if x[0] == '-':
-                    rstc.InsertText(rstc.XYToPosition(0, curline), '\n')  # add empty line to left
-                    lstc.MarkerAdd(curline, lstc.MARKER_MINUS)  # this line is added
+                    rstc.InsertText(rstc.XYToPosition(0, curline), '\n')
+                    lstc.MarkerAdd(curline, lstc.MARKER_MINUS)
                     rstc.SetLineState(curline, 1)
                     lstc.StartStyling(lstc.XYToPosition(0, curline))
                     lstc.SetStyling(lstc.GetLineLength(curline) + eol_right, 5)
                 if x[0] == '+':
-                    lstc.InsertText(lstc.XYToPosition(0, curline), '\n')  # add empty line to left
-                    rstc.MarkerAdd(curline, rstc.MARKER_PLUS)  # this line is added
+                    lstc.InsertText(lstc.XYToPosition(0, curline), '\n')
+                    rstc.MarkerAdd(curline, rstc.MARKER_PLUS)
                     lstc.SetLineState(curline, 1)
                     rstc.StartStyling(rstc.XYToPosition(0, curline))
                     rstc.SetStyling(rstc.GetLineLength(curline) + eol_right, 5)
@@ -901,7 +926,8 @@ class MainWindow(wx.Frame):
             self.status_bar.SetStatusText(enc, 3)
         elif enc == 'windows-1254':
             if te.code_page != 'utf-8':
-                str_tr = xx.encode('windows-1252').decode('windows-1254')  # works for ansi2ansi not uni2ansi
+                # works for ansi2ansi not uni2ansi
+                str_tr = xx.encode('windows-1252').decode('windows-1254')
             else:
                 str_tr = bytes(xx, encoding='windows-1254').decode('windows-1254')
             te.SetText(str_tr)
@@ -909,7 +935,8 @@ class MainWindow(wx.Frame):
             self.status_bar.SetStatusText(enc, 3)
         elif enc == 'windows-1252':
             if te.code_page != 'utf-8':
-                str_tr = xx.encode(te.code_page).decode('windows-1252')  # works for ansi2 ansi not uni2ansi
+                # works for ansi2 ansi not uni2ansi
+                str_tr = xx.encode(te.code_page).decode('windows-1252')
             else:
                 str_tr = bytes(xx, encoding='windows-1252').decode('windows-1252')
             te.SetText(str_tr)
@@ -920,8 +947,11 @@ class MainWindow(wx.Frame):
 class TransparencyDlg(wx.Dialog):
     def __init__(self, parent):
         self.parent = parent
-        wx.Dialog.__init__(self, parent, id=wx.ID_ANY, title="Set Transparency", pos=wx.DefaultPosition,
-                           size=(300, 150), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER | wx.STAY_ON_TOP)
+        wx.Dialog.__init__(self, parent, id=wx.ID_ANY,
+                           title="Set Transparency",
+                           pos=wx.DefaultPosition,
+                           size=(300, 150),
+                           style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER | wx.STAY_ON_TOP)
         slider = wx.Slider(self, 100, 100, 0, 255, size=(250, 100),
                            style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS | wx.SL_LABELS)
         slider.SetTickFreq(10)
@@ -934,7 +964,8 @@ class TransparencyDlg(wx.Dialog):
     def on_slide(self, event):
         x = event.Selection
         self.parent.transparency = x
-        self.parent.SetTransparent(max(x, 10))  # unexpectedly printing alpha on console with DeprecationWarning
+        self.parent.SetTransparent(max(x, 10))
+        # unexpectedly printing alpha on console with DeprecationWarning
 
 
 app = wx.App()

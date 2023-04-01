@@ -4,7 +4,7 @@ from configs import EID
 
 
 class TextEditor(wx.stc.StyledTextCtrl):
-    def __init__(self, parent, filename=''):
+    def __init__(self, parent=None, filename='', status_bar=None):
         stc.StyledTextCtrl.__init__(self, parent, style=wx.SIMPLE_BORDER)
         self.ID_MARGIN_CLICK = wx.ID_ANY
         self.markers = {}
@@ -17,11 +17,12 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.check_for_braces = False
         self.SetMultipleSelection(False)
         self.file_name = filename
-        self.lang = ''
+        self.lang = EID.LANG_TXT
         self.code_page = ''
         self.style_no = 0
         self.folding = False
-        self.status_bar = self.GetParent().GetParent().GetParent().GetParent().GetParent().status_bar
+        # self.status_bar = self.GetParent().GetParent().GetParent().GetParent().GetParent().status_bar
+        self.status_bar = status_bar
         self.Bind(stc.EVT_STC_UPDATEUI, self.on_update_ui)
         self.Bind(stc.EVT_STC_ZOOM, self.on_update_ui)
         self.Bind(wx.EVT_RIGHT_UP, self.on_popup)
@@ -34,7 +35,7 @@ class TextEditor(wx.stc.StyledTextCtrl):
 
         self.txt_fore = 'BLACK'
         self.txt_back = 'WHITE'
-        self.txt_size = '10'
+        self.txt_size = '12'
         self.txt_face = 'Courier New'
         self.txt_bold = ''  # "bold" or ""
         self.txt_italic = ''  # "italic" or ""
@@ -143,10 +144,12 @@ class TextEditor(wx.stc.StyledTextCtrl):
 
         # Line Numbers
         self.SetMarginType(self.LINE_NUMBERS_MARGIN, wx.stc.STC_MARGIN_NUMBER)
-        line_width = self.TextWidth(wx.stc.STC_STYLE_LINENUMBER, '9' + '9' * len(str(self.GetFirstVisibleLine()
-                                                                                     + self.LinesOnScreen())))
+        line_width = self.TextWidth(wx.stc.STC_STYLE_LINENUMBER, '9' + '9'
+                                    * len(str(self.GetFirstVisibleLine()
+                                              + self.LinesOnScreen())))
         self.SetMarginWidth(self.LINE_NUMBERS_MARGIN, line_width)
-        self.StyleSetSpec(wx.stc.STC_STYLE_LINENUMBER, 'fore:#FFFFFF,back:#5f74A1')
+        self.StyleSetSpec(wx.stc.STC_STYLE_LINENUMBER,
+                          'fore:#FFFFFF,back:#5f74A1')
 
     def on_receive_event(self, event):
         wx.PostEvent(self.GetEventHandler(), event)
@@ -160,9 +163,14 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.status_bar.SetStatusText('line:' + str(line_num) + ' col :' + str(col_num) + ' Sel:' + str(sel_len), 1)
         self.indicate_selection()
         self.set_margins()
-        self.update_toolbar_eol_mode()
         self.check_braces()
         event.Skip()
+        self.refresh()
+
+    def refresh(self):
+        # TODO: this needs to move out from on_update_ui
+        self.update_toolbar_eol_mode()
+        self.set_lang(self.lang)
 
     def get_eol_len(self):
         res = 1
@@ -207,7 +215,7 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.ConvertEOLs(eol_mode)
         self.SetEOLMode(eol_mode)
 
-    def set_lang(self, lang):
+    def set_lang(self, lang=EID.LANG_TXT):
 
         langs = {EID.LANG_PYTHON: self.lang_python,
                  EID.LANG_BASH: self.lang_bash,
@@ -220,6 +228,7 @@ class TextEditor(wx.stc.StyledTextCtrl):
                  }
 
         f = langs[lang]
+        self.lang = lang
         self.status_bar.SetStatusText(f.__name__[5:], 4)
         f()
 

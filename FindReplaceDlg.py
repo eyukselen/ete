@@ -27,28 +27,30 @@ class FindReplaceDlg(wx.Dialog):
 
         left_sizer.Add((0, 0), 1, wx.EXPAND, 5)
 
-        options_static_sizer = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY,
-                                                              u"Options"),
-                                                 wx.VERTICAL)
-        self.check_match_case = wx.CheckBox(options_static_sizer.GetStaticBox(),
+        options_sizer = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY,
+                                                       u"Options"),
+                                          wx.VERTICAL)
+        self.check_match_case = wx.CheckBox(options_sizer.GetStaticBox(),
                                             wx.ID_ANY, u"Match Case",
-                                            wx.DefaultPosition, wx.DefaultSize, 0)
-        options_static_sizer.Add(self.check_match_case, 0, wx.ALIGN_LEFT, 5)
+                                            wx.DefaultPosition,
+                                            wx.DefaultSize, 0)
+        options_sizer.Add(self.check_match_case, 0, wx.ALIGN_LEFT, 5)
 
-        self.check_whole_word = wx.CheckBox(options_static_sizer.GetStaticBox(),
+        self.check_whole_word = wx.CheckBox(options_sizer.GetStaticBox(),
                                             wx.ID_ANY, u"Whole Word",
-                                            wx.DefaultPosition, wx.DefaultSize, 0)
-        options_static_sizer.Add(self.check_whole_word, 0, wx.ALIGN_LEFT, 5)
+                                            wx.DefaultPosition,
+                                            wx.DefaultSize, 0)
+        options_sizer.Add(self.check_whole_word, 0, wx.ALIGN_LEFT, 5)
 
-        self.check_wraparound = wx.CheckBox(options_static_sizer.GetStaticBox(),
+        self.check_wraparound = wx.CheckBox(options_sizer.GetStaticBox(),
                                             wx.ID_ANY,
                                             u"Wrap Around",
                                             wx.DefaultPosition,
                                             wx.DefaultSize, 0)
-        options_static_sizer.Add(self.check_wraparound, 0, wx.ALIGN_LEFT, 5)
+        options_sizer.Add(self.check_wraparound, 0, wx.ALIGN_LEFT, 5)
         self.check_wraparound.SetValue(True)
 
-        left_sizer.Add(options_static_sizer, 1, wx.EXPAND, 5)
+        left_sizer.Add(options_sizer, 1, wx.EXPAND, 5)
 
         # endregion
 
@@ -175,7 +177,7 @@ class FindReplaceDlg(wx.Dialog):
                         te.SetSelection(res, res + len(search_str))
                 else:  # backward wrap
                     res, _ = te.FindText(te.GetTextLength(), 0,
-                                                search_str, flags)
+                                         search_str, flags)
                     if res == -1:
                         msg = 'Nothing found!'
                         wx.MessageBox(message=msg,
@@ -186,7 +188,8 @@ class FindReplaceDlg(wx.Dialog):
                         te.SetAnchor(res + len(search_str))
                         te.Refresh()
             else:
-                msg = 'Reached top of file!' if search_end == 0 else 'Reached end of file!'
+                msg = 'Reached top of file!' if search_end == 0 \
+                    else 'Reached end of file!'
                 wx.MessageBox(message=msg, caption='Warning!',
                               style=wx.OK | wx.ICON_WARNING)
 

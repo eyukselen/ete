@@ -214,22 +214,34 @@ class MainWindow(wx.Frame):
                               kind=wx.ITEM_NORMAL, shortHelp='Replace',
                               longHelp='Replace Text', clientData=None)
         self.tool_bar.AddSeparator()
-        self.tool_bar.AddTool(toolId=EID.ABOUT_INFO, label='Info', bitmap=get_icon('info_ico'),
-                              bmpDisabled=get_icon('info_ico'), kind=wx.ITEM_NORMAL, shortHelp='Information',
+        self.tool_bar.AddTool(toolId=EID.ABOUT_INFO, label='Info',
+                              bitmap=get_icon('info_ico'),
+                              bmpDisabled=get_icon('info_ico'),
+                              kind=wx.ITEM_NORMAL, shortHelp='Information',
                               longHelp='', clientData=None)
-        self.tool_bar.AddTool(toolId=EID.FILE_EXIT, label='Exit', bitmap=get_icon('exit_ico'),
-                              bmpDisabled=get_icon('exit_ico'), kind=wx.ITEM_NORMAL, shortHelp='Exit Application',
-                              longHelp='', clientData=None)
-        self.tool_bar.AddSeparator()
-        self.tool_bar.AddTool(toolId=EID.TOOLS_COMPARE, label='Compare', bitmap=get_icon('compare_ico'),
-                              bmpDisabled=get_icon('compare_ico'), kind=wx.ITEM_NORMAL, shortHelp='Compare',
-                              longHelp='', clientData=None)
-        self.tool_bar.AddTool(toolId=EID.TOOLS_CLEARCOMP, label='Clear Compare', bitmap=get_icon('clear_compare_ico'),
-                              bmpDisabled=get_icon('clear_compare_ico'), kind=wx.ITEM_NORMAL, shortHelp='Clear Compare',
+        self.tool_bar.AddTool(toolId=EID.FILE_EXIT, label='Exit',
+                              bitmap=get_icon('exit_ico'),
+                              bmpDisabled=get_icon('exit_ico'),
+                              kind=wx.ITEM_NORMAL,
+                              shortHelp='Exit Application',
                               longHelp='', clientData=None)
         self.tool_bar.AddSeparator()
-        self.tool_bar.AddTool(toolId=EID.TOOLS_SNIPLETS, label="Sniplets", bitmap=get_icon('sniplets'),
-                              bmpDisabled=get_icon('sniplets'), kind=wx.ITEM_NORMAL, shortHelp='Sniplets',
+        self.tool_bar.AddTool(toolId=EID.TOOLS_COMPARE, label='Compare',
+                              bitmap=get_icon('compare_ico'),
+                              bmpDisabled=get_icon('compare_ico'),
+                              kind=wx.ITEM_NORMAL, shortHelp='Compare',
+                              longHelp='', clientData=None)
+        self.tool_bar.AddTool(toolId=EID.TOOLS_CLEARCOMP,
+                              label='Clear Compare',
+                              bitmap=get_icon('clear_compare_ico'),
+                              bmpDisabled=get_icon('clear_compare_ico'),
+                              kind=wx.ITEM_NORMAL, shortHelp='Clear Compare',
+                              longHelp='', clientData=None)
+        self.tool_bar.AddSeparator()
+        self.tool_bar.AddTool(toolId=EID.TOOLS_SNIPLETS, label="Sniplets",
+                              bitmap=get_icon('sniplets'),
+                              bmpDisabled=get_icon('sniplets'),
+                              kind=wx.ITEM_NORMAL, shortHelp='Sniplets',
                               longHelp='', clientData=None)
 
         self.SetToolBar(self.tool_bar)
@@ -422,7 +434,7 @@ class MainWindow(wx.Frame):
         page = wx.Panel(parent=self.notebook)
         page_sizer = wx.BoxSizer(wx.VERTICAL)
         page.SetSizer(page_sizer)
-        te = TextEditor(parent=page, filename='')
+        te = TextEditor(parent=page, filename='', status_bar=self.status_bar)
         te.code_page = 'utf-8'
         self.status_bar.SetStatusText('utf-8', 3)
         if sys.platform == 'win32':
@@ -454,7 +466,7 @@ class MainWindow(wx.Frame):
                 page = wx.Panel(parent=self.notebook)
                 page_sizer = wx.BoxSizer(wx.VERTICAL)
                 page.SetSizer(page_sizer)
-                te = TextEditor(parent=page, filename=file)
+                te = TextEditor(parent=page, filename=file, status_bar=self.status_bar)
                 if sys.platform == 'win32':
                     te.DragAcceptFiles(True)
                     te.Bind(wx.EVT_DROP_FILES, self.open_page)
@@ -508,6 +520,7 @@ class MainWindow(wx.Frame):
         """set focus on text editor when a page selected"""
         te = self.get_text_editor_from_page(event.Selection)
         te.SetFocus()
+        te.refresh()
         event.Skip()
 
     def on_tab_popup(self, event):
@@ -972,3 +985,6 @@ app = wx.App()
 MainWindow(None)
 # wx.lib.inspection.InspectionTool().Show() # for debugging
 app.MainLoop()
+
+
+# TODO: encoding needs to be implemented

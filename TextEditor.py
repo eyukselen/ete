@@ -21,12 +21,12 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.code_page = ''
         self.style_no = 0
         self.folding = False
-        # self.status_bar = self.GetParent().GetParent().GetParent().GetParent().GetParent().status_bar
         self.status_bar = status_bar
         self.Bind(stc.EVT_STC_UPDATEUI, self.on_update_ui)
         self.Bind(stc.EVT_STC_ZOOM, self.on_update_ui)
         self.Bind(wx.EVT_RIGHT_UP, self.on_popup)
-        self.Bind(wx.stc.EVT_STC_MARGINCLICK, self.on_margin_click, id=self.ID_MARGIN_CLICK)
+        self.Bind(wx.stc.EVT_STC_MARGINCLICK, self.on_margin_click, 
+                  id=self.ID_MARGIN_CLICK)
         self.set_styles()
         self.set_margins()
         self.SetAdditionalSelectionTyping(True)
@@ -42,17 +42,22 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.txt_underline = ''  # "underline" or ""
 
         style_spec = "fore:" + self.txt_fore + ",back:" + self.txt_back + \
-                     ",size:" + self.txt_size + ",face:" + self.txt_face + "," + \
-                     self.txt_bold + "," + self.txt_italic + "," + self.txt_underline
+                     ",size:" + self.txt_size + ",face:" + self.txt_face + \
+                     "," + self.txt_bold + "," + self.txt_italic + \
+                     "," + self.txt_underline
         self.StyleSetSpec(stc.STC_STYLE_DEFAULT, style_spec)
-        self.StyleSetSpec(stc.STC_STYLE_BRACELIGHT, "fore:RED,back:MEDIUM TURQUOISE,bold")
-        self.StyleSetSpec(stc.STC_STYLE_BRACEBAD, "fore:RED,back:THISTLE,bold")
+        self.StyleSetSpec(stc.STC_STYLE_BRACELIGHT,
+                          "fore:RED,back:MEDIUM TURQUOISE,bold")
+        self.StyleSetSpec(stc.STC_STYLE_BRACEBAD,
+                          "fore:RED,back:THISTLE,bold")
 
         self.SetCaretWidth(2)  # caret feels better a little thicker
 
         # selection style and current line coloring
-        selection_color = wx.Colour(red=128, green=219, blue=255, alpha=wx.ALPHA_OPAQUE)
-        current_line_color = wx.Colour(red=216, green=255, blue=255, alpha=wx.ALPHA_OPAQUE)
+        selection_color = wx.Colour(red=128, green=219, blue=255,
+                                    alpha=wx.ALPHA_OPAQUE)
+        current_line_color = wx.Colour(red=216, green=255, blue=255,
+                                       alpha=wx.ALPHA_OPAQUE)
         self.SetSelBackground(True, selection_color)
         self.SetSelEOLFilled(False)
         self.SetCaretLineBackground(current_line_color)
@@ -91,7 +96,9 @@ class TextEditor(wx.stc.StyledTextCtrl):
 
         self.menu_popup.AppendSeparator()
 
-        menu_popup_select_all = wx.MenuItem(self.menu_popup, 2010, "Select All")
+        menu_popup_select_all = wx.MenuItem(self.menu_popup,
+                                            2010,
+                                            "Select All")
         self.menu_popup.Append(menu_popup_select_all)
         self.Bind(wx.EVT_MENU, self.select_all, menu_popup_select_all)
 
@@ -135,10 +142,8 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.SetMarginWidth(self.MARKER_MARGIN, 12)
 
         # diff markers
-        # self.MarkerDefine(4, stc.STC_MARK_CHARACTER + ord('+'), "WHEAT", "#808080")
-        # self.MarkerDefine(5, stc.STC_MARK_CHARACTER + ord('-'), "WHEAT", "#808080")
-        # self.MarkerDefine(6, stc.STC_MARK_CHARACTER + ord('='), "WHEAT", "#808080")
-        self.MarkerDefine(self.MARKER_BOOKMARK, stc.STC_MARK_BOOKMARK, 'black', 'red')
+        self.MarkerDefine(self.MARKER_BOOKMARK, stc.STC_MARK_BOOKMARK, 
+                          'black', 'red')
         self.MarkerDefine(self.MARKER_PLUS, stc.STC_MARK_PLUS)
         self.MarkerDefine(self.MARKER_MINUS, stc.STC_MARK_MINUS)
 
@@ -160,7 +165,9 @@ class TextEditor(wx.stc.StyledTextCtrl):
         line_num = self.GetCurrentLine() + 1
         col_num = self.GetColumn(self.GetCurrentPos())
         sel_len = abs(cursor - anchor)
-        self.status_bar.SetStatusText('line:' + str(line_num) + ' col :' + str(col_num) + ' Sel:' + str(sel_len), 1)
+        self.status_bar.SetStatusText('line:' + str(line_num)
+                                      + ' col :' + str(col_num)
+                                      + ' Sel:' + str(sel_len), 1)
         self.indicate_selection()
         self.set_margins()
         self.check_braces()

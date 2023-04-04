@@ -1,6 +1,6 @@
 import wx
 import wx.stc as stc
-from configs import EID
+from configs import EID, keywords
 
 
 class TextEditor(wx.stc.StyledTextCtrl):
@@ -25,7 +25,7 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.Bind(stc.EVT_STC_UPDATEUI, self.on_update_ui)
         self.Bind(stc.EVT_STC_ZOOM, self.on_update_ui)
         self.Bind(wx.EVT_RIGHT_UP, self.on_popup)
-        self.Bind(wx.stc.EVT_STC_MARGINCLICK, self.on_margin_click, 
+        self.Bind(wx.stc.EVT_STC_MARGINCLICK, self.on_margin_click,
                   id=self.ID_MARGIN_CLICK)
         self.set_styles()
         self.set_margins()
@@ -142,7 +142,7 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.SetMarginWidth(self.MARKER_MARGIN, 12)
 
         # diff markers
-        self.MarkerDefine(self.MARKER_BOOKMARK, stc.STC_MARK_BOOKMARK, 
+        self.MarkerDefine(self.MARKER_BOOKMARK, stc.STC_MARK_BOOKMARK,
                           'black', 'red')
         self.MarkerDefine(self.MARKER_PLUS, stc.STC_MARK_PLUS)
         self.MarkerDefine(self.MARKER_MINUS, stc.STC_MARK_MINUS)
@@ -244,20 +244,36 @@ class TextEditor(wx.stc.StyledTextCtrl):
             self.folding = True
             self.SetProperty('fold', '1')  # this needs to be send to stc
             # TODO: below property needs to run only when lang=xml|html
-            self.SetProperty("fold.html", "1")  # this is needed for html and xml
+            self.SetProperty("fold.html", "1")  # needed for html and xml
             self.SetMarginType(self.FOLD_MARGIN, wx.stc.STC_MARGIN_SYMBOL)
             self.SetMarginMask(self.FOLD_MARGIN, wx.stc.STC_MASK_FOLDERS)
             self.SetMarginSensitive(self.FOLD_MARGIN, True)
             self.SetMarginWidth(self.FOLD_MARGIN, 16)
-            self.MarkerDefine(stc.STC_MARKNUM_FOLDERMIDTAIL, stc.STC_MARK_TCORNERCURVE, "WHEAT", "#808080")
-            self.MarkerDefine(stc.STC_MARKNUM_FOLDEROPEN, stc.STC_MARK_BOXMINUS, "WHEAT", "#808080")
-            self.MarkerDefine(stc.STC_MARKNUM_FOLDER, stc.STC_MARK_BOXPLUS, "WHEAT", "#808080")
-            self.MarkerDefine(stc.STC_MARKNUM_FOLDERSUB, stc.STC_MARK_VLINE, "WHEAT", "#808080")
-            self.MarkerDefine(stc.STC_MARKNUM_FOLDERTAIL, stc.STC_MARK_LCORNER, "WHEAT", "#808080")
-            self.MarkerDefine(stc.STC_MARKNUM_FOLDEREND, stc.STC_MARK_BOXPLUSCONNECTED, "WHEAT", "#808080")
-            self.MarkerDefine(stc.STC_MARKNUM_FOLDEROPENMID, stc.STC_MARK_BOXMINUSCONNECTED, "WHEAT", "#808080")
+            self.MarkerDefine(stc.STC_MARKNUM_FOLDERMIDTAIL,
+                              stc.STC_MARK_TCORNERCURVE,
+                              "WHEAT", "#808080")
+            self.MarkerDefine(stc.STC_MARKNUM_FOLDEROPEN,
+                              stc.STC_MARK_BOXMINUS,
+                              "WHEAT", "#808080")
+            self.MarkerDefine(stc.STC_MARKNUM_FOLDER,
+                              stc.STC_MARK_BOXPLUS,
+                              "WHEAT", "#808080")
+            self.MarkerDefine(stc.STC_MARKNUM_FOLDERSUB,
+                              stc.STC_MARK_VLINE,
+                              "WHEAT", "#808080")
+            self.MarkerDefine(stc.STC_MARKNUM_FOLDERTAIL,
+                              stc.STC_MARK_LCORNER,
+                              "WHEAT", "#808080")
+            self.MarkerDefine(stc.STC_MARKNUM_FOLDEREND,
+                              stc.STC_MARK_BOXPLUSCONNECTED,
+                              "WHEAT", "#808080")
+            self.MarkerDefine(stc.STC_MARKNUM_FOLDEROPENMID,
+                              stc.STC_MARK_BOXMINUSCONNECTED,
+                              "WHEAT", "#808080")
             self.SetAutomaticFold(wx.stc.STC_AUTOMATICFOLD_SHOW)
-            self.Bind(wx.stc.EVT_STC_MARGINCLICK, self.on_margin_click, id=self.ID_MARGIN_CLICK)
+            self.Bind(wx.stc.EVT_STC_MARGINCLICK,
+                      self.on_margin_click,
+                      id=self.ID_MARGIN_CLICK)
         else:
             self.folding = False
             self.SetProperty('fold', '0')  # this needs to be send to stc
@@ -281,9 +297,7 @@ class TextEditor(wx.stc.StyledTextCtrl):
     def lang_python(self):
         self.StyleClearAll()
         self.SetLexer(stc.STC_LEX_PYTHON)
-        self.SetKeyWords(0, 'False None True and as assert async await break class continue def del elif else '
-                            'except finally for from global if import in is lambda nonlocal not or pass raise '
-                            'return try while with yield self')
+        self.SetKeyWords(0, keywords['python']['keywords_0'])
         self.StyleSetSpec(stc.STC_P_DEFAULT, 'fore:#000000,back:#FFFFFF')
         self.StyleSetSpec(stc.STC_P_COMMENTLINE, 'fore:#008000,back:#FFFFFF')
         self.StyleSetSpec(stc.STC_P_NUMBER, 'fore:#FF0000,back:#FFFFFF')
@@ -293,103 +307,69 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.StyleSetSpec(stc.STC_P_WORD2, 'fore:#880088,back:#FFFFFF,bold')
         self.StyleSetSpec(stc.STC_P_TRIPLE, 'fore:#FF8000,back:#FFFFFF')
         self.StyleSetSpec(stc.STC_P_TRIPLEDOUBLE, 'fore:#FF8000,back:#FFFFFF')
-        self.StyleSetSpec(stc.STC_P_CLASSNAME, 'fore:#000000,back:#FFFFFF,bold')
+        self.StyleSetSpec(stc.STC_P_CLASSNAME,
+                          'fore:#000000,back:#FFFFFF,bold')
         self.StyleSetSpec(stc.STC_P_DEFNAME, 'fore:#FF00FF,back:#FFFFFF')
         self.StyleSetSpec(stc.STC_P_OPERATOR, 'fore:#000080,back:#FFFFFF,bold')
         self.StyleSetSpec(stc.STC_P_IDENTIFIER, 'fore:#000000,back:#FFFFFF')
         self.StyleSetSpec(stc.STC_P_COMMENTBLOCK, 'fore:#008000,back:#FFFFFF')
-        self.StyleSetSpec(stc.STC_P_DECORATOR, 'fore:#FF8000,back:#FFFFFF,italic')
-        self.StyleSetSpec(stc.STC_P_STRINGEOL, 'fore:#RED,back:#FFFFFF,underline')
-        self.StyleSetSpec(stc.STC_STYLE_BRACELIGHT, "fore:RED,back:MEDIUM TURQUOISE,bold")
+        self.StyleSetSpec(stc.STC_P_DECORATOR,
+                          'fore:#FF8000,back:#FFFFFF,italic')
+        self.StyleSetSpec(stc.STC_P_STRINGEOL,
+                          'fore:#RED,back:#FFFFFF,underline')
+        self.StyleSetSpec(stc.STC_STYLE_BRACELIGHT,
+                          "fore:RED,back:MEDIUM TURQUOISE,bold")
         self.StyleSetSpec(stc.STC_STYLE_BRACEBAD, "fore:RED,back:THISTLE,bold")
-        self.SetProperty("tab.timmy.whinge.level", "1")  # to mark inconsistent indentation
+        # to mark inconsistent indentation
+        self.SetProperty("tab.timmy.whinge.level", "1")
         self.set_folding(True)
 
     def lang_ps(self):
         self.StyleClearAll()
         self.SetLexer(stc.STC_LEX_BASH)
-        self.SetKeyWords(0, 'break continue do else elseif filter for foreach '
-                            'function if in return switch until '
-                            'where while')
-        self.SetKeyWords(1, 'add-content add-history add-member add-pssnapin '
-                            'clear-content clear-item '
-                            'clear-itemproperty clear-variable compare-object '
-                            'convertfrom-securestring convert-path convertto-html '
-                            'convertto-securestring copy-item copy-itemproperty export-alias '
-                            'export-clixml export-console export-csv foreach-object format-custom format-list '
-                            'format-table format-wide get-acl get-alias get-authenticodesignature get-childitem '
-                            'get-command get-content get-credential get-culture get-date get-eventlog '
-                            'get-executionpolicy get-help get-history get-host get-item get-itemproperty get-location '
-                            'get-member get-pfxcertificate get-process get-psdrive get-psprovider get-pssnapin '
-                            'get-service get-tracesource get-uiculture get-unique get-variable get-wmiobject '
-                            'group-object import-alias import-clixml import-csv invoke-expression invoke-history '
-                            'invoke-item join-path measure-command measure-object move-item move-itemproperty '
-                            'new-alias new-item new-itemproperty new-object new-psdrive new-service new-timespan '
-                            'new-variable out-default out-file out-host out-null out-printer out-string pop-location '
-                            'push-location read-host remove-item remove-itemproperty remove-psdrive remove-pssnapin '
-                            'remove-variable rename-item rename-itemproperty resolve-path restart-service '
-                            'resume-service select-object select-string set-acl set-alias set-authenticodesignature '
-                            'set-content set-date set-executionpolicy set-item set-itemproperty set-location '
-                            'set-psdebug set-service set-tracesource set-variable sort-object split-path '
-                            'start-service start-sleep start-transcript stop-process stop-service stop-transcript '
-                            'suspend-service tee-object test-path trace-command update-formatdata update-typedata '
-                            'where-object write-debug write-error write-host write-output write-progress '
-                            'write-verbose write-warning')
-        self.SetKeyWords(2, 'ac asnp clc cli clp clv cpi cpp cvpa diff epal epcsv fc fl foreach ft fw gal gc gci gcm '
-                            'gdr ghy gi gl gm gp gps group gsv gsnp gu gv gwmi iex ihy ii ipal ipcsv mi mp nal ndr ni '
-                            'nv oh rdr ri rni rnp rp rsnp rv rvpa sal sasv sc select si sl sleep sort sp spps spsv sv '
-                            'tee where write cat cd clear cp h history kill lp ls mount mv popd ps pushd pwd r rm '
-                            'rmdir echo cls chdir copy del dir erase move rd ren set type')
-        self.SetKeyWords(3, 'component description example externalhelp forwardhelpcategory forwardhelptargetname '
-                            'functionality inputs link notes outputs parameter remotehelprunspace role synopsis')
-        self.StyleSetSpec(stc.STC_POWERSHELL_ALIAS, 'fore:#0080FF,back:#FFFFFF')
-        self.StyleSetSpec(stc.STC_POWERSHELL_CHARACTER, 'fore:#808080,back:#FFFFFF')
-        self.StyleSetSpec(stc.STC_POWERSHELL_CMDLET, 'fore:#8000FF,back:#FFFFFF')
-        self.StyleSetSpec(stc.STC_POWERSHELL_COMMENT, 'fore:#008000,back:#FFFFFF')
-        self.StyleSetSpec(stc.STC_POWERSHELL_COMMENTDOCKEYWORD, 'fore:#008080,back:#FFFFFF')
-        self.StyleSetSpec(stc.STC_POWERSHELL_COMMENTSTREAM, 'fore:#008080,back:#FFFFFF')
-        self.StyleSetSpec(stc.STC_POWERSHELL_DEFAULT, 'fore:#000000,back:#FFFFFF')
-        # self.StyleSetSpec(stc.STC_POWERSHELL_FUNCTION, 'fore:#880088,back:#FFFFFF,bold')
-        self.StyleSetSpec(stc.STC_POWERSHELL_HERE_CHARACTER, 'fore:#808080,back:#FFFFFF')
-        self.StyleSetSpec(stc.STC_POWERSHELL_HERE_STRING, 'fore:#808080,back:#FFFFFF')
-        self.StyleSetSpec(stc.STC_POWERSHELL_IDENTIFIER, 'fore:#0000FF,back:#FFFFFF,bold')
-        # self.StyleSetSpec(stc.STC_POWERSHELL_KEYWORD, 'fore:#880088,back:#FFFFFF,bold')
-        self.StyleSetSpec(stc.STC_POWERSHELL_NUMBER, 'fore:#FF8000,back:#FFFFFF')
-        self.StyleSetSpec(stc.STC_POWERSHELL_OPERATOR, 'fore:#000080,back:#FFFFFF,bold')
-        self.StyleSetSpec(stc.STC_POWERSHELL_STRING, 'fore:#808080,back:#FFFFFF')
-        self.StyleSetSpec(stc.STC_POWERSHELL_USER1, 'fore:#000000,back:#FFFFFF')
-        self.StyleSetSpec(stc.STC_POWERSHELL_VARIABLE, 'fore:#000000,back:#FFFFFF,bold')
+        self.SetKeyWords(0, keywords['ps']['keywords_0'])
+        self.SetKeyWords(1, keywords['ps']['keywords_1'])
+        self.SetKeyWords(2, keywords['ps']['keywords_2'])
+        self.SetKeyWords(3, keywords['ps']['keywords_3'])
+        self.StyleSetSpec(stc.STC_POWERSHELL_ALIAS,
+                          'fore:#0080FF,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_POWERSHELL_CHARACTER,
+                          'fore:#808080,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_POWERSHELL_CMDLET,
+                          'fore:#8000FF,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_POWERSHELL_COMMENT,
+                          'fore:#008000,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_POWERSHELL_COMMENTDOCKEYWORD,
+                          'fore:#008080,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_POWERSHELL_COMMENTSTREAM,
+                          'fore:#008080,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_POWERSHELL_DEFAULT,
+                          'fore:#000000,back:#FFFFFF')
+        # self.StyleSetSpec(stc.STC_POWERSHELL_FUNCTION,
+        # 'fore:#880088,back:#FFFFFF,bold')
+        self.StyleSetSpec(stc.STC_POWERSHELL_HERE_CHARACTER,
+                          'fore:#808080,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_POWERSHELL_HERE_STRING,
+                          'fore:#808080,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_POWERSHELL_IDENTIFIER,
+                          'fore:#0000FF,back:#FFFFFF,bold')
+        # self.StyleSetSpec(stc.STC_POWERSHELL_KEYWORD,
+        # 'fore:#880088,back:#FFFFFF,bold')
+        self.StyleSetSpec(stc.STC_POWERSHELL_NUMBER,
+                          'fore:#FF8000,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_POWERSHELL_OPERATOR,
+                          'fore:#000080,back:#FFFFFF,bold')
+        self.StyleSetSpec(stc.STC_POWERSHELL_STRING,
+                          'fore:#808080,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_POWERSHELL_USER1,
+                          'fore:#000000,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_POWERSHELL_VARIABLE,
+                          'fore:#000000,back:#FFFFFF,bold')
 
     def lang_bash(self):
         self.StyleClearAll()
         self.SetLexer(stc.STC_LEX_BASH)
-        self.SetKeyWords(0, '7z adduser alias apt-get ar as asa autoconf automake awk banner base64 basename bash '
-                            'bc bdiff blkid break bsdcpio bsdtar bunzip2 bzcmp bzdiff bzegrep bzfgrep bzgrep bzip2 '
-                            'bzip2recover bzless bzmore c++ cal calendar case cat cc cd cfdisk chattr chgrp chmod '
-                            'chown chroot chvt cksum clang clang++ clear cmp col column comm compgen compress '
-                            'continue convert cp cpio crontab crypt csplit ctags curl cut date dc dd deallocvt '
-                            'declare deluser depmod deroff df dialog diff diff3 dig dircmp dirname disown dmesg '
-                            'do done dpkg dpkg-deb du echo ed egrep elif else env esac eval ex exec exit expand '
-                            'export expr fakeroot false fc fdisk ffmpeg fgrep fi file find flex flock fmt fold for '
-                            'fsck function functions fuser fusermount g++ gas gawk gcc gdb genisoimage getconf '
-                            'getopt getopts git gpg gpgsplit gpgv grep gres groff groups gunzip gzexe hash hd head '
-                            'help hexdump hg history httpd iconv id if ifconfig ifdown ifquery ifup in insmod '
-                            'integer inxi ip ip6tables ip6tables-save ip6tables-restore iptables iptables-save '
-                            'iptables-restore ip jobs join kill killall killall5 lc ld ldd let lex line ln local '
-                            'logname look ls lsattr lsb_release lsblk lscpu lshw lslocks lsmod lsusb lzcmp lzegrep '
-                            'lzfgrep lzgrep lzless lzma lzmainfo lzmore m4 mail mailx make man mkdir mkfifo mkswap '
-                            'mktemp modinfo modprobe mogrify more mount msgfmt mt mv nameif nasm nc ndisasm netcat '
-                            'newgrp nl nm nohup ntps objdump od openssl p7zip pacman passwd paste patch pathchk '
-                            'pax pcat pcregrep pcretest perl pg ping ping6 pivot_root poweroff pr print printf ps '
-                            'pwd python python2 python3 ranlib read readlink readonly reboot reset return rev rm '
-                            'rmdir rmmod rpm rsync sed select service set sh sha1sum sha224sum sha256sum sha3sum '
-                            'sha512sum shift shred shuf shutdown size sleep sort spell split start stop strings '
-                            'strip stty su sudo sum suspend switch_root sync systemctl tac tail tar tee test then '
-                            'time times touch tr trap troff true tsort tty type typeset ulimit umask umount '
-                            'unalias uname uncompress unexpand uniq unlink unlzma unset until unzip unzipsfx '
-                            'useradd userdel uudecode uuencode vi vim wait wc wget whence which while who wpaste '
-                            'wstart xargs xdotool xxd xz xzcat xzcmp xzdiff xzfgrep xzgrep xzless xzmore yes yum '
-                            'zcat zcmp zdiff zegrep zfgrep zforce zgrep zless zmore znew zsh')
+        self.SetKeyWords(0, keywords['bash']['keywords_0'])
         self.StyleSetSpec(stc.STC_SH_BACKTICKS, 'fore:#FFFF00')
         self.StyleSetSpec(stc.STC_SH_NUMBER, 'fore:#FF00FF')
         self.StyleSetSpec(stc.STC_SH_CHARACTER, 'fore:#8DB0D3')
@@ -408,63 +388,55 @@ class TextEditor(wx.stc.StyledTextCtrl):
     def lang_txt(self):
         self.StyleClearAll()
         self.SetLexer(stc.STC_LEX_NULL)
-        self.StyleSetSpec(stc.STC_STYLE_BRACELIGHT, "fore:RED,back:MEDIUM TURQUOISE,bold")
-        self.StyleSetSpec(stc.STC_STYLE_BRACEBAD, "fore:RED,back:THISTLE,bold")
+        self.StyleSetSpec(stc.STC_STYLE_BRACELIGHT,
+                          "fore:RED,back:MEDIUM TURQUOISE,bold")
+        self.StyleSetSpec(stc.STC_STYLE_BRACEBAD,
+                          "fore:RED,back:THISTLE,bold")
         self.set_folding(False)
 
     def lang_json(self):
         self.StyleClearAll()
         self.SetLexer(stc.STC_LEX_JSON)
-        self.StyleSetSpec(stc.STC_STYLE_BRACELIGHT, "fore:RED,back:MEDIUM TURQUOISE,bold")
+        self.StyleSetSpec(stc.STC_STYLE_BRACELIGHT,
+                          "fore:RED,back:MEDIUM TURQUOISE,bold")
         self.StyleSetSpec(stc.STC_STYLE_BRACEBAD, "fore:RED,back:THISTLE,bold")
         self.set_folding(True)
-        self.StyleSetSpec(stc.STC_JSON_BLOCKCOMMENT, "fore:#008000,back:#FFFFFF")
+        self.StyleSetSpec(stc.STC_JSON_BLOCKCOMMENT,
+                          "fore:#008000,back:#FFFFFF")
         self.StyleSetSpec(stc.STC_JSON_COMPACTIRI, "fore:#0000FF,back:#FFFFFF")
         self.StyleSetSpec(stc.STC_JSON_DEFAULT, "fore:#000000,back:#FFFFFF")
         self.StyleSetSpec(stc.STC_JSON_ERROR, "fore:#FFFF80,back:#FF0000")
-        self.StyleSetSpec(stc.STC_JSON_ESCAPESEQUENCE, "fore:#0000FF,back:#FFFFFF")
+        self.StyleSetSpec(stc.STC_JSON_ESCAPESEQUENCE,
+                          "fore:#0000FF,back:#FFFFFF")
         self.StyleSetSpec(stc.STC_JSON_KEYWORD, "fore:#18AF8A,back:#FFFFFF")
-        self.StyleSetSpec(stc.STC_JSON_PROPERTYNAME, "fore:#8000FF,back:#FFFFFF,bold")
+        self.StyleSetSpec(stc.STC_JSON_PROPERTYNAME,
+                          "fore:#8000FF,back:#FFFFFF,bold")
         self.StyleSetSpec(stc.STC_JSON_LDKEYWORD, "fore:#FF0000,back:#FFFFFF")
-        self.StyleSetSpec(stc.STC_JSON_LINECOMMENT, "fore:#008000,back:#FFFFFF")
+        self.StyleSetSpec(stc.STC_JSON_LINECOMMENT,
+                          "fore:#008000,back:#FFFFFF")
         self.StyleSetSpec(stc.STC_JSON_URI, "fore:#0000FF,back:#FFFFFF")
         self.StyleSetSpec(stc.STC_JSON_STRINGEOL, "fore=#808080,back:#FFFFFF")
         self.StyleSetSpec(stc.STC_JSON_NUMBER, "fore:#FF8000,back:#FFFFFF")
         self.StyleSetSpec(stc.STC_JSON_STRING, "fore:#800000,back:#FFFFFF")
         self.StyleSetSpec(stc.STC_JSON_OPERATOR, "fore:#000000,back:#FFFFFF")
-        self.SetKeyWords(0, "null false true")
-        self.SetKeyWords(1, "@id @context @type @value @language @container @list "
-                            "@set @reverse @index @base @vocab @graph")
+        self.SetKeyWords(0, keywords['json']['keywords_0'])
+        self.SetKeyWords(1, keywords['json']['keywords_1'])
 
     def lang_mssql(self):
         self.StyleClearAll()
         self.SetLexer(stc.STC_LEX_MSSQL)
-        self.SetKeyWords(0, "add external procedure all fetch public alter file raiserror and fillfactor read any for "
-                            "readtext as foreign reconfigure asc freetext references authorization freetexttable "
-                            "replication backup from restore begin full restrict between function return break goto "
-                            "revert browse grant revoke bulk group right by having rollback cascade holdlock rowcount "
-                            "case identity rowguidcol check identity_insert rule checkpoint identitycol save close if "
-                            "schema clustered in securityaudit coalesce index select collate inner column insert "
-                            "semantickeyphrasetable semanticsimilaritydetailstable commit intersect constraint join "
-                            "semanticsimilaritytable compute into session_user is set contains  setuser containstable "
-                            "key shutdown continue kill some convert left primary within group exists load tablesample "
-                            "statistics create like system_user cross lineno table current current_date merge nocheck "
-                            "textsize current_time national then current_timestamp current_user nonclustered openxml "
-                            "top cursor not tran database null transaction dbcc nullif to deallocate of truncate "
-                            "declare off try_convert default offsets tsequal delete on union deny open unique desc "
-                            "opendatasource writetext exit proc percent when escape option"
-                            "unpivot disk openquery update distinct openrowset updatetext distributed use double "
-                            "user drop or values dump order varying else outer view end over waitfor errlvl "
-                            "pivot where except plan while exec precision with execute print trigger")
+        self.SetKeyWords(0, keywords['mssql']['keywords_0'])
         self.StyleSetSpec(stc.STC_MSSQL_DEFAULT, 'fore:#000000,back:#FFFFFF')
         self.StyleSetSpec(stc.STC_MSSQL_COMMENT, 'fore:#838383')
         self.StyleSetSpec(stc.STC_MSSQL_COLUMN_NAME, 'fore:#A52B2B, bold')
         self.StyleSetSpec(stc.STC_MSSQL_COLUMN_NAME_2, 'fore:#2E8B57, bold')
         self.StyleSetSpec(stc.STC_MSSQL_DATATYPE, 'fore:#2E8B57, bold')
-        self.StyleSetSpec(stc.STC_MSSQL_DEFAULT_PREF_DATATYPE, 'fore:#2E8B57, bold')
+        self.StyleSetSpec(stc.STC_MSSQL_DEFAULT_PREF_DATATYPE,
+                          'fore:#2E8B57, bold')
         self.StyleSetSpec(stc.STC_MSSQL_FUNCTION, 'fore:#008B8B, bold')
         self.StyleSetSpec(stc.STC_MSSQL_GLOBAL_VARIABLE, 'fore:#007F7F')
-        self.StyleSetSpec(stc.STC_MSSQL_IDENTIFIER, 'fore:#000000,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_MSSQL_IDENTIFIER,
+                          'fore:#000000,back:#FFFFFF')
         self.StyleSetSpec(stc.STC_MSSQL_LINE_COMMENT, 'fore:#838383')
         self.StyleSetSpec(stc.STC_MSSQL_NUMBER, 'fore:#DD0101')
         self.StyleSetSpec(stc.STC_MSSQL_OPERATOR, 'Fore:#000000, bold')
@@ -473,27 +445,31 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.StyleSetSpec(stc.STC_MSSQL_STRING, 'fore:#FF3AFF, bold')
         self.StyleSetSpec(stc.STC_MSSQL_SYSTABLE, 'fore:#9D2424')
         self.StyleSetSpec(stc.STC_MSSQL_VARIABLE, 'fore:#AB37F2')
-        self.StyleSetSpec(stc.STC_STYLE_BRACELIGHT, "fore:RED,back:MEDIUM TURQUOISE,bold")
+        self.StyleSetSpec(stc.STC_STYLE_BRACELIGHT,
+                          "fore:RED,back:MEDIUM TURQUOISE,bold")
         self.StyleSetSpec(stc.STC_STYLE_BRACEBAD, "fore:RED,back:THISTLE,bold")
 
     def lang_xml(self):
         self.StyleClearAll()
         self.SetLexer(stc.STC_LEX_XML)
-        # setting keywords 0 has an unexpected behaviour such as tags and attributes are not styled as expected
-        self.SetKeyWords(1, "xml xaml xsl xslt xsd xul kml svg mxml xsml wsdl xlf xliff xbl sxbl "
-                            "sitemap gml gpx plist ")
+        # setting keywords 0 has an unexpected behaviour such as
+        # tags and attributes are not styled as expected
+        self.SetKeyWords(1, keywords['xml']['keywords_1'])
         self.StyleSetSpec(stc.STC_H_DEFAULT, 'fore:#000000,back:#FFFFFF,bold')
         self.StyleSetSpec(stc.STC_H_XMLSTART, 'fore:#FF0000,back:#FFFF00')
         self.StyleSetSpec(stc.STC_H_XMLEND, 'fore:#FF0000,back:#FFFF00')
         self.StyleSetSpec(stc.STC_H_COMMENT, 'fore:#008000,back:#FFFFFF')
         self.StyleSetSpec(stc.STC_H_NUMBER, 'fore:#FF0000,back:#FFFFFF')
-        self.StyleSetSpec(stc.STC_H_DOUBLESTRING, 'fore:#8000FF,back:#FFFFFF,bold')
-        self.StyleSetSpec(stc.STC_H_SINGLESTRING, 'fore:#8000FF,back:#FFFFFF,bold')
+        self.StyleSetSpec(stc.STC_H_DOUBLESTRING,
+                          'fore:#8000FF,back:#FFFFFF,bold')
+        self.StyleSetSpec(stc.STC_H_SINGLESTRING,
+                          'fore:#8000FF,back:#FFFFFF,bold')
         self.StyleSetSpec(stc.STC_H_TAG, 'fore:#0000FF,back:#FFFFFF')
         self.StyleSetSpec(stc.STC_H_TAGEND, 'fore:#0000FF,back:#FFFFFF')
         self.StyleSetSpec(stc.STC_H_TAGUNKNOWN, 'fore:#0000FF,back:#FFFFFF')
         self.StyleSetSpec(stc.STC_H_ATTRIBUTE, 'fore:#FF0000,back:#FFFFFF')
-        self.StyleSetSpec(stc.STC_H_ATTRIBUTEUNKNOWN, 'fore:#FF0000,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_H_ATTRIBUTEUNKNOWN,
+                          'fore:#FF0000,back:#FFFFFF')
         self.StyleSetSpec(stc.STC_H_SGML_DEFAULT, 'fore:#000000,back:#A6CAF0')
         self.StyleSetSpec(stc.STC_H_CDATA, 'fore:#FF8000,back:#FFFFFF')
         self.StyleSetSpec(stc.STC_H_ENTITY, 'fore:#000000,back:#FEFDE0,italic')
@@ -503,62 +479,35 @@ class TextEditor(wx.stc.StyledTextCtrl):
     def lang_html(self):
         self.StyleClearAll()
         self.SetLexer(stc.STC_LEX_HTML)
-        self.SetKeyWords(1, '!doctype ^data- a abbr accept accept-charset accesskey acronym action address align '
-                            'alink alt applet archive area article aside async audio autocomplete autofocus axis '
-                            'b background base basefont bdi bdo bgcolor bgsound big blink blockquote body border '
-                            'br button canvas caption cellpadding cellspacing center char charoff charset checkbox '
-                            'checked cite class classid clear code codebase codetype col colgroup color cols colspan '
-                            'command compact content contenteditable contextmenu coords data datafld dataformatas '
-                            'datalist datapagesize datasrc datetime dd declare defer del details dfn dialog dir '
-                            'disabled div dl draggable dropzone dt element em embed enctype event face fieldset '
-                            'figcaption figure file font footer for form formaction formenctype formmethod '
-                            'formnovalidate formtarget frame frameborder frameset h1 h2 h3 h4 h5 h6 head header '
-                            'headers height hgroup hidden hr href hreflang hspace html http-equiv i id iframe image '
-                            'img input ins isindex ismap kbd keygen label lang language leftmargin legend li link list '
-                            'listing longdesc main manifest map marginheight marginwidth mark marquee max maxlength '
-                            'media menu menuitem meta meter method min multicol multiple name nav nobr noembed '
-                            'noframes nohref noresize noscript noshade novalidate nowrap object ol onabort '
-                            'onafterprint onautocomplete onautocompleteerror onbeforeonload onbeforeprint onblur '
-                            'oncancel oncanplay oncanplaythrough onchange onclick onclose oncontextmenu oncuechange '
-                            'ondblclick ondrag ondragend ondragenter ondragleave ondragover ondragstart ondrop '
-                            'ondurationchange onemptied onended onerror onfocus onhashchange oninput oninvalid '
-                            'onkeydown onkeypress onkeyup onload onloadeddata onloadedmetadata onloadstart onmessage '
-                            'onmousedown onmouseenter onmouseleave onmousemove onmouseout onmouseover onmouseup '
-                            'onmousewheel onoffline ononline onpagehide onpageshow onpause onplay onplaying '
-                            'onpointercancel onpointerdown onpointerenter onpointerleave onpointerlockchange '
-                            'onpointerlockerror onpointermove onpointerout onpointerover onpointerup onpopstate '
-                            'onprogress onratechange onreadystatechange onredo onreset onresize onscroll '
-                            'onseeked onseeking onselect onshow onsort onstalled onstorage onsubmit onsuspend '
-                            'ontimeupdate ontoggle onundo onunload onvolumechange onwaiting optgroup option output p '
-                            'param password pattern picture placeholder plaintext pre profile progress prompt public q '
-                            'radio readonly rel required reset rev reversed role rows rowspan rp rt rtc ruby rules s '
-                            'samp sandbox scheme scope scoped script seamless section select selected shadow shape '
-                            'size sizes small source spacer span spellcheck src srcdoc standby start step strike '
-                            'strong style sub submit summary sup svg svg:svg tabindex table target tbody td template '
-                            'text textarea tfoot th thead time title topmargin tr track tt type u ul usemap valign '
-                            'value valuetype var version video vlink vspace wbr width xml xmlns xmp')
+        self.SetKeyWords(1, keywords['html']['keywords_1'])
         self.StyleSetSpec(stc.STC_H_DEFAULT, 'fore:#000000,back:#FFFFFF,bold')
         self.StyleSetSpec(stc.STC_H_COMMENT, 'fore:#008000,back:#FFFFFF')
         self.StyleSetSpec(stc.STC_H_NUMBER, 'fore:#FF0000,back:#FFFFFF')
-        self.StyleSetSpec(stc.STC_H_DOUBLESTRING, 'fore:#8000FF,back:#FFFFFF,bold')
-        self.StyleSetSpec(stc.STC_H_SINGLESTRING, 'fore:#8000FF,back:#FFFFFF,bold')
+        self.StyleSetSpec(stc.STC_H_DOUBLESTRING,
+                          'fore:#8000FF,back:#FFFFFF,bold')
+        self.StyleSetSpec(stc.STC_H_SINGLESTRING,
+                          'fore:#8000FF,back:#FFFFFF,bold')
         self.StyleSetSpec(stc.STC_H_TAG, 'fore:#0000FF,back:#FFFFFF')
         self.StyleSetSpec(stc.STC_H_TAGEND, 'fore:#0000FF,back:#FFFFFF')
         self.StyleSetSpec(stc.STC_H_TAGUNKNOWN, 'fore:#000000,back:#FFFFFF')
         self.StyleSetSpec(stc.STC_H_ATTRIBUTE, 'fore:#FF0000,back:#FFFFFF')
-        self.StyleSetSpec(stc.STC_H_ATTRIBUTEUNKNOWN, 'fore:#000000,back:#FFFFFF')
+        self.StyleSetSpec(stc.STC_H_ATTRIBUTEUNKNOWN,
+                          'fore:#000000,back:#FFFFFF')
         self.StyleSetSpec(stc.STC_H_SGML_DEFAULT, 'fore:#000000,back:#A6CAF0')
         self.StyleSetSpec(stc.STC_H_CDATA, 'fore:#FF8000,back:#FFFFFF')
         self.StyleSetSpec(stc.STC_H_VALUE, 'fore:#000000,back:#A6CAF0')
         self.StyleSetSpec(stc.STC_H_ENTITY, 'fore:#000000,back:#FEFDE0,italic')
 
     def set_styles(self):
-        self.StyleSetSpec(4, 'back:TURQUOISE')  # style set 4 for compare matched line
-        self.StyleSetSpec(5, 'back:WHEAT')  # style set 5 for compare unmatched line
+        # style set 4 for compare matched line
+        self.StyleSetSpec(4, 'back:TURQUOISE')
+        # style set 5 for compare unmatched line
+        self.StyleSetSpec(5, 'back:WHEAT')
         self.StyleSetEOLFilled(4, True)
         self.StyleSetEOLFilled(5, True)
         self.SetIndicatorCurrent(9)
-        self.IndicatorSetStyle(9, stc.STC_INDIC_ROUNDBOX)  # style set 9 for matched search word indicator
+        # style set 9 for matched search word indicator
+        self.IndicatorSetStyle(9, stc.STC_INDIC_ROUNDBOX)
         self.IndicatorSetForeground(9, 'BLUE')
 
     def indicate_selection(self):

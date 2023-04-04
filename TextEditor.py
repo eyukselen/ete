@@ -308,11 +308,14 @@ class TextEditor(wx.stc.StyledTextCtrl):
     def lang_ps(self):
         self.StyleClearAll()
         self.SetLexer(stc.STC_LEX_BASH)
-        self.SetKeyWords(0, 'break continue do else elseif filter for foreach function if in return switch until '
+        self.SetKeyWords(0, 'break continue do else elseif filter for foreach '
+                            'function if in return switch until '
                             'where while')
-        self.SetKeyWords(1, 'add-content add-history add-member add-pssnapin clear-content clear-item '
-                            'clear-itemproperty clear-variable compare-object convertfrom-securestring convert-path '
-                            'convertto-html convertto-securestring copy-item copy-itemproperty export-alias '
+        self.SetKeyWords(1, 'add-content add-history add-member add-pssnapin '
+                            'clear-content clear-item '
+                            'clear-itemproperty clear-variable compare-object '
+                            'convertfrom-securestring convert-path convertto-html '
+                            'convertto-securestring copy-item copy-itemproperty export-alias '
                             'export-clixml export-console export-csv foreach-object format-custom format-list '
                             'format-table format-wide get-acl get-alias get-authenticodesignature get-childitem '
                             'get-command get-content get-credential get-culture get-date get-eventlog '

@@ -264,7 +264,8 @@ class MainWindow(wx.Frame):
 
         # self.main_sizer.Add(self.editor_panel, 3, wx.EXPAND)
         # self.main_sizer.Add(self.sniplets_panel,1,wx.EXPAND)
-        self.main_panel_window.SplitVertically(self.editor_panel, self.sniplets_panel, -250)
+        self.main_panel_window.SplitVertically(self.editor_panel,
+                                               self.sniplets_panel, -250)
         self.main_panel_window.SetSashGravity(1)
         # sash gravity
         # 1.0: only left/top window grows on resize
@@ -334,7 +335,7 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID.EDIT_DELETE)
         self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID.EDIT_SELECTALL)
         self.Bind(wx.EVT_MENU, self.on_find, id=EID.EDIT_FIND)
-        self.Bind(wx.EVT_MENU, self.on_find, id=EID.EDIT_REPLACE)  # using the same dialog as find for now.
+        self.Bind(wx.EVT_MENU, self.on_find, id=EID.EDIT_REPLACE)
         self.Bind(wx.EVT_MENU, self.on_jump_to, id=EID.EDIT_JUMPTO)
         self.Bind(wx.EVT_MENU, self.on_about, id=EID.ABOUT_INFO)
         self.Bind(wx.EVT_MENU, self.on_language, id=EID.LANG_TXT)
@@ -350,11 +351,15 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_view_eol, id=EID.VIEW_EOL)
         self.Bind(wx.EVT_MENU, self.on_view_indent_guide, id=EID.VIEW_INDENT)
         self.Bind(wx.EVT_MENU, self.on_view_wrap, id=EID.VIEW_WRAP)
-        self.Bind(wx.EVT_MENU, self.on_view_transparent, id=EID.VIEW_TRANSPARENT)
+        self.Bind(wx.EVT_MENU, self.on_view_transparent,
+                  id=EID.VIEW_TRANSPARENT)
 
-        self.Bind(wx.EVT_MENU, self.on_menu_tools_compare, id=EID.TOOLS_COMPARE)
-        self.Bind(wx.EVT_MENU, self.on_menu_tools_clear_compare, id=EID.TOOLS_CLEARCOMP)
-        self.Bind(wx.EVT_MENU, self.on_menu_tools_sniplets, id=EID.TOOLS_SNIPLETS)
+        self.Bind(wx.EVT_MENU, self.on_menu_tools_compare,
+                  id=EID.TOOLS_COMPARE)
+        self.Bind(wx.EVT_MENU, self.on_menu_tools_clear_compare,
+                  id=EID.TOOLS_CLEARCOMP)
+        self.Bind(wx.EVT_MENU, self.on_menu_tools_sniplets,
+                  id=EID.TOOLS_SNIPLETS)
         self.Bind(wx.EVT_MENU, self.on_menu_edit_case, id=EID.EDIT_UPPER)
         self.Bind(wx.EVT_MENU, self.on_menu_edit_case, id=EID.EDIT_LOWER)
 
@@ -370,17 +375,21 @@ class MainWindow(wx.Frame):
 
         # detect double click on tab bar empty space
         self.Bind(aui.EVT_AUINOTEBOOK_BG_DCLICK, self.new_page, id=wx.ID_ANY)
-        self.Bind(aui.EVT_AUINOTEBOOK_TAB_RIGHT_UP, self.on_tab_popup, id=wx.ID_ANY)
+        self.Bind(aui.EVT_AUINOTEBOOK_TAB_RIGHT_UP, self.on_tab_popup,
+                  id=wx.ID_ANY)
 
-        self.notebook.Bind(aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.on_tab_close, id=wx.ID_ANY)
-        self.notebook.Bind(aui.EVT_AUINOTEBOOK_PAGE_CHANGED, self.on_page_select, id=wx.ID_ANY)
+        self.notebook.Bind(aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.on_tab_close,
+                           id=wx.ID_ANY)
+        self.notebook.Bind(aui.EVT_AUINOTEBOOK_PAGE_CHANGED,
+                           self.on_page_select, id=wx.ID_ANY)
 
         self.Bind(wx.EVT_CHAR_HOOK, self.on_key_event)
         self.Bind(wx.EVT_CLOSE, self.onclose)
 
         # endregion
 
-        self.search_dlg = Frd.FindReplaceDlg(parent=self, notebook=self.notebook)
+        self.search_dlg = Frd.FindReplaceDlg(parent=self,
+                                             notebook=self.notebook)
         self.info = wx.adv.AboutDialogInfo()
         self.Show()
 
@@ -448,7 +457,8 @@ class MainWindow(wx.Frame):
         if hasattr(event, 'Files'):
             files = event.GetFiles()
         elif event.GetId() == EID.FILE_OPEN:
-            with wx.FileDialog(self, "Open file", wildcard="All files (*)|*|text files (*.txt)|*.txt",
+            with wx.FileDialog(self, "Open file",
+                               wildcard="All files (*)|*|text files (*.txt)|*.txt",
                                style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_MULTIPLE) as fileDialog:
                 if fileDialog.ShowModal() == wx.ID_CANCEL:
                     return
@@ -466,7 +476,8 @@ class MainWindow(wx.Frame):
                 page = wx.Panel(parent=self.notebook)
                 page_sizer = wx.BoxSizer(wx.VERTICAL)
                 page.SetSizer(page_sizer)
-                te = TextEditor(parent=page, filename=file, status_bar=self.status_bar)
+                te = TextEditor(parent=page, filename=file,
+                                tatus_bar=self.status_bar)
                 if sys.platform == 'win32':
                     te.DragAcceptFiles(True)
                     te.Bind(wx.EVT_DROP_FILES, self.open_page)

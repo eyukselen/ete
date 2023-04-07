@@ -505,25 +505,28 @@ class MainWindow(wx.Frame):
     def on_tab_popup(self, event):
         tab_id = event.GetSelection()
         self.notebook.SetSelection(tab_id)
-        mouse_position = wx.GetMousePosition() - self.notebook.GetScreenPosition()
-        self.PopupMenu(self.tab_popup, pos=mouse_position)
+        mouse_pos = wx.GetMousePosition() - self.notebook.GetScreenPosition()
+        self.PopupMenu(self.tab_popup, pos=mouse_pos)
 
     def on_tab_popup_action(self, event):
         if event.GetId() == self.tab_popup_close.GetId():
             evt = aui.AuiNotebookEvent(aui.EVT_AUINOTEBOOK_PAGE_CLOSE.typeId,
                                        wx.aui.wxEVT_AUINOTEBOOK_PAGE_CLOSE)
             evt.SetEventObject(self.notebook)
-            evt.SetSelection(self.notebook.GetPageIndex(self.notebook.GetCurrentPage()))
+            evt.SetSelection(self.notebook.GetPageIndex(
+                self.notebook.GetCurrentPage()))
             wx.PostEvent(self.notebook, evt)
         if event.GetId() == self.tab_popup_close_all_others.GetId():
-            active_tab = self.notebook.GetPageIndex(self.notebook.GetCurrentPage())
+            active_tab = self.notebook.GetPageIndex(
+                self.notebook.GetCurrentPage())
             for x in range(self.notebook.GetPageCount()-1, -1, -1):
                 if x != active_tab:
                     self.close_tab(x)
 
     def close_page(self, _):
         if self.notebook.GetPageCount() > 0:
-            page_idx = self.notebook.GetPageIndex(self.notebook.GetCurrentPage())
+            page_idx = self.notebook.GetPageIndex(
+                self.notebook.GetCurrentPage())
             self.close_tab(page_idx)
 
     def close_tab(self, page):
@@ -564,7 +567,8 @@ class MainWindow(wx.Frame):
         for x in range(self.notebook.GetPageCount(), 0, -1):
             cp = self.notebook.GetPage(x-1)
             for widget in cp.GetChildren():
-                filename = self.notebook.GetPageToolTip(self.notebook.GetPageIndex(cp))
+                filename = self.notebook.GetPageToolTip(
+                    self.notebook.GetPageIndex(cp))
                 if filename:
                     msg = 'Save ' + filename + ' ?'
                 else:
@@ -575,16 +579,19 @@ class MainWindow(wx.Frame):
                                             wx.YES_NO | wx.CANCEL)
                         if dlg == wx.YES:
                             self.save_page(event)
-                            self.notebook.DeletePage(self.notebook.GetPageIndex(cp))
+                            self.notebook.DeletePage(
+                                self.notebook.GetPageIndex(cp))
                         elif dlg == wx.NO:
                             widget.SetText('')
-                            self.notebook.DeletePage(self.notebook.GetPageIndex(cp))
+                            self.notebook.DeletePage(
+                                self.notebook.GetPageIndex(cp))
                         elif dlg == wx.CANCEL:
                             return
                         else:
                             pass
                     else:
-                        self.notebook.DeletePage(self.notebook.GetPageIndex(cp))
+                        self.notebook.DeletePage(
+                            self.notebook.GetPageIndex(cp))
         self.Destroy()
 
     def on_menu_edit_event(self, event):
@@ -735,7 +742,7 @@ class MainWindow(wx.Frame):
                 event.Skip()
 
         def set_scroll_l(event):
-            if (lstc.GetFirstVisibleLine() == rstc.GetFirstVisibleLine() 
+            if (lstc.GetFirstVisibleLine() == rstc.GetFirstVisibleLine()
                     and lstc.GetXOffset() == rstc.GetXOffset()):
                 event.Skip()
                 return
@@ -809,7 +816,8 @@ class MainWindow(wx.Frame):
         if jump_to_dlg.ShowModal() == wx.ID_OK:
             line_to_jump = jump_to_dlg.GetValue()
             if line_to_jump.isdigit():
-                te = self.get_text_editor_from_page(self.notebook.GetPageIndex(cp))
+                te = self.get_text_editor_from_page(
+                         self.notebook.GetPageIndex(cp))
                 if 1 <= int(line_to_jump) <= te.GetLineCount():
                     te.GotoLine(int(line_to_jump) - 1)
                     # if max lines < line_to_jump < 0 does not give error and

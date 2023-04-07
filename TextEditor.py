@@ -518,15 +518,20 @@ class TextEditor(wx.stc.StyledTextCtrl):
             self.IndicatorClearRange(0, self.GetTextLength())
             if self.IsRangeWord(sel_start, sel_end):
                 vis_start = self.XYToPosition(0, self.GetFirstVisibleLine())
-                vis_end = self.GetLineEndPosition(self.GetFirstVisibleLine() + self.LinesOnScreen())
+                vis_end = self.GetLineEndPosition(
+                    self.GetFirstVisibleLine() + self.LinesOnScreen())
                 chk = True
                 while chk:
-                    found_start, found_end = self.FindText(vis_start, vis_end, self.GetSelectedText(),
-                                                           stc.STC_FIND_WHOLEWORD)
+                    found_start, found_end = self.FindText(
+                                                vis_start,
+                                                vis_end,
+                                                self.GetSelectedText(),
+                                                stc.STC_FIND_WHOLEWORD)
                     if found_start == -1:
                         break
                     else:
-                        self.IndicatorFillRange(found_start, found_end - found_start)
+                        self.IndicatorFillRange(found_start,
+                                                found_end - found_start)
                         vis_start += found_end - found_start
             else:
                 self.IndicatorFillRange(sel_start, sel_end)

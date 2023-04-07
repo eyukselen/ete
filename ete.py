@@ -9,7 +9,7 @@ import io
 import wx.lib.inspection  # for debugging
 import zlib
 import base64
-from configs import icons
+from configs import icons, menu
 from configs import EID
 import FindReplaceDlg as Frd
 from TextEditor import TextEditor
@@ -63,90 +63,27 @@ class MainWindow(wx.Frame):
 
         # region menubar
 
-        menux = {
-            '&File': [
-                        [EID.FILE_NEW, '&New\tCTRL+N', get_icon('new_ico'), ],
-                        [EID.FILE_OPEN, '&Open\tCTRL+O', get_icon('open_ico'), ],
-                        [EID.FILE_SAVE, '&Save\tCTRL+S', get_icon('save_ico'), ],
-                        [EID.FILE_SAVEAS, 'Save &As\tCTRL+SHIFT+S', get_icon('save_as_ico'), ],
-                        [EID.SEP, ],
-                        [EID.CLOSE_TAB, 'Close', ],
-                        [EID.FILE_EXIT, 'E&xit', get_icon('exit_ico'), ],
-                     ],
-            '&Edit': [
-                        [EID.EDIT_UNDO, '&Undo\tCTRL+Z', get_icon('undo_ico'), ],
-                        [EID.EDIT_REDO, '&Redo\tCTRL+Y', get_icon('redo_ico'), ],
-                        [EID.SEP, ],
-                        [EID.EDIT_CUT, 'Cu&t\tCTRL+X', get_icon('cut_ico'), ],
-                        [EID.EDIT_COPY, '&Copy\tCTRL+C', get_icon('copy_ico'), ],
-                        [EID.EDIT_PASTE, '&Paste\tCTRL+V', get_icon('paste_ico'), ],
-                        [EID.SEP, ],
-                        [EID.EDIT_FIND, '&Find\tCTRL+F', get_icon('find_ico'), ],
-                        [EID.EDIT_REPLACE, '&Replace\tCTRL+R', get_icon('replace_ico'), ],
-                        [EID.EDIT_JUMPTO, 'Jump To\tCTRL+J', get_icon('select_ico'), ],
-                        [EID.SEP, ],
-                        [EID.EDIT_DELETE, 'Delete', get_icon('delete_ico'), ],
-                        [EID.EDIT_SELECTALL, 'Select All', get_icon('select_ico'), ],
-                        [EID.SEP, ],
-                        [EID.EDIT_UPPER, 'Upper Case', ],
-                        [EID.EDIT_LOWER, 'Lower Case', ],
-                        [EID.SEP, ],
-                        [EID.EDIT_CRLF, 'Change Eol to CRLF', ],
-                        [EID.EDIT_LF, 'Change Eol to LF', ],
-                        [EID.EDIT_CR, 'Change Eol to CR', ],
-                        [EID.SEP, ],
-                        [EID.EDIT_MULTISELECT, 'Multiple Selection', ],
-                      ],
-            '&View':  [
-                        [EID.VIEW_SPACE, 'Show White Space', ],
-                        [EID.VIEW_EOL, 'Show End Of Line', ],
-                        [EID.VIEW_INDENT, 'Show Indentation Guides', ],
-                        [EID.SEP, ],
-                        [EID.VIEW_WRAP, 'Wrap', ],
-                        [EID.VIEW_TRANSPARENT, 'Transparent', ],
-
-                      ],
-            '&Lang':  [
-                        [EID.LANG_TXT, 'Text', ],
-                        [EID.LANG_PYTHON, 'Python', ],
-                        [EID.LANG_MSSQL, 'MSSQL', ],
-                        [EID.LANG_BASH, 'Bash', ],
-                        [EID.LANG_POWERSHELL, 'PowerShell', ],
-                        [EID.LANG_XML, 'XML', ],
-                        [EID.LANG_HTML, 'HTML', ],
-                        [EID.LANG_JSON, 'JSON', ],
-                      ],
-            'E&ncoding': [
-                            [EID.ENCODE_UTF8, 'UTF-8', ],
-                            [EID.ENCODE_WIN1252, 'Windows-1252', ],
-                            [EID.ENCODE_WIN1254, 'Windows-1254', ],
-                         ],
-            '&Tools': [
-                         [EID.TOOLS_COMPARE, '&Compare', get_icon('compare_ico'), ],
-                         [EID.TOOLS_CLEARCOMP, 'Clea&r Compare', get_icon('clear_compare_ico'), ],
-                      ],
-            '&About': [
-                         [EID.ABOUT_INFO, 'About', get_icon('about_ico'), ],
-                      ],
-            }
-
         self.menu_bar = wx.MenuBar()
 
-        for item in menux:
+        for item in menu:
             m = wx.Menu()
-            for i in menux[item]:
+            for i in menu[item]:
                 if i[0] == EID.SEP:
                     m.AppendSeparator()
                 else:
                     try:
-                        mi = wx.MenuItem(parentMenu=m, id=i[0], text=i[1], kind=wx.ITEM_NORMAL)
+                        mi = wx.MenuItem(parentMenu=m, id=i[0],
+                                         text=i[1], kind=wx.ITEM_NORMAL)
                         if len(i) > 2:
-                            bmp = i[2]
+                            bmp = get_icon(i[2])
                             img = bmp.ConvertToImage()
-                            mi.SetBitmap(wx.Bitmap(img.Scale(24, 24, wx.IMAGE_QUALITY_HIGH)))
-                            # TODO: this call is only for mac os - windows handles this fine
-                            # mac os scaled same bitmap differently for toolbar and menu
-                            # entire if block should be only mi.SetBitmap(i[2]) for windows
+                            mi.SetBitmap(wx.Bitmap(img.Scale(24, 24,
+                                                   wx.IMAGE_QUALITY_HIGH)))
+                            # TODO: this call is only for mac os
+                            # windows handles this fine.
+                            # mac os scales same bitmap differently for toolbar
+                            # and menu. normally entire if block should be
+                            # only mi.SetBitmap(i[2]) for windows
                         m.Append(mi)
                     finally:
                         pass
@@ -160,11 +97,14 @@ class MainWindow(wx.Frame):
         # on windows adding text makes icons too big
         self.tool_bar = wx.ToolBar(self)
         if sys.platform == 'win32':
-            self.tool_bar.SetWindowStyle(wx.TB_HORIZONTAL | wx.TB_FLAT | wx.NO_BORDER)
+            self.tool_bar.SetWindowStyle(
+                wx.TB_HORIZONTAL | wx.TB_FLAT | wx.NO_BORDER)
         elif sys.platform == 'darwin':
-            self.tool_bar.SetWindowStyle(wx.TB_HORIZONTAL | wx.TB_FLAT | wx.TB_TEXT | wx.NO_BORDER)
+            self.tool_bar.SetWindowStyle(
+                wx.TB_HORIZONTAL | wx.TB_FLAT | wx.TB_TEXT | wx.NO_BORDER)
         else:
-            self.tool_bar.SetWindowStyle(wx.TB_HORIZONTAL | wx.TB_FLAT | wx.NO_BORDER)
+            self.tool_bar.SetWindowStyle(
+                wx.TB_HORIZONTAL | wx.TB_FLAT | wx.NO_BORDER)
 
         self.tool_bar.AddTool(toolId=EID.FILE_NEW, label='New',
                               bitmap=get_icon('new_ico'),
@@ -250,7 +190,9 @@ class MainWindow(wx.Frame):
 
         # region main panel
         # self.main_panel = wx.Panel(parent=self)
-        self.main_panel_window = wx.SplitterWindow(self, id=wx.ID_ANY, style=wx.SP_3D | wx.SP_LIVE_UPDATE)
+        self.main_panel_window = wx.SplitterWindow(
+                                     self, id=wx.ID_ANY,
+                                     style=wx.SP_3D | wx.SP_LIVE_UPDATE)
         # self.main_sizer = wx.BoxSizer(wx.HORIZONTAL)
         # self.main_panel.SetSizer(self.main_sizer)
 
@@ -398,19 +340,25 @@ class MainWindow(wx.Frame):
             self.sniplets_panel.on_save_tree(event)
             self.main_panel_window.Unsplit()
         else:
-            self.sniplets_panel = Sniplet_Control(parent=self.main_panel_window)
-            self.main_panel_window.SplitVertically(self.editor_panel, self.sniplets_panel, -250)
+            self.sniplets_panel = Sniplet_Control(
+                parent=self.main_panel_window)
+            self.main_panel_window.SplitVertically(self.editor_panel,
+                                                   self.sniplets_panel,
+                                                   -250)
             self.main_panel_window.SetSashGravity(1)
 
     def get_current_text_editor(self):
-        cp = self.notebook.GetCurrentPage()  # if tab is switched when dlg is open pick new tab
+        # if tab is switched when dlg is open pick new tab
+        cp = self.notebook.GetCurrentPage()
         te = self.get_text_editor_from_page(self.notebook.GetPageIndex(cp))
         return te
 
     def on_key_event(self, event):
-        if event.AltDown() and event.ShiftDown() and event.GetKeyCode() == wx.WXK_DOWN:
+        if (event.AltDown() and event.ShiftDown() and
+                event.GetKeyCode() == wx.WXK_DOWN):
             print('key comb pressed')
-            cp = self.notebook.GetCurrentPage()  # if tab is switched when dlg is open pick new tab
+            # if tab is switched when dlg is open pick new tab
+            cp = self.notebook.GetCurrentPage()
             te = self.get_text_editor_from_page(self.notebook.GetPageIndex(cp))
             te.SetAdditionalSelectionTyping(True)
             te.LineDownRectExtend()
@@ -428,8 +376,10 @@ class MainWindow(wx.Frame):
 
     def on_about(self, _):
         displays = ((i, wx.Display(i)) for i in range(wx.Display.GetCount()))
-        desc = [str(i) + ':' + str(display.GetGeometry().GetSize()) for i, display in displays]
-        desc.append('Content Scale factor:' + str(self.GetContentScaleFactor()))
+        desc = [str(i) + ':' + str(display.GetGeometry().GetSize())
+                for i, display in displays]
+        desc.append('Content Scale factor:'
+                    + str(self.GetContentScaleFactor()))
         desc.append('DPI scale factor:' + str(self.GetDPIScaleFactor()))
         self.info.SetName("ete text editor")
         self.info.SetVersion('0.3.a')
@@ -457,9 +407,11 @@ class MainWindow(wx.Frame):
         if hasattr(event, 'Files'):
             files = event.GetFiles()
         elif event.GetId() == EID.FILE_OPEN:
-            with wx.FileDialog(self, "Open file",
-                               wildcard="All files (*)|*|text files (*.txt)|*.txt",
-                               style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_MULTIPLE) as fileDialog:
+            with wx.FileDialog(
+                  self, "Open file",
+                  wildcard="All files (*)|*|text files (*.txt)|*.txt",
+                  style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_MULTIPLE
+                  ) as fileDialog:
                 if fileDialog.ShowModal() == wx.ID_CANCEL:
                     return
                 files = fileDialog.GetPaths()
@@ -489,16 +441,23 @@ class MainWindow(wx.Frame):
                 # te.LoadFile(file) # adding my method to replace builtin
                 te.load_file(file)
 
-                self.notebook.SetPageToolTip(self.notebook.GetPageIndex(self.notebook.GetCurrentPage()), file)
+                self.notebook.SetPageToolTip(
+                    self.notebook.GetPageIndex(
+                        self.notebook.GetCurrentPage()), file)
                 _, f = os.path.split(file)
-                self.notebook.SetPageText(self.notebook.GetPageIndex(self.notebook.GetCurrentPage()), f)
+                self.notebook.SetPageText(
+                    self.notebook.GetPageIndex(
+                        self.notebook.GetCurrentPage()), f)
                 te.Refresh()
-
-        self.Raise()  # get the focus to main frame from outside world after files are being dragged in
+        # get the focus to main frame from outside world after
+        # files are being dragged in
+        self.Raise()
 
     def save_page(self, _):
         if self.notebook.GetPageCount() > 0:
-            te = self.get_text_editor_from_page(self.notebook.GetPageIndex(self.notebook.GetCurrentPage()))
+            te = self.get_text_editor_from_page(
+                     self.notebook.GetPageIndex(
+                        self.notebook.GetCurrentPage()))
             filename = te.file_name
             if filename:
                 # te.SaveFile(filename) # adding my method to replace builtin
@@ -510,22 +469,31 @@ class MainWindow(wx.Frame):
 
     def save_as_page(self, _):
         if self.notebook.GetPageCount() > 0:
-            te = self.get_text_editor_from_page(self.notebook.GetPageIndex(self.notebook.GetCurrentPage()))
+            te = self.get_text_editor_from_page(
+                     self.notebook.GetPageIndex(
+                        self.notebook.GetCurrentPage()))
             filename = te.file_name
         else:
             return  # there is nothing open to save
 
-        with wx.FileDialog(self, "Save As", wildcard="text files (*.txt)|*.txt", defaultFile=filename,
-                           style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT) as fileDialog:
+        with wx.FileDialog(self, "Save As",
+                           wildcard="text files (*.txt)|*.txt",
+                           defaultFile=filename,
+                           style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT
+                           ) as fileDialog:
             if fileDialog.ShowModal() == wx.ID_CANCEL:
                 return
             filename = fileDialog.GetPath()
             # te.SaveFile(filename) # adding my method to replace builtin
             te.save_file(filename)
             te.file_name = filename
-            self.notebook.SetPageToolTip(self.notebook.GetPageIndex(self.notebook.GetCurrentPage()), filename)
+            self.notebook.SetPageToolTip(self.notebook.GetPageIndex(
+                                             self.notebook.GetCurrentPage()),
+                                         filename)
             _, file = os.path.split(filename)
-            self.notebook.SetPageText(self.notebook.GetPageIndex(self.notebook.GetCurrentPage()), file)
+            self.notebook.SetPageText(self.notebook.GetPageIndex(
+                                          self.notebook.GetCurrentPage()),
+                                      file)
 
     def on_page_select(self, event):
         """set focus on text editor when a page selected"""
@@ -542,7 +510,8 @@ class MainWindow(wx.Frame):
 
     def on_tab_popup_action(self, event):
         if event.GetId() == self.tab_popup_close.GetId():
-            evt = aui.AuiNotebookEvent(aui.EVT_AUINOTEBOOK_PAGE_CLOSE.typeId, wx.aui.wxEVT_AUINOTEBOOK_PAGE_CLOSE)
+            evt = aui.AuiNotebookEvent(aui.EVT_AUINOTEBOOK_PAGE_CLOSE.typeId,
+                                       wx.aui.wxEVT_AUINOTEBOOK_PAGE_CLOSE)
             evt.SetEventObject(self.notebook)
             evt.SetSelection(self.notebook.GetPageIndex(self.notebook.GetCurrentPage()))
             wx.PostEvent(self.notebook, evt)
@@ -580,7 +549,8 @@ class MainWindow(wx.Frame):
 
     def on_tab_close(self, event):
         event.Veto()
-        if len(self.compare_tabs) == 2:  # if its in compare mode first clear compare then close tab
+        # if its in compare mode first clear compare then close tab
+        if len(self.compare_tabs) == 2:
             self.on_menu_tools_clear_compare(None)
             # for some reason with new IDs this is not picked correctly
             # e = wx.MenuEvent(wx.EVT_MENU.typeId, EID.TOOLS_CLEARCOMP)
@@ -601,7 +571,8 @@ class MainWindow(wx.Frame):
                     msg = 'Save changes to file?'
                 if isinstance(widget, wx.stc.StyledTextCtrl):
                     if widget.IsModified():
-                        dlg = wx.MessageBox(msg, 'Save ?', wx.YES_NO | wx.CANCEL)
+                        dlg = wx.MessageBox(msg, 'Save ?',
+                                            wx.YES_NO | wx.CANCEL)
                         if dlg == wx.YES:
                             self.save_page(event)
                             self.notebook.DeletePage(self.notebook.GetPageIndex(cp))
@@ -689,11 +660,13 @@ class MainWindow(wx.Frame):
         self.notebook.SetSelection(rpi)
 
     def on_menu_tools_clear_compare(self, _):
-        if not len(self.compare_tabs) == 2:  # I will loose tab id when they are switched or new tabs added
+        # I will loose tab id when they are switched or new tabs added
+        if not len(self.compare_tabs) == 2:
             return
         lstc, rstc = self.compare_tabs
 
-        # need to clean up end to start otherwise in top-down line numbers would change on every delete
+        # need to clean up end to start otherwise in top-down line numbers
+        # would change on every delete
         for i in range(lstc.GetMaxLineState(), -1, -1):
             if lstc.GetLineState(i) == 1 and lstc.GetLineText(i) == '':
                 lstc.GotoLine(i)
@@ -752,7 +725,8 @@ class MainWindow(wx.Frame):
             event.Skip()
 
         def set_scroll_r(event):
-            if lstc.GetFirstVisibleLine() == rstc.GetFirstVisibleLine() and lstc.GetXOffset() == rstc.GetXOffset():
+            if (lstc.GetFirstVisibleLine() == rstc.GetFirstVisibleLine()
+                    and lstc.GetXOffset() == rstc.GetXOffset()):
                 event.Skip()
                 return
             else:
@@ -761,7 +735,8 @@ class MainWindow(wx.Frame):
                 event.Skip()
 
         def set_scroll_l(event):
-            if lstc.GetFirstVisibleLine() == rstc.GetFirstVisibleLine() and lstc.GetXOffset() == rstc.GetXOffset():
+            if (lstc.GetFirstVisibleLine() == rstc.GetFirstVisibleLine() 
+                    and lstc.GetXOffset() == rstc.GetXOffset()):
                 event.Skip()
                 return
             else:
@@ -775,8 +750,10 @@ class MainWindow(wx.Frame):
             rstc.GotoLine(0)
             lstc.Bind(stc.EVT_STC_ZOOM, set_zoom_r, id=self.ID_SYNC_ZOOM_L)
             rstc.Bind(stc.EVT_STC_ZOOM, set_zoom_l, id=self.ID_SYNC_ZOOM_R)
-            lstc.Bind(stc.EVT_STC_UPDATEUI, set_scroll_r, id=self.ID_SYNC_SCROLL_L)
-            rstc.Bind(stc.EVT_STC_UPDATEUI, set_scroll_l, id=self.ID_SYNC_SCROLL_R)
+            lstc.Bind(stc.EVT_STC_UPDATEUI, set_scroll_r,
+                      id=self.ID_SYNC_SCROLL_L)
+            rstc.Bind(stc.EVT_STC_UPDATEUI, set_scroll_l,
+                      id=self.ID_SYNC_SCROLL_R)
         else:
             lstc.Unbind(stc.EVT_STC_ZOOM, id=self.ID_SYNC_ZOOM_L)
             rstc.Unbind(stc.EVT_STC_ZOOM, id=self.ID_SYNC_ZOOM_R)
@@ -809,12 +786,14 @@ class MainWindow(wx.Frame):
         else:
             return self.diff(old[: sub_start_old], new[: sub_start_new]) + \
                    [('=', new[sub_start_new: sub_start_new + sub_length])] + \
-                   self.diff(old[sub_start_old + sub_length:], new[sub_start_new + sub_length:])
+                   self.diff(old[sub_start_old + sub_length:],
+                             new[sub_start_new + sub_length:])
 
     def on_find(self, _):
         if self.notebook.GetPageCount() == 0 or self.search_dlg.IsShown():
             return
-        cp = self.notebook.GetCurrentPage()  # if tab is switched when dlg is open pick new tab
+        # if tab is switched when dlg is open pick new tab
+        cp = self.notebook.GetCurrentPage()
         te = self.get_text_editor_from_page(self.notebook.GetPageIndex(cp))
         self.search_dlg.text_find_str.SetValue(te.GetSelectedText())
         self.search_dlg.Show()
@@ -823,23 +802,31 @@ class MainWindow(wx.Frame):
         if self.notebook.GetPageCount() == 0:
             return
         cp = self.notebook.GetCurrentPage()
-        jump_to_dlg = wx.TextEntryDialog(parent=self, message='Enter line number to jump to:', caption='Jump To')
+        jump_to_dlg = wx.TextEntryDialog(
+                          parent=self,
+                          message='Enter line number to jump to:',
+                          caption='Jump To')
         if jump_to_dlg.ShowModal() == wx.ID_OK:
             line_to_jump = jump_to_dlg.GetValue()
             if line_to_jump.isdigit():
                 te = self.get_text_editor_from_page(self.notebook.GetPageIndex(cp))
                 if 1 <= int(line_to_jump) <= te.GetLineCount():
                     te.GotoLine(int(line_to_jump) - 1)
-                    # if max lines < line_to_jump < 0 does not give error goes to first or last line
+                    # if max lines < line_to_jump < 0 does not give error and
+                    # goes to first or last line
                 else:
-                    wx.MessageBox('Could not locate line number:' + line_to_jump, 'Warning', wx.OK | wx.ICON_WARNING)
+                    wx.MessageBox(
+                        'Could not locate line number:' + line_to_jump,
+                        'Warning',
+                        wx.OK | wx.ICON_WARNING)
             else:
-                wx.MessageBox('Could not locate line number:' + line_to_jump, 'Warning', wx.OK | wx.ICON_WARNING)
+                wx.MessageBox('Could not locate line number:' + line_to_jump,
+                              'Warning', wx.OK | wx.ICON_WARNING)
 
     def on_view_whitespace(self, _):
         if self.notebook.GetPageCount() == 0:
             return
-        cp = self.notebook.GetCurrentPage()  # returns none if there is no page open
+        cp = self.notebook.GetCurrentPage()
         te = self.get_text_editor_from_page(self.notebook.GetPageIndex(cp))
         if te.ViewWhiteSpace:
             te.SetViewWhiteSpace(False)
@@ -944,7 +931,8 @@ class MainWindow(wx.Frame):
         xx = te.GetText()
 
         if enc == 'utf-8':
-            str_tr = bytes(xx, encoding=te.code_page).decode(te.code_page)  # pseudo conversion
+            # pseudo conversion
+            str_tr = bytes(xx, encoding=te.code_page).decode(te.code_page)
             te.SetText(str_tr)
             te.code_page = enc
             self.status_bar.SetStatusText(enc, 3)
@@ -953,7 +941,8 @@ class MainWindow(wx.Frame):
                 # works for ansi2ansi not uni2ansi
                 str_tr = xx.encode('windows-1252').decode('windows-1254')
             else:
-                str_tr = bytes(xx, encoding='windows-1254').decode('windows-1254')
+                str_tr = bytes(xx,
+                               encoding='windows-1254').decode('windows-1254')
             te.SetText(str_tr)
             te.code_page = enc
             self.status_bar.SetStatusText(enc, 3)
@@ -962,7 +951,8 @@ class MainWindow(wx.Frame):
                 # works for ansi2 ansi not uni2ansi
                 str_tr = xx.encode(te.code_page).decode('windows-1252')
             else:
-                str_tr = bytes(xx, encoding='windows-1252').decode('windows-1252')
+                str_tr = bytes(xx,
+                               encoding='windows-1252').decode('windows-1252')
             te.SetText(str_tr)
             te.code_page = enc
             self.status_bar.SetStatusText(enc, 3)
@@ -971,13 +961,15 @@ class MainWindow(wx.Frame):
 class TransparencyDlg(wx.Dialog):
     def __init__(self, parent):
         self.parent = parent
-        wx.Dialog.__init__(self, parent, id=wx.ID_ANY,
-                           title="Set Transparency",
-                           pos=wx.DefaultPosition,
-                           size=(300, 150),
-                           style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER | wx.STAY_ON_TOP)
-        slider = wx.Slider(self, 100, 100, 0, 255, size=(250, 100),
-                           style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS | wx.SL_LABELS)
+        wx.Dialog.__init__(
+            self, parent, id=wx.ID_ANY,
+            title="Set Transparency",
+            pos=wx.DefaultPosition,
+            size=(300, 150),
+            style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER | wx.STAY_ON_TOP)
+        slider = wx.Slider(
+            self, 100, 100, 0, 255, size=(250, 100),
+            style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS | wx.SL_LABELS)
         slider.SetTickFreq(10)
         slider.SetValue(self.parent.transparency)
         sizer = wx.BoxSizer(wx.VERTICAL)

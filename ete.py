@@ -255,7 +255,7 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_tab_popup_action, self.tab_popup_close)
         self.tab_popup_close_all_others = wx.MenuItem(self.tab_popup,
                                                       wx.ID_ANY,
-                                                      "Close All others")
+                                                      "Close others tabs")
         self.tab_popup.Append(self.tab_popup_close_all_others)
         self.Bind(wx.EVT_MENU, self.on_tab_popup_action,
                   self.tab_popup_close_all_others)

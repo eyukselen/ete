@@ -70,6 +70,7 @@ class TextEditor(wx.stc.StyledTextCtrl):
         # endregion
 
         # region context menu
+        # TODO: update hard coded IDs with config import
         self.menu_popup = wx.Menu()
         menu_popup_undo = wx.MenuItem(self.menu_popup, 2001, "Undo")
         self.menu_popup.Append(menu_popup_undo)

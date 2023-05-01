@@ -14,6 +14,7 @@ from configs import EID
 import FindReplaceDlg as Frd
 from TextEditor import TextEditor
 from sniplets import Sniplet_Control
+from TreeView import Tree_Control
 
 
 # region high dpi settings for windows
@@ -185,6 +186,11 @@ class MainWindow(wx.Frame):
                               bmpDisabled=get_icon('sniplets'),
                               kind=wx.ITEM_NORMAL, shortHelp='Sniplets',
                               longHelp='', clientData=None)
+        self.tool_bar.AddTool(toolId=EID.TOOLS_EXPLORER, label="Explorer",
+                              bitmap=get_icon('select_ico'),
+                              bmpDisabled=get_icon('select_ico'),
+                              kind=wx.ITEM_NORMAL, shortHelp='Explorer',
+                              longHelp='', clientData=None)
 
         self.SetToolBar(self.tool_bar)
         self.tool_bar.Realize()
@@ -195,27 +201,40 @@ class MainWindow(wx.Frame):
         self.main_panel_window = wx.SplitterWindow(
                                      self, id=wx.ID_ANY,
                                      style=wx.SP_3D | wx.SP_LIVE_UPDATE)
-        # self.main_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        # self.main_panel.SetSizer(self.main_sizer)
+        self.mp_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.main_panel_window.SetSizer(self.mp_sizer)
+        self.explorer_panel = Tree_Control(parent=self.main_panel_window)
+        self.main_panel_right = wx.SplitterWindow(
+            parent=self.main_panel_window,
+            id=wx.ID_ANY,
+            style=wx.SP_3D | wx.SP_LIVE_UPDATE)
+        self.mp_sizer.Add(self.explorer_panel, 1, wx.EXPAND)
+        self.mp_sizer.Add(self.main_panel_right, 3, wx.EXPAND)
 
-        self.editor_panel = wx.Panel(parent=self.main_panel_window)
+        self.editor_panel = wx.Panel(parent=self.main_panel_right)
         self.editor_sizer = wx.BoxSizer(wx.VERTICAL)
         self.editor_panel.SetSizer(self.editor_sizer)
         self.editor_panel.DragAcceptFiles(True)
         self.editor_panel.Bind(wx.EVT_DROP_FILES, self.open_page)
+        self.sniplets_panel = Sniplet_Control(parent=self.main_panel_right)
+        self.mpr_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.main_panel_right.SetSizer(self.mpr_sizer)
+        self.mpr_sizer.Add(self.editor_panel, 3, wx.EXPAND)
+        self.mpr_sizer.Add(self.sniplets_panel, 1, wx.EXPAND)
 
-        self.sniplets_panel = Sniplet_Control(parent=self.main_panel_window)
-
-        # self.main_sizer.Add(self.editor_panel, 3, wx.EXPAND)
-        # self.main_sizer.Add(self.sniplets_panel,1,wx.EXPAND)
-        self.main_panel_window.SplitVertically(self.editor_panel,
-                                               self.sniplets_panel, -250)
-        self.main_panel_window.SetSashGravity(1)
+        self.main_panel_window.SplitVertically(self.explorer_panel,
+                                               self.main_panel_right, 250)
+        self.main_panel_right.SplitVertically(self.editor_panel,
+                                              self.sniplets_panel, 250)
+        self.main_panel_window.SetSashGravity(0)
+        self.main_panel_right.SetSashGravity(1)
+        self.main_panel_right.Unsplit()
         # sash gravity
         # 1.0: only left/top window grows on resize
         # 0.0: only the bottom/right window is automatically resized
         # 0.5: both windows grow by equal size
-        self.main_panel_window.Unsplit()  # start hidden
+        # self.main_panel_window.Unsplit()  # start hidden
+
 
         # endregion
 
@@ -304,6 +323,8 @@ class MainWindow(wx.Frame):
                   id=EID.TOOLS_CLEARCOMP)
         self.Bind(wx.EVT_MENU, self.on_menu_tools_sniplets,
                   id=EID.TOOLS_SNIPLETS)
+        self.Bind(wx.EVT_MENU, self.on_menu_tools_explorer,
+                  id=EID.TOOLS_EXPLORER)
         self.Bind(wx.EVT_MENU, self.on_menu_edit_case, id=EID.EDIT_UPPER)
         self.Bind(wx.EVT_MENU, self.on_menu_edit_case, id=EID.EDIT_LOWER)
 
@@ -338,16 +359,28 @@ class MainWindow(wx.Frame):
         self.Show()
 
     def on_menu_tools_sniplets(self, event):
-        if self.main_panel_window.IsSplit():
+        if self.main_panel_right.IsSplit():
             self.sniplets_panel.on_save_tree(event)
-            self.main_panel_window.Unsplit()
+            self.main_panel_right.Unsplit()
         else:
             self.sniplets_panel = Sniplet_Control(
-                parent=self.main_panel_window)
-            self.main_panel_window.SplitVertically(self.editor_panel,
-                                                   self.sniplets_panel,
-                                                   -250)
-            self.main_panel_window.SetSashGravity(1)
+                parent=self.main_panel_right)
+            self.main_panel_right.SplitVertically(self.editor_panel,
+                                                  self.sniplets_panel,
+                                                  -250)
+            self.main_panel_right.SetSashGravity(1)
+
+    def on_menu_tools_explorer(self, _):
+        if self.main_panel_window.IsSplit():
+            self.main_panel_window.Unsplit(toRemove=self.explorer_panel)
+        else:
+            self.explorer_panel = Tree_Control(
+                 parent=self.main_panel_window)
+            self.main_panel_window.SplitVertically(
+                self.explorer_panel,
+                self.main_panel_right,
+                250)
+            self.main_panel_window.SetSashGravity(0)
 
     def get_current_text_editor(self):
         # if tab is switched when dlg is open pick new tab
@@ -996,7 +1029,7 @@ class TransparencyDlg(wx.Dialog):
 
 app = wx.App()
 MainWindow(None)
-# wx.lib.inspection.InspectionTool().Show() # for debugging
+wx.lib.inspection.InspectionTool().Show() # for debugging
 app.MainLoop()
 
 

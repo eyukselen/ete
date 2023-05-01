@@ -14,6 +14,8 @@ from configs import EID
 import FindReplaceDlg as Frd
 from TextEditor import TextEditor
 from sniplets import Sniplet_Control
+
+
 # region high dpi settings for windows
 if sys.platform == 'win32':
     # import ctypes

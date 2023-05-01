@@ -14,6 +14,10 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.MARKER_BOOKMARK = 4
         self.MARKER_PLUS = 5
         self.MARKER_MINUS = 6
+        self.MarkerDefine(self.MARKER_PLUS, self.MARKER_PLUS,
+                          foreground="RED", background="BLACK")
+        self.MarkerDefine(self.MARKER_MINUS, self.MARKER_MINUS,
+                          foreground="RED", background="BLACK")
         self.check_for_braces = False
         self.SetMultipleSelection(False)
         self.file_name = filename

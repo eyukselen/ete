@@ -31,21 +31,29 @@ class Explorer_Tree(TreeCtrl):
         self.Bind(wx.EVT_MENU, self.node_open, self.tree_popup_open)
         self.tree_popup.Append(self.tree_popup_close)
         self.Bind(wx.EVT_MENU, self.node_close, self.tree_popup_close)
-        self.Bind(wx.EVT_RIGHT_UP, self.on_popup)
+        # self.Bind(wx.EVT_RIGHT_UP, self.on_popup)
+        self.Bind(wx.EVT_TREE_ITEM_RIGHT_CLICK, self.on_popup)
         # self.current_node = self.root
         # self.Bind(wx.EVT_TREE_BEGIN_DRAG, self.on_begin_drag)
         # self.Bind(wx.EVT_TREE_END_DRAG, self.on_end_drag)
         # self.Bind(wx.EVT_TREE_SEL_CHANGED, self.on_selection_changed)
 
     def on_popup(self, event):
-        self.PopupMenu(self.tree_popup, pos=event.GetPosition())
+        # self.PopupMenu(self.tree_popup, pos=event.GetPosition())
+        print(event)
+        print(event.EventObject())
+        print(event.EventType())
+        print(event.GetItem())
+        print('right clicked')
         event.Skip()
 
     def node_open(self, event):
         print(event, "node open")
+        event.Skip()
 
     def node_close(self, event):
         print(event, "node close")
+        event.Skip()
 
     def populate(self, pth=None):
         if pth is None:

@@ -25,26 +25,34 @@ class Explorer_Tree(TreeCtrl):
 
         self.populate()
         self.tree_popup = wx.Menu()
-        self.tree_popup_open = wx.MenuItem(self.tree_popup, wx.ID_ANY, "Open")
-        self.tree_popup_close = wx.MenuItem(self.tree_popup, wx.ID_ANY, "Close")
+        self.tree_popup_open = wx.MenuItem(self.tree_popup,
+                                           wx.ID_ANY, "Open")
+        self.tree_popup_close = wx.MenuItem(self.tree_popup,
+                                            wx.ID_ANY, "Close")
         self.tree_popup.Append(self.tree_popup_open)
         self.Bind(wx.EVT_MENU, self.node_open, self.tree_popup_open)
         self.tree_popup.Append(self.tree_popup_close)
         self.Bind(wx.EVT_MENU, self.node_close, self.tree_popup_close)
         # self.Bind(wx.EVT_RIGHT_UP, self.on_popup)
         self.Bind(wx.EVT_TREE_ITEM_RIGHT_CLICK, self.on_popup)
+        self.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.node_activated)
         # self.current_node = self.root
         # self.Bind(wx.EVT_TREE_BEGIN_DRAG, self.on_begin_drag)
         # self.Bind(wx.EVT_TREE_END_DRAG, self.on_end_drag)
         # self.Bind(wx.EVT_TREE_SEL_CHANGED, self.on_selection_changed)
 
+    def node_activated(self, event):
+        node = event.GetItem()
+        file_name = os.path.join(self.GetItemData(node), self.GetItemText(node))
+        print(file_name)
+        event.Skip()
+
     def on_popup(self, event):
+        node = event.GetItem()
+        pos = event.GetPoint()
+        # wx.Window.PopupMenu(self.PopupMenu, pos)
         # self.PopupMenu(self.tree_popup, pos=event.GetPosition())
-        print(event)
-        print(event.EventObject())
-        print(event.EventType())
-        print(event.GetItem())
-        print('right clicked')
+        self.PopupMenu(self.tree_popup, pos=pos)
         event.Skip()
 
     def node_open(self, event):
@@ -64,6 +72,7 @@ class Explorer_Tree(TreeCtrl):
         root_name = os.path.basename(pth.rstrip('/'))
         self.root = self.AddRoot(text=root_name, data=root_pth)
         self.populate_expand(self.root)
+        self.Expand(self.root)
         # tk = self.AppendItem(self.root, 'Toolkits')
         # self.AppendItem(tk, 'Qt')
 
@@ -86,84 +95,9 @@ class Explorer_Tree(TreeCtrl):
                 self.AppendItem(node, text=item[1],
                                 data=os.path.join(root_pth, pth))
 
-    # def build_child_nodes(self, nod):
-    #     child, cookie = self.GetFirstChild(nod)
-    #     while child.IsOk():
-    #         parent = self.GetItemParent(child)
-    #         parent_id = self.GetItemData(parent)
-    #         snip_id = self.GetItemData(child)
-    #         node_dic = {'id': snip_id,  # id
-    #                     'parent_id': parent_id,  # parent d
-    #                     'text': self.GetItemText(child),  # label
-    #                     'data': self.node_notes[snip_id],  # associated note
-    #                     'is_expanded': self.IsExpanded(child),  # if expanded
-    #                     }
-    #         self.node_list.append(node_dic)
-    #         if self.GetChildrenCount(child) > 0:
-    #             self.build_child_nodes(child)
-    #         child, cookie = self.GetNextChild(nod, cookie)
-
-    # def on_selection_changed(self, event):
-    #     node = event.GetItem()
-    #     self.current_node = node
-    #     self.SelectItem(node, True)
-    #     # self.SetFocusedItem(node)
-    #     self.SetFocus()
-    #     self.Refresh()
-
-    # def check_can_move(self, source_node, target_node):
-    #     res = True
-    #     childs = self.get_children(source_node)
-    #     if target_node in childs:
-    #         res = False
-    #     self.dummy_list = []
-    #     return res
-
-    # def on_begin_drag(self, event):
-    #     if not self.dragging_node:
-    #         self.dragging_node = event.GetItem()
-    #     if self.dragging_node:
-    #         event.Allow()
-
-    # def copy_node(self, source_node, target_node):
-    #     expand_collapse = []
-    #     new_node = self.AppendItem(parent=target_node,
-    #                                text=self.GetItemText(source_node),
-    #                                data=self.GetItemData(source_node),)
-    #     expand_collapse.append((new_node, self.IsExpanded(source_node)))
-    #     if self.GetChildrenCount(source_node) > 0:
-    #         childs = self.get_children(source_node)
-    #         for child in childs:
-    #             self.copy_node(child, new_node)
-    #     for node, state in expand_collapse:
-    #         if state:
-    #             self.Expand(node)
-
-    # def on_end_drag(self, event):
-    #     self.target_node = event.GetItem()
-    #     if self.check_can_move(self.dragging_node, self.target_node):
-    #         if self.dragging_node:
-    #             if self.target_node:
-    #                 event.Allow()
-    #                 self.copy_node(self.dragging_node, self.target_node)
-    #                 self.Delete(self.dragging_node)
-    #                 self.dragging_node = None
-    #                 self.Refresh()
-
-    # def get_parent_node(self, node):
-    #     parent_node = self.GetItemParent(node)
-    #     return parent_node
-
-    # def get_current_node(self):
-    #     if self.GetFocusedItem():
-    #         self.current_node = self.GetFocusedItem()
-    #     else:
-    #         self.current_node = self.root
-    #     return self.current_node
-
 
 class Tree_Control(wx.Panel):
-    def __init__(self, parent):
+    def __init__(self, parent, main_window):
         wx.Panel.__init__(self, parent, style=wx.SUNKEN_BORDER)
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
         self.SetSizer(self.main_sizer)
@@ -197,19 +131,19 @@ class Tree_Control(wx.Panel):
         self.tool_bar.Realize()
         self.Refresh()
 
-        self.Bind(wx.EVT_MENU, self.on_add_node, id=wx.ID_ADD)
-        self.Bind(wx.EVT_MENU, self.on_del_node, id=wx.ID_DELETE)
-        self.Bind(wx.EVT_MENU, self.on_edit_node, id=wx.ID_EDIT)
-        self.Bind(wx.EVT_MENU, self.on_save_tree, id=wx.ID_SAVE)
+    #     self.Bind(wx.EVT_MENU, self.on_add_node, id=wx.ID_ADD)
+    #     self.Bind(wx.EVT_MENU, self.on_del_node, id=wx.ID_DELETE)
+    #     self.Bind(wx.EVT_MENU, self.on_edit_node, id=wx.ID_EDIT)
+    #     self.Bind(wx.EVT_MENU, self.on_save_tree, id=wx.ID_SAVE)
 
-    def on_save_tree(self, _):
-        self.explorer.save_tree()
+    # def on_save_tree(self, _):
+    #     self.explorer.save_tree()
 
-    def on_add_node(self, _):
-        self.explorer.add_node()
+    # def on_add_node(self, _):
+    #     self.explorer.add_node()
 
-    def on_del_node(self, _):
-        self.explorer.del_node()
+    # def on_del_node(self, _):
+    #     self.explorer.del_node()
 
-    def on_edit_node(self, _):
-        self.explorer.edit_node()
+    # def on_edit_node(self, _):
+    #     self.explorer.edit_node()

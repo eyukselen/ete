@@ -234,12 +234,9 @@ class MainWindow(wx.Frame):
         # 0.0: only the bottom/right window is automatically resized
         # 0.5: both windows grow by equal size
         # self.main_panel_window.Unsplit()  # start hidden
-
-
         # endregion
 
         # region tabbed notebook definition
-
         self.notebook = aui.AuiNotebook(parent=self.editor_panel,
                                         style=aui.AUI_NB_CLOSE_ON_ALL_TABS |
                                         aui.AUI_NB_DEFAULT_STYLE |
@@ -391,7 +388,6 @@ class MainWindow(wx.Frame):
     def on_key_event(self, event):
         if (event.AltDown() and event.ShiftDown() and
                 event.GetKeyCode() == wx.WXK_DOWN):
-            print('key comb pressed')
             # if tab is switched when dlg is open pick new tab
             cp = self.notebook.GetCurrentPage()
             te = self.get_text_editor_from_page(self.notebook.GetPageIndex(cp))
@@ -1029,7 +1025,7 @@ class TransparencyDlg(wx.Dialog):
 
 app = wx.App()
 MainWindow(None)
-wx.lib.inspection.InspectionTool().Show() # for debugging
+wx.lib.inspection.InspectionTool().Show()  # for debugging
 app.MainLoop()
 
 

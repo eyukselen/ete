@@ -460,7 +460,7 @@ class MainWindow(wx.Frame):
                 page_sizer = wx.BoxSizer(wx.VERTICAL)
                 page.SetSizer(page_sizer)
                 te = TextEditor(parent=page, filename=file,
-                                tatus_bar=self.status_bar)
+                                status_bar=self.status_bar)
                 if sys.platform == 'win32':
                     te.DragAcceptFiles(True)
                     te.Bind(wx.EVT_DROP_FILES, self.open_page)

@@ -97,7 +97,7 @@ class Explorer_Tree(TreeCtrl):
 
 
 class Tree_Control(wx.Panel):
-    def __init__(self, parent, main_window):
+    def __init__(self, parent):
         wx.Panel.__init__(self, parent, style=wx.SUNKEN_BORDER)
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
         self.SetSizer(self.main_sizer)

@@ -6,7 +6,7 @@ import wx.aui as aui
 import wx.stc as stc
 import wx.svg
 import io
-import wx.lib.inspection  # for debugging
+# import wx.lib.inspection  # for debugging
 import zlib
 import base64
 from configs import icons, menu
@@ -203,7 +203,8 @@ class MainWindow(wx.Frame):
                                      style=wx.SP_3D | wx.SP_LIVE_UPDATE)
         self.mp_sizer = wx.BoxSizer(wx.VERTICAL)
         self.main_panel_window.SetSizer(self.mp_sizer)
-        self.explorer_panel = Tree_Control(parent=self.main_panel_window)
+        self.explorer_panel = Tree_Control(parent=self.main_panel_window,
+                                           main_window=self)
         self.main_panel_right = wx.SplitterWindow(
             parent=self.main_panel_window,
             id=wx.ID_ANY,
@@ -284,7 +285,6 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.save_page, id=EID.FILE_SAVE)
         self.Bind(wx.EVT_MENU, self.save_as_page, id=EID.FILE_SAVEAS)
         self.Bind(wx.EVT_MENU, self.close_page, id=EID.CLOSE_TAB)
-        self.Bind(wx.EVT_MENU, self.on_info, id=EID.ABOUT_INFO)
         self.Bind(wx.EVT_MENU, self.onclose, id=EID.FILE_EXIT)
 
         self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID.EDIT_UNDO)
@@ -292,12 +292,25 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID.EDIT_CUT)
         self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID.EDIT_COPY)
         self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID.EDIT_PASTE)
-        self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID.EDIT_DELETE)
-        self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID.EDIT_SELECTALL)
         self.Bind(wx.EVT_MENU, self.on_find, id=EID.EDIT_FIND)
         self.Bind(wx.EVT_MENU, self.on_find, id=EID.EDIT_REPLACE)
         self.Bind(wx.EVT_MENU, self.on_jump_to, id=EID.EDIT_JUMPTO)
-        self.Bind(wx.EVT_MENU, self.on_about, id=EID.ABOUT_INFO)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID.EDIT_DELETE)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID.EDIT_SELECTALL)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_case, id=EID.EDIT_UPPER)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_case, id=EID.EDIT_LOWER)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_eol, id=EID.EDIT_CRLF)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_eol, id=EID.EDIT_LF)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_eol, id=EID.EDIT_CR)
+        self.Bind(wx.EVT_MENU, self.on_select_mode, id=EID.EDIT_MULTISELECT)
+
+        self.Bind(wx.EVT_MENU, self.on_view_whitespace, id=EID.VIEW_SPACE)
+        self.Bind(wx.EVT_MENU, self.on_view_eol, id=EID.VIEW_EOL)
+        self.Bind(wx.EVT_MENU, self.on_view_indent_guide, id=EID.VIEW_INDENT)
+        self.Bind(wx.EVT_MENU, self.on_view_wrap, id=EID.VIEW_WRAP)
+        self.Bind(wx.EVT_MENU, self.on_view_transparent,
+                  id=EID.VIEW_TRANSPARENT)
+
         self.Bind(wx.EVT_MENU, self.on_language, id=EID.LANG_TXT)
         self.Bind(wx.EVT_MENU, self.on_language, id=EID.LANG_PYTHON)
         self.Bind(wx.EVT_MENU, self.on_language, id=EID.LANG_MSSQL)
@@ -307,12 +320,9 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_language, id=EID.LANG_HTML)
         self.Bind(wx.EVT_MENU, self.on_language, id=EID.LANG_JSON)
 
-        self.Bind(wx.EVT_MENU, self.on_view_whitespace, id=EID.VIEW_SPACE)
-        self.Bind(wx.EVT_MENU, self.on_view_eol, id=EID.VIEW_EOL)
-        self.Bind(wx.EVT_MENU, self.on_view_indent_guide, id=EID.VIEW_INDENT)
-        self.Bind(wx.EVT_MENU, self.on_view_wrap, id=EID.VIEW_WRAP)
-        self.Bind(wx.EVT_MENU, self.on_view_transparent,
-                  id=EID.VIEW_TRANSPARENT)
+        self.Bind(wx.EVT_MENU, self.on_menu_encode, id=EID.ENCODE_UTF8)
+        self.Bind(wx.EVT_MENU, self.on_menu_encode, id=EID.ENCODE_WIN1252)
+        self.Bind(wx.EVT_MENU, self.on_menu_encode, id=EID.ENCODE_WIN1254)
 
         self.Bind(wx.EVT_MENU, self.on_menu_tools_compare,
                   id=EID.TOOLS_COMPARE)
@@ -322,18 +332,9 @@ class MainWindow(wx.Frame):
                   id=EID.TOOLS_SNIPLETS)
         self.Bind(wx.EVT_MENU, self.on_menu_tools_explorer,
                   id=EID.TOOLS_EXPLORER)
-        self.Bind(wx.EVT_MENU, self.on_menu_edit_case, id=EID.EDIT_UPPER)
-        self.Bind(wx.EVT_MENU, self.on_menu_edit_case, id=EID.EDIT_LOWER)
 
-        self.Bind(wx.EVT_MENU, self.on_menu_edit_eol, id=EID.EDIT_CRLF)
-        self.Bind(wx.EVT_MENU, self.on_menu_edit_eol, id=EID.EDIT_LF)
-        self.Bind(wx.EVT_MENU, self.on_menu_edit_eol, id=EID.EDIT_CR)
-
-        self.Bind(wx.EVT_MENU, self.on_select_mode, id=EID.EDIT_MULTISELECT)
-
-        self.Bind(wx.EVT_MENU, self.on_menu_encode, id=EID.ENCODE_UTF8)
-        self.Bind(wx.EVT_MENU, self.on_menu_encode, id=EID.ENCODE_WIN1252)
-        self.Bind(wx.EVT_MENU, self.on_menu_encode, id=EID.ENCODE_WIN1254)
+        self.Bind(wx.EVT_MENU, self.on_about, id=EID.ABOUT_INFO)
+        self.Bind(wx.EVT_MENU, self.on_info, id=EID.ABOUT_INFO)
 
         # detect double click on tab bar empty space
         self.Bind(aui.EVT_AUINOTEBOOK_BG_DCLICK, self.new_page, id=wx.ID_ANY)
@@ -372,7 +373,8 @@ class MainWindow(wx.Frame):
             self.main_panel_window.Unsplit(toRemove=self.explorer_panel)
         else:
             self.explorer_panel = Tree_Control(
-                 parent=self.main_panel_window)
+                 parent=self.main_panel_window,
+                 main_window=self)
             self.main_panel_window.SplitVertically(
                 self.explorer_panel,
                 self.main_panel_right,
@@ -1025,7 +1027,7 @@ class TransparencyDlg(wx.Dialog):
 
 app = wx.App()
 MainWindow(None)
-wx.lib.inspection.InspectionTool().Show()  # for debugging
+# wx.lib.inspection.InspectionTool().Show()  # for debugging
 app.MainLoop()
 
 

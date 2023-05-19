@@ -1023,6 +1023,8 @@ class TransparencyDlg(wx.Dialog):
         self.parent.transparency = x
         self.parent.SetTransparent(max(x, 10))
         # unexpectedly printing alpha on console with DeprecationWarning
+        # Debug: SetTransparent() must be called before Show()
+        # need to update for linux
 
 
 app = wx.App()

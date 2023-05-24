@@ -46,8 +46,9 @@ class Explorer_Tree(TreeCtrl):
         node = event.GetItem()
         file_name = os.path.join(self.GetItemData(node),
                                  self.GetItemText(node))
-        self.main_window.open_file([file_name, ])
-        self.SetItemBold(node)
+        if os.path.isfile(file_name):
+            self.main_window.open_file([file_name, ])
+            self.SetItemBold(node)
         event.Skip()
 
     def on_popup_action(self, event):

@@ -1,5 +1,4 @@
-import pathlib
-
+from typing import List
 import wx
 from wx import TreeCtrl
 import os
@@ -16,8 +15,8 @@ def get_icon(name):
 
 class FileManager:
     root_path: str
-    files: list[str]
-    open_files: list[str]
+    files: List[str] = []
+    open_files: List[str] = []
 
     def __init__(self, root_path: str) -> None:
         if root_path:

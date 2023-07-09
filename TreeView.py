@@ -1,3 +1,5 @@
+import pathlib
+
 import wx
 from wx import TreeCtrl
 import os
@@ -6,11 +8,26 @@ import io
 import zlib
 import base64
 
-
 def get_icon(name):
     with io.BytesIO(zlib.decompress(base64.b64decode(icons[name]))) as stream:
         icon = wx.Bitmap(wx.Image(stream))
     return icon
+
+
+class FileManager:
+    root_path: str
+    files: list[str]
+    open_files: list[str]
+
+    def __init__(self, root_path: str) -> None:
+        if root_path:
+            self.root_path = root_path
+        else:
+            self.root_path = os.getcwd()
+
+    def add(self, filename):
+        pass
+
 
 
 class Explorer_Tree(TreeCtrl):
@@ -110,6 +127,8 @@ class Explorer_Tree(TreeCtrl):
 
 
 class Tree_Control(wx.Panel):
+    """This is only a panel to glue together actual
+    tree control and some future buttons"""
     def __init__(self, parent, main_window):
         wx.Panel.__init__(self, parent, style=wx.SUNKEN_BORDER)
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)

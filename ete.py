@@ -14,7 +14,7 @@ from configs import EID
 import FindReplaceDlg as Frd
 from TextEditor import TextEditor
 from sniplets import Sniplet_Control
-from TreeView import Tree_Control
+from TreeView import Tree_Control, FileManager
 
 
 # region high dpi settings for windows
@@ -353,6 +353,7 @@ class MainWindow(wx.Frame):
 
         self.search_dlg = Frd.FindReplaceDlg(parent=self,
                                              notebook=self.notebook)
+        self.file_manager = FileManager(root_path=None)
         self.info = wx.adv.AboutDialogInfo()
         self.Show()
 
@@ -451,12 +452,8 @@ class MainWindow(wx.Frame):
         self.open_file(files)
 
     def open_file(self, files):
-        open_files = []
-        for idx in range(self.notebook.GetPageCount()):
-            te = self.get_text_editor_from_page(idx)
-            open_files.append(te.file_name)
         for file in files:
-            if file not in open_files:
+            if file not in self.file_manager.open_files:
                 _, file_name = os.path.split(file)
                 page = wx.Panel(parent=self.notebook)
                 page_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -473,6 +470,7 @@ class MainWindow(wx.Frame):
                 self.notebook.AddPage(page, select=True, caption=file_name)
                 # te.LoadFile(file) # adding my method to replace builtin
                 te.load_file(file)
+                self.file_manager.open_files.append(file)
 
                 self.notebook.SetPageToolTip(
                     self.notebook.GetPageIndex(
@@ -505,28 +503,30 @@ class MainWindow(wx.Frame):
             te = self.get_text_editor_from_page(
                      self.notebook.GetPageIndex(
                         self.notebook.GetCurrentPage()))
-            filename = te.file_name
+            filename_old = te.file_name
         else:
             return  # there is nothing open to save
 
         with wx.FileDialog(self, "Save As",
                            wildcard="text files (*.txt)|*.txt",
-                           defaultFile=filename,
+                           defaultFile=filename_old,
                            style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT
                            ) as fileDialog:
             if fileDialog.ShowModal() == wx.ID_CANCEL:
                 return
-            filename = fileDialog.GetPath()
+            filename_new = fileDialog.GetPath()
             # te.SaveFile(filename) # adding my method to replace builtin
-            te.save_file(filename)
-            te.file_name = filename
+            te.save_file(filename_new)
+            te.file_name = filename_new
             self.notebook.SetPageToolTip(self.notebook.GetPageIndex(
                                              self.notebook.GetCurrentPage()),
-                                         filename)
-            _, file = os.path.split(filename)
+                                         filename_new)
+            _, file = os.path.split(filename_new)
             self.notebook.SetPageText(self.notebook.GetPageIndex(
                                           self.notebook.GetCurrentPage()),
                                       file)
+            self.file_manager.open_files.remove(filename_old)
+            self.file_manager.open_files.remove(filename_new)
 
     def on_page_select(self, event):
         """set focus on text editor when a page selected"""
@@ -565,6 +565,7 @@ class MainWindow(wx.Frame):
     def close_tab(self, page):
         self.notebook.SetSelection(page)
         te = self.get_text_editor_from_page(page)
+        file_name_old = te.file_name
         if te.IsModified():
             filename = self.notebook.GetPageToolTip(page)
             if filename:
@@ -582,6 +583,7 @@ class MainWindow(wx.Frame):
                 pass
         else:
             self.notebook.DeletePage(page)
+        self.file_manager.open_files.remove(file_name_old)
 
     def on_tab_close(self, event):
         event.Veto()
@@ -700,7 +702,7 @@ class MainWindow(wx.Frame):
         self.notebook.SetSelection(rpi)
 
     def on_menu_tools_clear_compare(self, _):
-        # I will loose tab id when they are switched or new tabs added
+        # I will lose tab id when they are switched or new tabs added
         if not len(self.compare_tabs) == 2:
             return
         lstc, rstc = self.compare_tabs

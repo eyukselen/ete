@@ -6,7 +6,7 @@ import wx.aui as aui
 import wx.stc as stc
 import wx.svg
 import io
-import wx.lib.inspection  # for debugging
+# import wx.lib.inspection  # for debugging
 import zlib
 import base64
 from configs import icons, menu
@@ -14,6 +14,7 @@ from configs import EID
 import FindReplaceDlg as Frd
 from TextEditor import TextEditor
 from sniplets import Sniplet_Control
+from TreeView import Tree_Control, FileManager
 
 
 # region high dpi settings for windows
@@ -185,6 +186,11 @@ class MainWindow(wx.Frame):
                               bmpDisabled=get_icon('sniplets'),
                               kind=wx.ITEM_NORMAL, shortHelp='Sniplets',
                               longHelp='', clientData=None)
+        self.tool_bar.AddTool(toolId=EID.TOOLS_EXPLORER, label="Explorer",
+                              bitmap=get_icon('select_ico'),
+                              bmpDisabled=get_icon('select_ico'),
+                              kind=wx.ITEM_NORMAL, shortHelp='Explorer',
+                              longHelp='', clientData=None)
 
         self.SetToolBar(self.tool_bar)
         self.tool_bar.Realize()
@@ -195,32 +201,43 @@ class MainWindow(wx.Frame):
         self.main_panel_window = wx.SplitterWindow(
                                      self, id=wx.ID_ANY,
                                      style=wx.SP_3D | wx.SP_LIVE_UPDATE)
-        # self.main_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        # self.main_panel.SetSizer(self.main_sizer)
+        self.mp_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.main_panel_window.SetSizer(self.mp_sizer)
+        self.explorer_panel = Tree_Control(parent=self.main_panel_window,
+                                           main_window=self)
+        self.main_panel_right = wx.SplitterWindow(
+            parent=self.main_panel_window,
+            id=wx.ID_ANY,
+            style=wx.SP_3D | wx.SP_LIVE_UPDATE)
+        self.mp_sizer.Add(self.explorer_panel, 1, wx.EXPAND)
+        self.mp_sizer.Add(self.main_panel_right, 3, wx.EXPAND)
 
-        self.editor_panel = wx.Panel(parent=self.main_panel_window)
+        self.editor_panel = wx.Panel(parent=self.main_panel_right)
         self.editor_sizer = wx.BoxSizer(wx.VERTICAL)
         self.editor_panel.SetSizer(self.editor_sizer)
         self.editor_panel.DragAcceptFiles(True)
         self.editor_panel.Bind(wx.EVT_DROP_FILES, self.open_page)
+        self.sniplets_panel = Sniplet_Control(parent=self.main_panel_right)
+        self.mpr_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.main_panel_right.SetSizer(self.mpr_sizer)
+        self.mpr_sizer.Add(self.editor_panel, 3, wx.EXPAND)
+        self.mpr_sizer.Add(self.sniplets_panel, 1, wx.EXPAND)
 
-        self.sniplets_panel = Sniplet_Control(parent=self.main_panel_window)
-
-        # self.main_sizer.Add(self.editor_panel, 3, wx.EXPAND)
-        # self.main_sizer.Add(self.sniplets_panel,1,wx.EXPAND)
-        self.main_panel_window.SplitVertically(self.editor_panel,
-                                               self.sniplets_panel, -250)
-        self.main_panel_window.SetSashGravity(1)
+        self.main_panel_window.SplitVertically(self.explorer_panel,
+                                               self.main_panel_right, 250)
+        self.main_panel_right.SplitVertically(self.editor_panel,
+                                              self.sniplets_panel, 250)
+        self.main_panel_window.SetSashGravity(0)
+        self.main_panel_right.SetSashGravity(1)
+        self.main_panel_right.Unsplit()
         # sash gravity
         # 1.0: only left/top window grows on resize
         # 0.0: only the bottom/right window is automatically resized
         # 0.5: both windows grow by equal size
-        self.main_panel_window.Unsplit()  # start hidden
-
+        # self.main_panel_window.Unsplit()  # start hidden
         # endregion
 
         # region tabbed notebook definition
-
         self.notebook = aui.AuiNotebook(parent=self.editor_panel,
                                         style=aui.AUI_NB_CLOSE_ON_ALL_TABS |
                                         aui.AUI_NB_DEFAULT_STYLE |
@@ -268,7 +285,6 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.save_page, id=EID.FILE_SAVE)
         self.Bind(wx.EVT_MENU, self.save_as_page, id=EID.FILE_SAVEAS)
         self.Bind(wx.EVT_MENU, self.close_page, id=EID.CLOSE_TAB)
-        self.Bind(wx.EVT_MENU, self.on_info, id=EID.ABOUT_INFO)
         self.Bind(wx.EVT_MENU, self.onclose, id=EID.FILE_EXIT)
 
         self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID.EDIT_UNDO)
@@ -276,12 +292,25 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID.EDIT_CUT)
         self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID.EDIT_COPY)
         self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID.EDIT_PASTE)
-        self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID.EDIT_DELETE)
-        self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID.EDIT_SELECTALL)
         self.Bind(wx.EVT_MENU, self.on_find, id=EID.EDIT_FIND)
         self.Bind(wx.EVT_MENU, self.on_find, id=EID.EDIT_REPLACE)
         self.Bind(wx.EVT_MENU, self.on_jump_to, id=EID.EDIT_JUMPTO)
-        self.Bind(wx.EVT_MENU, self.on_about, id=EID.ABOUT_INFO)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID.EDIT_DELETE)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_event, id=EID.EDIT_SELECTALL)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_case, id=EID.EDIT_UPPER)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_case, id=EID.EDIT_LOWER)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_eol, id=EID.EDIT_CRLF)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_eol, id=EID.EDIT_LF)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_eol, id=EID.EDIT_CR)
+        self.Bind(wx.EVT_MENU, self.on_select_mode, id=EID.EDIT_MULTISELECT)
+
+        self.Bind(wx.EVT_MENU, self.on_view_whitespace, id=EID.VIEW_SPACE)
+        self.Bind(wx.EVT_MENU, self.on_view_eol, id=EID.VIEW_EOL)
+        self.Bind(wx.EVT_MENU, self.on_view_indent_guide, id=EID.VIEW_INDENT)
+        self.Bind(wx.EVT_MENU, self.on_view_wrap, id=EID.VIEW_WRAP)
+        self.Bind(wx.EVT_MENU, self.on_view_transparent,
+                  id=EID.VIEW_TRANSPARENT)
+
         self.Bind(wx.EVT_MENU, self.on_language, id=EID.LANG_TXT)
         self.Bind(wx.EVT_MENU, self.on_language, id=EID.LANG_PYTHON)
         self.Bind(wx.EVT_MENU, self.on_language, id=EID.LANG_MSSQL)
@@ -291,12 +320,9 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_language, id=EID.LANG_HTML)
         self.Bind(wx.EVT_MENU, self.on_language, id=EID.LANG_JSON)
 
-        self.Bind(wx.EVT_MENU, self.on_view_whitespace, id=EID.VIEW_SPACE)
-        self.Bind(wx.EVT_MENU, self.on_view_eol, id=EID.VIEW_EOL)
-        self.Bind(wx.EVT_MENU, self.on_view_indent_guide, id=EID.VIEW_INDENT)
-        self.Bind(wx.EVT_MENU, self.on_view_wrap, id=EID.VIEW_WRAP)
-        self.Bind(wx.EVT_MENU, self.on_view_transparent,
-                  id=EID.VIEW_TRANSPARENT)
+        self.Bind(wx.EVT_MENU, self.on_menu_encode, id=EID.ENCODE_UTF8)
+        self.Bind(wx.EVT_MENU, self.on_menu_encode, id=EID.ENCODE_WIN1252)
+        self.Bind(wx.EVT_MENU, self.on_menu_encode, id=EID.ENCODE_WIN1254)
 
         self.Bind(wx.EVT_MENU, self.on_menu_tools_compare,
                   id=EID.TOOLS_COMPARE)
@@ -304,18 +330,11 @@ class MainWindow(wx.Frame):
                   id=EID.TOOLS_CLEARCOMP)
         self.Bind(wx.EVT_MENU, self.on_menu_tools_sniplets,
                   id=EID.TOOLS_SNIPLETS)
-        self.Bind(wx.EVT_MENU, self.on_menu_edit_case, id=EID.EDIT_UPPER)
-        self.Bind(wx.EVT_MENU, self.on_menu_edit_case, id=EID.EDIT_LOWER)
+        self.Bind(wx.EVT_MENU, self.on_menu_tools_explorer,
+                  id=EID.TOOLS_EXPLORER)
 
-        self.Bind(wx.EVT_MENU, self.on_menu_edit_eol, id=EID.EDIT_CRLF)
-        self.Bind(wx.EVT_MENU, self.on_menu_edit_eol, id=EID.EDIT_LF)
-        self.Bind(wx.EVT_MENU, self.on_menu_edit_eol, id=EID.EDIT_CR)
-
-        self.Bind(wx.EVT_MENU, self.on_select_mode, id=EID.EDIT_MULTISELECT)
-
-        self.Bind(wx.EVT_MENU, self.on_menu_encode, id=EID.ENCODE_UTF8)
-        self.Bind(wx.EVT_MENU, self.on_menu_encode, id=EID.ENCODE_WIN1252)
-        self.Bind(wx.EVT_MENU, self.on_menu_encode, id=EID.ENCODE_WIN1254)
+        self.Bind(wx.EVT_MENU, self.on_about, id=EID.ABOUT_INFO)
+        self.Bind(wx.EVT_MENU, self.on_info, id=EID.ABOUT_INFO)
 
         # detect double click on tab bar empty space
         self.Bind(aui.EVT_AUINOTEBOOK_BG_DCLICK, self.new_page, id=wx.ID_ANY)
@@ -334,20 +353,34 @@ class MainWindow(wx.Frame):
 
         self.search_dlg = Frd.FindReplaceDlg(parent=self,
                                              notebook=self.notebook)
+        self.file_manager = FileManager(root_path=None)
         self.info = wx.adv.AboutDialogInfo()
         self.Show()
 
     def on_menu_tools_sniplets(self, event):
-        if self.main_panel_window.IsSplit():
+        if self.main_panel_right.IsSplit():
             self.sniplets_panel.on_save_tree(event)
-            self.main_panel_window.Unsplit()
+            self.main_panel_right.Unsplit()
         else:
             self.sniplets_panel = Sniplet_Control(
-                parent=self.main_panel_window)
-            self.main_panel_window.SplitVertically(self.editor_panel,
-                                                   self.sniplets_panel,
-                                                   -250)
-            self.main_panel_window.SetSashGravity(1)
+                parent=self.main_panel_right)
+            self.main_panel_right.SplitVertically(self.editor_panel,
+                                                  self.sniplets_panel,
+                                                  -250)
+            self.main_panel_right.SetSashGravity(1)
+
+    def on_menu_tools_explorer(self, _):
+        if self.main_panel_window.IsSplit():
+            self.main_panel_window.Unsplit(toRemove=self.explorer_panel)
+        else:
+            self.explorer_panel = Tree_Control(
+                 parent=self.main_panel_window,
+                 main_window=self)
+            self.main_panel_window.SplitVertically(
+                self.explorer_panel,
+                self.main_panel_right,
+                250)
+            self.main_panel_window.SetSashGravity(0)
 
     def get_current_text_editor(self):
         # if tab is switched when dlg is open pick new tab
@@ -358,7 +391,6 @@ class MainWindow(wx.Frame):
     def on_key_event(self, event):
         if (event.AltDown() and event.ShiftDown() and
                 event.GetKeyCode() == wx.WXK_DOWN):
-            print('key comb pressed')
             # if tab is switched when dlg is open pick new tab
             cp = self.notebook.GetCurrentPage()
             te = self.get_text_editor_from_page(self.notebook.GetPageIndex(cp))
@@ -420,18 +452,14 @@ class MainWindow(wx.Frame):
         self.open_file(files)
 
     def open_file(self, files):
-        open_files = []
-        for idx in range(self.notebook.GetPageCount()):
-            te = self.get_text_editor_from_page(idx)
-            open_files.append(te.file_name)
         for file in files:
-            if file not in open_files:
+            if file not in self.file_manager.open_files:
                 _, file_name = os.path.split(file)
                 page = wx.Panel(parent=self.notebook)
                 page_sizer = wx.BoxSizer(wx.VERTICAL)
                 page.SetSizer(page_sizer)
                 te = TextEditor(parent=page, filename=file,
-                                tatus_bar=self.status_bar)
+                                status_bar=self.status_bar)
                 if sys.platform == 'win32':
                     te.DragAcceptFiles(True)
                     te.Bind(wx.EVT_DROP_FILES, self.open_page)
@@ -442,6 +470,7 @@ class MainWindow(wx.Frame):
                 self.notebook.AddPage(page, select=True, caption=file_name)
                 # te.LoadFile(file) # adding my method to replace builtin
                 te.load_file(file)
+                self.file_manager.open_files.append(file)
 
                 self.notebook.SetPageToolTip(
                     self.notebook.GetPageIndex(
@@ -474,28 +503,30 @@ class MainWindow(wx.Frame):
             te = self.get_text_editor_from_page(
                      self.notebook.GetPageIndex(
                         self.notebook.GetCurrentPage()))
-            filename = te.file_name
+            filename_old = te.file_name
         else:
             return  # there is nothing open to save
 
         with wx.FileDialog(self, "Save As",
                            wildcard="text files (*.txt)|*.txt",
-                           defaultFile=filename,
+                           defaultFile=filename_old,
                            style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT
                            ) as fileDialog:
             if fileDialog.ShowModal() == wx.ID_CANCEL:
                 return
-            filename = fileDialog.GetPath()
+            filename_new = fileDialog.GetPath()
             # te.SaveFile(filename) # adding my method to replace builtin
-            te.save_file(filename)
-            te.file_name = filename
+            te.save_file(filename_new)
+            te.file_name = filename_new
             self.notebook.SetPageToolTip(self.notebook.GetPageIndex(
                                              self.notebook.GetCurrentPage()),
-                                         filename)
-            _, file = os.path.split(filename)
+                                         filename_new)
+            _, file = os.path.split(filename_new)
             self.notebook.SetPageText(self.notebook.GetPageIndex(
                                           self.notebook.GetCurrentPage()),
                                       file)
+            self.file_manager.open_files.remove(filename_old)
+            self.file_manager.open_files.remove(filename_new)
 
     def on_page_select(self, event):
         """set focus on text editor when a page selected"""
@@ -534,6 +565,7 @@ class MainWindow(wx.Frame):
     def close_tab(self, page):
         self.notebook.SetSelection(page)
         te = self.get_text_editor_from_page(page)
+        file_name_old = te.file_name
         if te.IsModified():
             filename = self.notebook.GetPageToolTip(page)
             if filename:
@@ -551,6 +583,7 @@ class MainWindow(wx.Frame):
                 pass
         else:
             self.notebook.DeletePage(page)
+        self.file_manager.open_files.remove(file_name_old)
 
     def on_tab_close(self, event):
         event.Veto()
@@ -669,7 +702,7 @@ class MainWindow(wx.Frame):
         self.notebook.SetSelection(rpi)
 
     def on_menu_tools_clear_compare(self, _):
-        # I will loose tab id when they are switched or new tabs added
+        # I will lose tab id when they are switched or new tabs added
         if not len(self.compare_tabs) == 2:
             return
         lstc, rstc = self.compare_tabs
@@ -992,11 +1025,13 @@ class TransparencyDlg(wx.Dialog):
         self.parent.transparency = x
         self.parent.SetTransparent(max(x, 10))
         # unexpectedly printing alpha on console with DeprecationWarning
+        # Debug: SetTransparent() must be called before Show()
+        # need to update for linux
 
 
 app = wx.App()
 MainWindow(None)
-# wx.lib.inspection.InspectionTool().Show() # for debugging
+# wx.lib.inspection.InspectionTool().Show()  # for debugging
 app.MainLoop()
 
 

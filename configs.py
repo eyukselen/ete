@@ -42,6 +42,7 @@ class EID:
     TOOLS_COMPARE = 6001
     TOOLS_CLEARCOMP = 6002
     TOOLS_SNIPLETS = 6003
+    TOOLS_EXPLORER = 6004
     ABOUT_INFO = 7001
 
 
@@ -93,7 +94,7 @@ menu = {
               [EID.FILE_SAVE, '&Save\tCTRL+S', 'save_ico', ],
               [EID.FILE_SAVEAS, 'Save &As\tCTRL+SHIFT+S', 'save_as_ico', ],
               [EID.SEP, ],
-              [EID.CLOSE_TAB, 'Close', ],
+              [EID.CLOSE_TAB, 'Close File', ],
               [EID.FILE_EXIT, 'E&xit', 'exit_ico', ],
               ],
     '&Edit': [

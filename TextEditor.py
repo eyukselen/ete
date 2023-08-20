@@ -70,39 +70,38 @@ class TextEditor(wx.stc.StyledTextCtrl):
         # endregion
 
         # region context menu
-        # TODO: update hard coded IDs with config import
         self.menu_popup = wx.Menu()
-        menu_popup_undo = wx.MenuItem(self.menu_popup, 2001, "Undo")
+        menu_popup_undo = wx.MenuItem(self.menu_popup, EID.EDIT_UNDO, "Undo")
         self.menu_popup.Append(menu_popup_undo)
         self.Bind(wx.EVT_MENU, self.undo, menu_popup_undo)
 
-        menu_popup_redo = wx.MenuItem(self.menu_popup, 2002, "Redo")
+        menu_popup_redo = wx.MenuItem(self.menu_popup, EID.EDIT_REDO, "Redo")
         self.menu_popup.Append(menu_popup_redo)
         self.Bind(wx.EVT_MENU, self.redo, menu_popup_redo)
 
         self.menu_popup.AppendSeparator()
 
-        menu_popup_cut = wx.MenuItem(self.menu_popup, 2003, "Cut")
+        menu_popup_cut = wx.MenuItem(self.menu_popup, EID.EDIT_CUT, "Cut")
         self.menu_popup.Append(menu_popup_cut)
         self.Bind(wx.EVT_MENU, self.oncut, menu_popup_cut)
 
-        menu_popup_copy = wx.MenuItem(self.menu_popup, 2004, "Copy")
+        menu_popup_copy = wx.MenuItem(self.menu_popup, EID.EDIT_COPY, "Copy")
         self.menu_popup.Append(menu_popup_copy)
         self.Bind(wx.EVT_MENU, self.copy, menu_popup_copy)
 
-        menu_popup_paste = wx.MenuItem(self.menu_popup, 2005, "Paste")
+        menu_popup_paste = wx.MenuItem(self.menu_popup, EID.EDIT_PASTE, "Paste")
         self.menu_popup.Append(menu_popup_paste)
         self.Bind(wx.EVT_MENU, self.paste, menu_popup_paste)
-        self.Bind(wx.EVT_MENU, self.paste, id=5033)
+        self.Bind(wx.EVT_MENU, self.paste, id=5033)  # TODO what's this?
 
-        menu_popup_delete = wx.MenuItem(self.menu_popup, 2009, "Delete")
+        menu_popup_delete = wx.MenuItem(self.menu_popup, EID.EDIT_DELETE, "Delete")
         self.menu_popup.Append(menu_popup_delete)
         self.Bind(wx.EVT_MENU, self.delete, menu_popup_delete)
 
         self.menu_popup.AppendSeparator()
 
         menu_popup_select_all = wx.MenuItem(self.menu_popup,
-                                            2010,
+                                            EID.EDIT_SELECTALL,
                                             "Select All")
         self.menu_popup.Append(menu_popup_select_all)
         self.Bind(wx.EVT_MENU, self.select_all, menu_popup_select_all)

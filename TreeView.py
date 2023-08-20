@@ -13,24 +13,8 @@ def get_icon(name):
     return icon
 
 
-class FileManager:
-    root_path: str
-    files: List[str] = []
-    open_files: List[str] = []
-
-    def __init__(self, root_path: str) -> None:
-        if root_path:
-            self.root_path = root_path
-        else:
-            self.root_path = os.getcwd()
-
-    def add(self, filename):
-        pass
-
-
-
-class Explorer_Tree(TreeCtrl):
-    def __init__(self, parent, main_window):
+class FileTreeCtrl(TreeCtrl):
+    def __init__(self, parent, main_window, file_manager):
         TreeCtrl.__init__(self, parent,
                           style=wx.TR_FULL_ROW_HIGHLIGHT |
                           wx.TR_LINES_AT_ROOT |
@@ -39,8 +23,11 @@ class Explorer_Tree(TreeCtrl):
                           wx.TR_TWIST_BUTTONS |
                           wx.TR_EDIT_LABELS)
         self.main_window = main_window
+        self.file_manager = file_manager
 
         self.populate()
+
+        # region popup menu
         self.tree_popup = wx.Menu()
         self.tree_popup_open = wx.MenuItem(self.tree_popup,
                                            wx.ID_ANY, "Open")
@@ -57,6 +44,7 @@ class Explorer_Tree(TreeCtrl):
         # self.Bind(wx.EVT_TREE_BEGIN_DRAG, self.on_begin_drag)
         # self.Bind(wx.EVT_TREE_END_DRAG, self.on_end_drag)
         # self.Bind(wx.EVT_TREE_SEL_CHANGED, self.on_selection_changed)
+        # endregion
 
     def node_activated(self, event):
         node = event.GetItem()
@@ -73,11 +61,12 @@ class Explorer_Tree(TreeCtrl):
             file_name = os.path.join(self.GetItemData(node),
                                      self.GetItemText(node))
             self.node_open(file_name)
-            self.SetItemBold(node)
+            self.SetItemBold(node, bold=True)
         if event.GetId() == self.tree_popup_close.GetId():
             file_name = os.path.join(self.GetItemData(node),
                                      self.GetItemText(node))
-            print('close', file_name)
+            self.node_close(file_name)
+            self.SetItemBold(node, bold=False)
         event.Skip()
 
     def on_popup(self, event):
@@ -87,10 +76,10 @@ class Explorer_Tree(TreeCtrl):
         event.Skip()
 
     def node_open(self, file_name):
-        self.main_window.open_file(file_name)
+        self.main_window.open_file([file_name, ])
 
-    def node_close(self, file_name):
-        print("node close")
+    def node_close(self, filename):
+        self.main_window.close_file(filename)
 
     def populate(self, pth=None):
         if pth is None:
@@ -125,14 +114,15 @@ class Explorer_Tree(TreeCtrl):
                                 data=os.path.join(root_pth, pth))
 
 
-class Tree_Control(wx.Panel):
+class FileTree(wx.Panel):
     """This is only a panel to glue together actual
-    tree control and some future buttons"""
-    def __init__(self, parent, main_window):
+    tree control and controls"""
+    def __init__(self, parent, main_window, file_manager):
         wx.Panel.__init__(self, parent, style=wx.SUNKEN_BORDER)
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
         self.SetSizer(self.main_sizer)
         self.main_window = main_window
+        self.file_manager = file_manager
 
         self.tool_bar = wx.ToolBar(parent=self)
         self.tool_bar.AddTool(toolId=wx.ID_ADD, label='Add',
@@ -156,27 +146,11 @@ class Tree_Control(wx.Panel):
                               kind=wx.ITEM_NORMAL, shortHelp='Save',
                               longHelp='', clientData=None)
 
-        self.explorer = Explorer_Tree(parent=self,
-                                      main_window=self.main_window)
+        self.explorer = FileTreeCtrl(parent=self,
+                                     main_window=self.main_window,
+                                     file_manager=self.file_manager)
 
         self.main_sizer.Add(self.tool_bar, 0, wx.EXPAND)
         self.main_sizer.Add(self.explorer, 2, wx.EXPAND)
         self.tool_bar.Realize()
         self.Refresh()
-
-    #     self.Bind(wx.EVT_MENU, self.on_add_node, id=wx.ID_ADD)
-    #     self.Bind(wx.EVT_MENU, self.on_del_node, id=wx.ID_DELETE)
-    #     self.Bind(wx.EVT_MENU, self.on_edit_node, id=wx.ID_EDIT)
-    #     self.Bind(wx.EVT_MENU, self.on_save_tree, id=wx.ID_SAVE)
-
-    # def on_save_tree(self, _):
-    #     self.explorer.save_tree()
-
-    # def on_add_node(self, _):
-    #     self.explorer.add_node()
-
-    # def on_del_node(self, _):
-    #     self.explorer.del_node()
-
-    # def on_edit_node(self, _):
-    #     self.explorer.edit_node()

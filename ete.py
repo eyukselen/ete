@@ -14,8 +14,8 @@ from configs import EID
 import FindReplaceDlg as Frd
 from TextEditor import TextEditor
 from sniplets import Sniplet_Control
-from TreeView import Tree_Control, FileManager
-
+from TreeView import FileTree
+from FileManager import FileManager
 
 # region high dpi settings for windows
 if sys.platform == 'win32':
@@ -57,6 +57,7 @@ class MainWindow(wx.Frame):
         app_ico = wx.Icon()
         app_ico.LoadFile('ete.png', wx.BITMAP_TYPE_PNG, 32, 32)
         self.SetIcon(app_ico)
+        self.file_manager = FileManager(pth=None)
 
         def get_icon(name):
             with io.BytesIO(zlib.decompress(
@@ -96,7 +97,7 @@ class MainWindow(wx.Frame):
         # endregion
 
         # region toolbar definition
-        # cascaded toolbar on macos does not show icons so text added
+        # cascaded toolbar on macOS does not show icons so text added
         # on windows adding text makes icons too big
         self.tool_bar = wx.ToolBar(self)
         if sys.platform == 'win32':
@@ -203,8 +204,9 @@ class MainWindow(wx.Frame):
                                      style=wx.SP_3D | wx.SP_LIVE_UPDATE)
         self.mp_sizer = wx.BoxSizer(wx.VERTICAL)
         self.main_panel_window.SetSizer(self.mp_sizer)
-        self.explorer_panel = Tree_Control(parent=self.main_panel_window,
-                                           main_window=self)
+        self.explorer_panel = FileTree(parent=self.main_panel_window,
+                                       main_window=self,
+                                       file_manager=self.file_manager)
         self.main_panel_right = wx.SplitterWindow(
             parent=self.main_panel_window,
             id=wx.ID_ANY,
@@ -353,7 +355,6 @@ class MainWindow(wx.Frame):
 
         self.search_dlg = Frd.FindReplaceDlg(parent=self,
                                              notebook=self.notebook)
-        self.file_manager = FileManager(root_path=None)
         self.info = wx.adv.AboutDialogInfo()
         self.Show()
 
@@ -373,9 +374,6 @@ class MainWindow(wx.Frame):
         if self.main_panel_window.IsSplit():
             self.main_panel_window.Unsplit(toRemove=self.explorer_panel)
         else:
-            self.explorer_panel = Tree_Control(
-                 parent=self.main_panel_window,
-                 main_window=self)
             self.main_panel_window.SplitVertically(
                 self.explorer_panel,
                 self.main_panel_right,
@@ -387,6 +385,28 @@ class MainWindow(wx.Frame):
         cp = self.notebook.GetCurrentPage()
         te = self.get_text_editor_from_page(self.notebook.GetPageIndex(cp))
         return te
+
+    def get_page_from_filename(self, filename):
+        for idx in range(self.notebook.GetPageCount()):
+            page = self.notebook.GetPage(idx)
+            if self.notebook.GetPageToolTip(idx) == filename:
+                return page
+        return None
+
+    def get_page_idx_from_filename(self, filename):
+        for idx in range(self.notebook.GetPageCount()):
+            page = self.notebook.GetPage(idx)
+            if self.notebook.GetPageToolTip(idx) == filename:
+                return idx
+        return None
+
+    def close_file(self, filename):
+        page = self.get_page_idx_from_filename(filename)
+        print('about to close: ', str(page), filename)
+        if page is not None:
+            self.close_tab(page)
+            if filename in self.file_manager.open_files:
+                self.file_manager.open_files.remove(filename)
 
     def on_key_event(self, event):
         if (event.AltDown() and event.ShiftDown() and
@@ -562,12 +582,12 @@ class MainWindow(wx.Frame):
                 self.notebook.GetCurrentPage())
             self.close_tab(page_idx)
 
-    def close_tab(self, page):
-        self.notebook.SetSelection(page)
-        te = self.get_text_editor_from_page(page)
+    def close_tab(self, page_idx):
+        self.notebook.SetSelection(page_idx)
+        te = self.get_text_editor_from_page(page_idx)
         file_name_old = te.file_name
         if te.IsModified():
-            filename = self.notebook.GetPageToolTip(page)
+            filename = self.notebook.GetPageToolTip(page_idx)
             if filename:
                 msg = 'Save ' + filename + ' ?'
             else:
@@ -575,15 +595,16 @@ class MainWindow(wx.Frame):
             dlg = wx.MessageBox(msg, 'Save ?', wx.YES_NO | wx.CANCEL)
             if dlg == wx.YES:
                 self.save_page(None)
-                self.notebook.DeletePage(page)
+                self.notebook.DeletePage(page_idx)
             elif dlg == wx.NO:
                 te.SetText('')
-                self.notebook.DeletePage(page)
+                self.notebook.DeletePage(page_idx)
             else:
                 pass
         else:
-            self.notebook.DeletePage(page)
-        self.file_manager.open_files.remove(file_name_old)
+            self.notebook.DeletePage(page_idx)
+        if file_name_old:
+            self.file_manager.open_files.remove(file_name_old)
 
     def on_tab_close(self, event):
         event.Veto()
@@ -641,6 +662,7 @@ class MainWindow(wx.Frame):
     def on_info(self, event):
         _ = event
         self.on_about(None)
+        print(self.file_manager.open_files)
 
     def on_menu_tools_compare(self, _):
         if len(self.compare_tabs) == 2:  # already in compare so do nothing

@@ -402,7 +402,6 @@ class MainWindow(wx.Frame):
 
     def close_file(self, filename):
         page = self.get_page_idx_from_filename(filename)
-        print('about to close: ', str(page), filename)
         if page is not None:
             self.close_tab(page)
             if filename in self.file_manager.open_files:

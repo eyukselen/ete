@@ -3,7 +3,7 @@ import wx
 from wx import TreeCtrl
 import os.path
 import json
-from sniplet_edit import Sniplet_Editor
+from sniplet_edit import SnipletEditor
 from configs import icons
 import io
 import zlib
@@ -16,7 +16,7 @@ def get_icon(name):
     return icon
 
 
-class Sniplet_Tree(TreeCtrl):
+class SnipletTree(TreeCtrl):
     def __init__(self, parent):
         TreeCtrl.__init__(self, parent,
                           style=wx.TR_FULL_ROW_HIGHLIGHT |
@@ -28,7 +28,7 @@ class Sniplet_Tree(TreeCtrl):
         self.root = self.AddRoot(text='Sniplets', data=0)
         # node_notes int: node id, str: text note
         self.node_notes: dict[int: str] = DefaultDict(lambda: '')
-        self.node_counter = 0  # for keeping an Id for all nodes
+        self.node_counter = 0  # for keeping an ID for all nodes
         self.file = 'sniplets.json'
         self.load_tree()  # node_counter should be before this
         self.node_list = []  # used for load and save tree
@@ -118,12 +118,13 @@ class Sniplet_Tree(TreeCtrl):
                 self.Expand(node)
 
     def on_end_drag(self, event):
-        self.target_node = event.GetItem()
-        if self.check_can_move(self.dragging_node, self.target_node):
+        # TODO this needs review for move sub item to parent
+        target_node = event.GetItem()
+        if self.check_can_move(self.dragging_node, target_node):
             if self.dragging_node:
-                if self.target_node:
+                if target_node:
                     event.Allow()
-                    self.copy_node(self.dragging_node, self.target_node)
+                    self.copy_node(self.dragging_node, target_node)
                     self.Delete(self.dragging_node)
                     self.dragging_node = None
                     self.Refresh()
@@ -161,7 +162,7 @@ class Sniplet_Tree(TreeCtrl):
         snip_name = self.GetItemText(item)
         snip_body = self.node_notes[snip_id]
         if item.IsOk():
-            se = Sniplet_Editor(self, snip_name=snip_name, snip_body=snip_body)
+            se = SnipletEditor(self, snip_name=snip_name, snip_body=snip_body)
             res = se.ShowModal()
             if res == wx.ID_OK:
                 snip_name = se.snip_name
@@ -222,7 +223,7 @@ class Sniplet_Tree(TreeCtrl):
             max_counter = max(node['id'], max_counter)
 
 
-class Sniplet_Control(wx.Panel):
+class SnipletControl(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent, style=wx.SUNKEN_BORDER)
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -250,7 +251,7 @@ class Sniplet_Control(wx.Panel):
                               kind=wx.ITEM_NORMAL, shortHelp='Save',
                               longHelp='', clientData=None)
 
-        self.sniplets = Sniplet_Tree(parent=self)
+        self.sniplets = SnipletTree(parent=self)
 
         self.main_sizer.Add(self.tool_bar, 0, wx.EXPAND)
         self.main_sizer.Add(self.sniplets, 2, wx.EXPAND)

@@ -13,7 +13,7 @@ from configs import icons, menu
 from configs import EID
 import FindReplaceDlg as Frd
 from TextEditor import TextEditor
-from sniplets import Sniplet_Control
+from sniplets import SnipletControl
 from TreeView import FileTree
 from FileManager import FileManager
 
@@ -219,7 +219,7 @@ class MainWindow(wx.Frame):
         self.editor_panel.SetSizer(self.editor_sizer)
         self.editor_panel.DragAcceptFiles(True)
         self.editor_panel.Bind(wx.EVT_DROP_FILES, self.open_page)
-        self.sniplets_panel = Sniplet_Control(parent=self.main_panel_right)
+        self.sniplets_panel = SnipletControl(parent=self.main_panel_right)
         self.mpr_sizer = wx.BoxSizer(wx.VERTICAL)
         self.main_panel_right.SetSizer(self.mpr_sizer)
         self.mpr_sizer.Add(self.editor_panel, 3, wx.EXPAND)
@@ -363,7 +363,7 @@ class MainWindow(wx.Frame):
             self.sniplets_panel.on_save_tree(event)
             self.main_panel_right.Unsplit()
         else:
-            self.sniplets_panel = Sniplet_Control(
+            self.sniplets_panel = SnipletControl(
                 parent=self.main_panel_right)
             self.main_panel_right.SplitVertically(self.editor_panel,
                                                   self.sniplets_panel,
@@ -395,7 +395,6 @@ class MainWindow(wx.Frame):
 
     def get_page_idx_from_filename(self, filename):
         for idx in range(self.notebook.GetPageCount()):
-            page = self.notebook.GetPage(idx)
             if self.notebook.GetPageToolTip(idx) == filename:
                 return idx
         return None
@@ -1002,7 +1001,7 @@ class MainWindow(wx.Frame):
             self.status_bar.SetStatusText(enc, 3)
         elif enc == 'windows-1254':
             if te.code_page != 'utf-8':
-                # works for ansi2ansi not uni2ansi
+                # works for ansi 2 ansi not uni 2 ansi
                 str_tr = xx.encode('windows-1252').decode('windows-1254')
             else:
                 str_tr = bytes(xx,
@@ -1012,7 +1011,7 @@ class MainWindow(wx.Frame):
             self.status_bar.SetStatusText(enc, 3)
         elif enc == 'windows-1252':
             if te.code_page != 'utf-8':
-                # works for ansi2 ansi not uni2ansi
+                # works for ansi 2 ansi not uni 2 ansi
                 str_tr = xx.encode(te.code_page).decode('windows-1252')
             else:
                 str_tr = bytes(xx,

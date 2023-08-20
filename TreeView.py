@@ -1,4 +1,3 @@
-from typing import List
 import wx
 from wx import TreeCtrl
 import os
@@ -6,6 +5,7 @@ from configs import icons
 import io
 import zlib
 import base64
+
 
 def get_icon(name):
     with io.BytesIO(zlib.decompress(base64.b64decode(icons[name]))) as stream:
@@ -24,6 +24,7 @@ class FileTreeCtrl(TreeCtrl):
                           wx.TR_EDIT_LABELS)
         self.main_window = main_window
         self.file_manager = file_manager
+        self.root = None
 
         self.populate()
 
@@ -91,8 +92,6 @@ class FileTreeCtrl(TreeCtrl):
         self.root = self.AddRoot(text=root_name, data=root_pth)
         self.populate_expand(self.root)
         self.Expand(self.root)
-        # tk = self.AppendItem(self.root, 'Toolkits')
-        # self.AppendItem(tk, 'Qt')
 
     def populate_expand(self, node):
         # TODO: update this to only refresh selected node not traverse all

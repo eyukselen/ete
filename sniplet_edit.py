@@ -1,7 +1,7 @@
 import wx
 
 
-class Sniplet_Editor(wx.Dialog):
+class SnipletEditor(wx.Dialog):
     def __init__(self, parent, snip_name, snip_body):
         wx.Dialog.__init__(self, parent, id=wx.ID_ANY, title=u"Edit Sniplet",
                            pos=wx.DefaultPosition, size=wx.DefaultSize,

@@ -1,4 +1,4 @@
-from typing import DefaultDict
+from collections import defaultdict
 import wx
 from wx import TreeCtrl
 import os.path
@@ -27,7 +27,7 @@ class SnipletTree(TreeCtrl):
                           wx.TR_EDIT_LABELS)
         self.root = self.AddRoot(text='Sniplets', data=0)
         # node_notes int: node id, str: text note
-        self.node_notes: dict[int: str] = DefaultDict(lambda: '')
+        self.node_notes: dict[int: str] = defaultdict(lambda: '')
         self.node_counter = 0  # for keeping an ID for all nodes
         self.file = 'sniplets.json'
         self.load_tree()  # node_counter should be before this

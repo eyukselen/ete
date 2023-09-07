@@ -8,7 +8,7 @@ from configs import icons
 import io
 import zlib
 import base64
-
+from epytree import Tree
 
 def get_icon(name):
     with io.BytesIO(zlib.decompress(base64.b64decode(icons[name]))) as stream:
@@ -25,18 +25,12 @@ class SnipletTree(TreeCtrl):
                           wx.TR_SINGLE |
                           wx.TR_TWIST_BUTTONS |
                           wx.TR_EDIT_LABELS)
-        self.root = self.AddRoot(text='Sniplets', data=0)
-        # node_notes int: node id, str: text note
-        self.node_notes: dict[int: str] = defaultdict(lambda: '')
-        self.node_counter = 0  # for keeping an ID for all nodes
-        self.file = 'sniplets.json'
-        self.load_tree()  # node_counter should be before this
-        self.node_list = []  # used for load and save tree
-
+        # self.file = 'sniplets.json'
+        self.file = 'tree.json'
+        self.tree = Tree()
+        self.load_tree()
         self.dragging_node = None
-        self.dummy_list = []
 
-        self.current_node = self.root
         self.Bind(wx.EVT_TREE_BEGIN_DRAG, self.on_begin_drag)
         self.Bind(wx.EVT_TREE_END_DRAG, self.on_end_drag)
         self.Bind(wx.EVT_TREE_SEL_CHANGED, self.on_selection_changed)
@@ -197,13 +191,10 @@ class SnipletTree(TreeCtrl):
     def load_tree(self):
         if not os.path.exists(self.file):
             return
-        with open(self.file, 'r') as file:
-            node_list = json.load(file)
-
+        self.tree.load(self.file)
         self.DeleteAllItems()
-        root_node = node_list[0]
-        node_list.pop(0)  # remove root
-        self.AddRoot(text=root_node['text'], data=root_node['id'])
+        self.tree.root.name
+        self.AddRoot(text=self.tree.root.name, data=self.tree.root.id)
         max_counter = 0
         for node in node_list:
             self.AppendItem(parent=self.load_find_node(node['parent_id'],

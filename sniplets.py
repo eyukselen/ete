@@ -1,4 +1,3 @@
-from collections import defaultdict
 import wx
 from wx import TreeCtrl
 import os.path
@@ -9,6 +8,7 @@ import io
 import zlib
 import base64
 from epytree import Tree
+
 
 def get_icon(name):
     with io.BytesIO(zlib.decompress(base64.b64decode(icons[name]))) as stream:
@@ -28,12 +28,28 @@ class SnipletTree(TreeCtrl):
         # self.file = 'sniplets.json'
         self.file = 'tree.json'
         self.tree = Tree()
-        self.load_tree()
+        self.tree.load(self.file)  # load tree data
+        self.populate_tree()
         self.dragging_node = None
 
         self.Bind(wx.EVT_TREE_BEGIN_DRAG, self.on_begin_drag)
         self.Bind(wx.EVT_TREE_END_DRAG, self.on_end_drag)
         self.Bind(wx.EVT_TREE_SEL_CHANGED, self.on_selection_changed)
+
+    def populate_tree(self):
+        if self.GetRootItem().IsOk():
+            self.Delete(self.GetRootItem())
+        self.AddRoot(text=self.tree.root.name, data=self.tree.root.id)
+        for idx, node in self.tree.root.children:
+
+    def populate_children(self):
+        for idx, node in self.tree.root.children:
+            self.AppendItem(parent=self.get_parent_node())
+
+
+
+
+
 
     def build_child_nodes(self, nod):
         child, cookie = self.GetFirstChild(nod)

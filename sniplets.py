@@ -193,26 +193,15 @@ class SnipletTree(TreeCtrl):
             return
         self.tree.load(self.file)
         self.DeleteAllItems()
-        self.tree.root.name
-        self.AddRoot(text=self.tree.root.name, data=self.tree.root.id)
-        max_counter = 0
-        for node in node_list:
-            self.AppendItem(parent=self.load_find_node(node['parent_id'],
-                                                       self.GetRootItem()),
-                            text=node['text'],
-                            data=node['id']
+        nid = self.AddRoot(text=self.tree.root.name, data=self.tree.root.id)
+
+        for idx, node in self.tree.map.items():
+            parent = self.load_find_node(node.parent_id, self.GetRootItem())
+            print(parent)
+            self.AppendItem(parent,
+                            text=node.name,
+                            data=node.id
                             )
-            self.node_notes[node['id']] = node['data']
-            max_counter = max(node['id'], max_counter)
-
-        self.node_counter = max_counter
-        self.Expand(self.GetRootItem())
-        for node in node_list:
-            if node['is_expanded']:
-                self.Expand(self.load_find_node(node['id'],
-                            self.GetRootItem()))
-            max_counter = max(node['id'], max_counter)
-
 
 class SnipletControl(wx.Panel):
     def __init__(self, parent):

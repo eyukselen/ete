@@ -1,0 +1,38 @@
+{
+  "id": 0,
+  "parent_id": null,
+  "name": "Root",
+  "data": null,
+  "children": {
+    "1": {
+      "id": 1,
+      "parent_id": 0,
+      "name": "note 1",
+      "data": null,
+      "children": {
+        "2": {
+          "id": 2,
+          "parent_id": 1,
+          "name": "note 1-1",
+          "data": null,
+          "children": {}
+        }
+      }
+    },
+    "3": {
+      "id": 3,
+      "parent_id": 0,
+      "name": "note 2",
+      "data": null,
+      "children": {
+        "4": {
+          "id": 4,
+          "parent_id": 3,
+          "name": "note 1-1-1",
+          "data": null,
+          "children": {}
+        }
+      }
+    }
+  }
+}

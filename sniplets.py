@@ -28,14 +28,13 @@ class SnipletTree(TreeCtrl):
         self.tree = Tree()
         self.tree.load(self.file)  # load tree data
         self.populate_tree()
-        self.current_node = self.GetRootItem()
         self.dragging_node = None
 
         self.Bind(wx.EVT_TREE_BEGIN_DRAG, self.on_begin_drag)
         self.Bind(wx.EVT_TREE_END_DRAG, self.on_end_drag)
-        self.Bind(wx.EVT_TREE_SEL_CHANGED, self.on_selection_changed)
         self.Bind(wx.EVT_TREE_ITEM_EXPANDED, self.on_expanded)
         self.Bind(wx.EVT_TREE_ITEM_COLLAPSED, self.on_collapsed)
+        self.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.on_activate)
 
     def populate_tree(self):
         if self.GetRootItem().IsOk():
@@ -98,13 +97,11 @@ class SnipletTree(TreeCtrl):
                 if len(node.children) > 0:
                     self.populate_children(vnode_child, node)
 
-    def on_selection_changed(self, event):
-        node = event.GetItem()
-        self.current_node = node
-        self.SelectItem(node, True)
-        # self.SetFocusedItem(node)
-        self.SetFocus()
-        self.Refresh()
+    def on_activate(self, event):
+        nod = event.GetItem()
+        self.SetFocusedItem(nod)
+        event.Veto()
+        self.edit_node()
 
     def on_begin_drag(self, event):
         if not self.dragging_node:
@@ -117,10 +114,11 @@ class SnipletTree(TreeCtrl):
         tgt_note = self.GetItemData(tgt_nod)
         src_nod = self.dragging_node
         src_note = self.GetItemData(src_nod)
-        self.tree.move_node(src_note, tgt_note)
-        self.save_tree()
-        self.populate_tree()
-        self.Refresh()
+        if src_note and tgt_note:
+            self.tree.move_node(src_note, tgt_note)
+            self.save_tree()
+            self.populate_tree()
+            self.Refresh()
 
     def add_node(self):
         node = self.GetFocusedItem()

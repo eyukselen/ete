@@ -46,6 +46,8 @@ class Tree:
         return self.map.get(idx, None)
 
     def move_node(self, src_idx, tgt_idx):
+        if src_idx == 0:
+            return
         parent_old = self.get_node(src_idx).parent_id
         node_to_move = self.get_node(parent_old).children.pop(src_idx)
         parent_new = self.get_node(tgt_idx)

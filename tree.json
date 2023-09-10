@@ -1,33 +1,15 @@
 {
   "id": 0,
-  "parent_id": null,
+  "parent_id": -1,
   "name": "Root",
-  "data": null,
+  "data": "",
   "children": {
     "1": {
       "id": 1,
       "parent_id": 0,
       "name": "note 1",
       "data": null,
-      "children": {
-        "2": {
-          "id": 2,
-          "parent_id": 1,
-          "name": "note 1-1",
-          "data": null,
-          "children": {
-            "6": {
-              "id": 6,
-              "parent_id": 2,
-              "name": "New",
-              "data": "",
-              "children": {},
-              "is_expanded": false
-            }
-          },
-          "is_expanded": true
-        }
-      },
+      "children": {},
       "is_expanded": true
     },
     "3": {
@@ -35,25 +17,15 @@
       "parent_id": 0,
       "name": "note 2",
       "data": null,
-      "children": {
-        "4": {
-          "id": 4,
-          "parent_id": 3,
-          "name": "note 1-1-1",
-          "data": "note 1-1-1 body",
-          "children": {
-            "5": {
-              "id": 5,
-              "parent_id": 4,
-              "name": "New",
-              "data": "",
-              "children": {},
-              "is_expanded": false
-            }
-          },
-          "is_expanded": true
-        }
-      },
+      "children": {},
+      "is_expanded": true
+    },
+    "7": {
+      "id": 7,
+      "parent_id": 0,
+      "name": "note 3",
+      "data": "this is note 3",
+      "children": {},
       "is_expanded": true
     }
   },

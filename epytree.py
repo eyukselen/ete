@@ -12,19 +12,21 @@ class Node:
     id = None
     parent_id = None
     data = None
+    is_expanded = None
     children = None
 
-    def __init__(self, name=None, data=None, idx=None, parent_id=None):
+    def __init__(self, name=None, data=None, idx=None, parent_id=None, is_expanded=False):
         self.id = idx
         self.parent_id = parent_id
         self.name = name
         self.data = data
         self.children = {}
+        self.is_expanded = is_expanded
 
 
 class Tree:
     def __init__(self):
-        self.root = Node(name='Root', idx=0)
+        self.root = Node(name='Root', idx=0, is_expanded=True)
         self.max_id = 0
         self.map = {0: self.root}
 
@@ -70,14 +72,17 @@ class Tree:
                  idx=js['id'],
                  parent_id=js['parent_id'],
                  data=js['data'],
+                 is_expanded=js['is_expanded']
                  )
         if js['id'] == 0:
             self.root = n
             self.map[js['id']] = n
+            self.max_id = 0
         else:
             self.map[js['id']] = n
             pn = self.get_node(js['parent_id'])
             pn.children[js['id']] = n
+            self.max_id += 1
         if len(js['children']) > 0:
             for k, v in js['children'].items():
                 self.loads(v)

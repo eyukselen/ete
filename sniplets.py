@@ -61,10 +61,11 @@ class SnipletTree(TreeCtrl):
             return
         for idx, node in self.tree.map.items():
             tree_item_id = self.find_node_by_id(idx, self.GetRootItem())
-            if node.is_expanded:
-                self.Expand(tree_item_id)
-            else:
-                self.Collapse(tree_item_id)
+            if tree_item_id.IsOk():
+                if node.is_expanded:
+                    self.Expand(tree_item_id)
+                else:
+                    self.Collapse(tree_item_id)
         self.Refresh()
 
     def find_node_by_id(self, search_id, root_item):

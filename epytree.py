@@ -62,9 +62,10 @@ class Tree:
             f.write(self.to_json())
 
     def load(self, filename):
-        # self.root = Node(name='Root', idx=0)
-        # self.max_id = 0
-        # self.map = {0: self.root}
+        root = self.map.pop(0)
+        del root
+        self.max_id = 0
+        self.map = {}
         with open(filename, 'r') as f:
             json_tree = json.loads(f.read())
         self.loads(json_tree)
@@ -84,7 +85,7 @@ class Tree:
             self.map[js['id']] = n
             pn = self.get_node(js['parent_id'])
             pn.children[js['id']] = n
-            self.max_id += 1
+            self.max_id = max(self.max_id + 1, js['id'])
         if len(js['children']) > 0:
             for k, v in js['children'].items():
                 self.loads(v)

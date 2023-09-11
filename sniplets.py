@@ -115,11 +115,15 @@ class SnipletTree(TreeCtrl):
         tgt_note = self.GetItemData(tgt_nod)
         src_nod = self.dragging_node
         src_note = self.GetItemData(src_nod)
+        print('move node:', self.tree.map[src_note].name,
+              ' to node:', self.tree.map[tgt_note].name)
         if src_note and tgt_note:
             self.tree.move_node(src_note, tgt_note)
             self.save_tree()
             self.populate_tree()
             self.Refresh()
+        event.Veto()
+        self.dragging_node = None
 
     def add_node(self):
         node = self.GetFocusedItem()

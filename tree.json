@@ -9,30 +9,13 @@
       "parent_id": 0,
       "name": "note 1",
       "data": null,
-      "children": {},
-      "is_expanded": true
-    },
-    "3": {
-      "id": 3,
-      "parent_id": 0,
-      "name": "note 2",
-      "data": null,
       "children": {
         "8": {
           "id": 8,
-          "parent_id": 3,
-          "name": "note 4",
+          "parent_id": 1,
+          "name": "New",
           "data": "",
-          "children": {
-            "9": {
-              "id": 9,
-              "parent_id": 8,
-              "name": "note 5",
-              "data": "",
-              "children": {},
-              "is_expanded": false
-            }
-          },
+          "children": {},
           "is_expanded": true
         }
       },
@@ -43,7 +26,16 @@
       "parent_id": 0,
       "name": "note 3",
       "data": "this is note 3",
-      "children": {},
+      "children": {
+        "9": {
+          "id": 9,
+          "parent_id": 7,
+          "name": "New",
+          "data": "",
+          "children": {},
+          "is_expanded": false
+        }
+      },
       "is_expanded": true
     }
   },

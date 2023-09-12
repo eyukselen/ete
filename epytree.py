@@ -15,7 +15,8 @@ class Node:
     is_expanded = None
     children = None
 
-    def __init__(self, name=None, data=None, idx=None, parent_id=None, is_expanded=False):
+    def __init__(self, name=None, data=None, idx=None, parent_id=None,
+                 is_expanded=False):
         self.id = idx
         self.parent_id = parent_id
         self.name = name
@@ -40,7 +41,8 @@ class Tree:
 
     def del_node(self, idx):
         node = self.map.pop(idx)
-        del node
+        pnode = self.map[node.parent_id]
+        pnode.children.pop(node.id)
 
     def get_node(self, idx):
         return self.map.get(idx, None)

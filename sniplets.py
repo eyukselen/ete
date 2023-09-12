@@ -24,7 +24,7 @@ class SnipletTree(TreeCtrl):
                           wx.TR_TWIST_BUTTONS |
                           wx.TR_EDIT_LABELS)
         # self.file = 'sniplets.json'
-        self.file = 'tree.json'
+        self.file = 'sniplets.json'
         self.tree = Tree()
         self.tree.load(self.file)  # load tree data
         self.populate_tree()
@@ -138,18 +138,21 @@ class SnipletTree(TreeCtrl):
         self.tree.map[idx].is_expanded = True
         self.save_tree()
         self.populate_tree()
-        self.SetFocusedItem(self.find_node_by_id(self.tree.max_id, self.GetRootItem()))
+        self.SetFocusedItem(self.find_node_by_id(self.tree.max_id,
+                                                 self.GetRootItem()))
         self.SetFocus()
         self.Refresh()
 
     def del_node(self):
         node = self.GetFocusedItem()
         idx = self.GetItemData(node)
-        print('deleting node id:', idx)
+        pidx = self.tree.map[idx].parent_id
         self.tree.del_node(idx)
-        print(self.tree.to_json())
         self.save_tree()
         self.populate_tree()
+        self.SetFocusedItem(self.find_node_by_id(pidx,
+                                                 self.GetRootItem()))
+        self.SetFocus()
         self.Refresh()
 
     def edit_node(self):

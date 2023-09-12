@@ -68,8 +68,7 @@ class Tree:
             f.write(self.to_json())
 
     def load(self, filename):
-        root = self.map.pop(0)
-        del root
+        self.map.pop(0)
         self.max_id = 0
         self.map = {}
         with open(filename, 'r') as f:

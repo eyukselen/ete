@@ -9,8 +9,7 @@ import io
 # import wx.lib.inspection  # for debugging
 import zlib
 import base64
-from configs import icons, menu
-from configs import EID
+from configs import icons, menu, EID
 import FindReplaceDlg as Frd
 from TextEditor import TextEditor
 from sniplets import SnipletControl
@@ -57,7 +56,8 @@ class MainWindow(wx.Frame):
         app_ico = wx.Icon()
         app_ico.LoadFile('ete.png', wx.BITMAP_TYPE_PNG, 32, 32)
         self.SetIcon(app_ico)
-        self.file_manager = FileManager(pth=None)
+        # self.file_manager = FileManager(pth=None)
+        self.file_manager = FileManager(pth='/home/emre/Documents/MyNotes')
 
         def get_icon(name):
             with io.BytesIO(zlib.decompress(
@@ -81,7 +81,7 @@ class MainWindow(wx.Frame):
                         if len(i) > 2:
                             bmp = get_icon(i[2])
                             img = bmp.ConvertToImage()
-                            mi.SetBitmap(wx.Bitmap(img.Scale(24, 24,
+                            mi.SetBitmap(wx.Bitmap(img.Scale(16, 16,
                                                    wx.IMAGE_QUALITY_HIGH)))
                             # TODO: this call is only for mac os
                             # windows handles this fine.

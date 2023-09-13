@@ -26,7 +26,7 @@ class FileTreeCtrl(TreeCtrl):
         self.file_manager = file_manager
         self.root = None
 
-        self.populate()
+        self.populate(self.file_manager.root_path)
 
         # region popup menu
         self.tree_popup = wx.Menu()

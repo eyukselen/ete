@@ -1056,3 +1056,4 @@ app.MainLoop()
 
 
 # TODO: encoding needs to be implemented
+# TODO: compare needs to be fixed

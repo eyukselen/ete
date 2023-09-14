@@ -49,6 +49,7 @@ class MainWindow(wx.Frame):
         self.transparency = 255
         self.SetTransparent(self.transparency)
         self.SetSize((800, 600))
+        self.icon_size = (32, 32)
 
         self.compare_tabs = []
         self.ID_SYNC_SCROLL_R = wx.ID_ANY
@@ -64,7 +65,7 @@ class MainWindow(wx.Frame):
         def get_icon(name):
             with io.BytesIO(zlib.decompress(
                     base64.b64decode(icons[name]))) as stream:
-                icon = wx.Bitmap(wx.Image(stream).Scale(24, 24, wx.IMAGE_QUALITY_HIGH))
+                icon = wx.Bitmap(wx.Image(stream).Scale(self.icon_size[0], self.icon_size[1], wx.IMAGE_QUALITY_BICUBIC))
             return icon
 
         # region menubar
@@ -83,7 +84,8 @@ class MainWindow(wx.Frame):
                         if len(i) > 2:
                             bmp = get_icon(i[2])
                             img = bmp.ConvertToImage()
-                            mi.SetBitmap(wx.Bitmap(img.Scale(16, 16,
+                            mi.SetBitmap(wx.Bitmap(img.Scale(self.icon_size[0],
+                                                             self.icon_size[1],
                                                    wx.IMAGE_QUALITY_HIGH)))
                             # TODO: this call is only for mac os
                             # windows handles this fine.
@@ -195,6 +197,7 @@ class MainWindow(wx.Frame):
                               kind=wx.ITEM_NORMAL, shortHelp='Explorer',
                               longHelp='', clientData=None)
 
+        self.tool_bar.SetToolBitmapSize(self.icon_size)
         self.SetToolBar(self.tool_bar)
         self.tool_bar.Realize()
         # endregion
@@ -1044,6 +1047,8 @@ class TransparencyDlg(wx.Dialog):
         if self.parent.CanSetTransparent():
             self.parent.SetTransparent(max(x, 10))
             self.Refresh()
+
+
 
 
 app = wx.App()

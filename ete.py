@@ -62,7 +62,7 @@ class MainWindow(wx.Frame):
         def get_icon(name):
             with io.BytesIO(zlib.decompress(
                     base64.b64decode(icons[name]))) as stream:
-                icon = wx.Bitmap(wx.Image(stream))
+                icon = wx.Bitmap(wx.Image(stream).Scale(24, 24, wx.IMAGE_QUALITY_HIGH))
             return icon
 
         # region menubar
@@ -244,10 +244,11 @@ class MainWindow(wx.Frame):
                                         style=aui.AUI_NB_CLOSE_ON_ALL_TABS |
                                         aui.AUI_NB_DEFAULT_STYLE |
                                         aui.AUI_NB_WINDOWLIST_BUTTON)
-        # TODO: later to play with colours in tabs a little
-        # asta = self.notebook.GetArtProvider()
-        # asta.SetActiveColour(wx.Colour(77, 184, 255))
-        # asta.SetColour(wx.Colour(153, 214, 255))
+        # tab colors
+        asta = self.notebook.GetArtProvider()
+        asta.SetActiveColour(wx.Colour(77, 184, 255))
+        asta.SetColour(wx.Colour(153, 214, 255))
+
         self.editor_sizer.Add(self.notebook, 1, wx.EXPAND)
         # endregion
 
@@ -259,11 +260,6 @@ class MainWindow(wx.Frame):
                                          wx.SB_SUNKEN,
                                          wx.SB_SUNKEN,
                                          wx.SB_SUNKEN])
-        # 0 - empty
-        # 1 - cursor
-        # 2 - ?
-        # 3 - ?
-        # 4 - ?
         self.SetStatusBar(self.status_bar)
         # endregion
 
@@ -1043,7 +1039,9 @@ class TransparencyDlg(wx.Dialog):
     def on_slide(self, event):
         x = event.Selection
         self.parent.transparency = x
-        self.parent.SetTransparent(max(x, 10))
+        if self.parent.CanSetTransparent():
+            # self.parent.SetBackgroundStyle(wx.BG_STYLE_TRANSPARENT)
+            self.parent.SetTransparent(max(x, 10))
         # unexpectedly printing alpha on console with DeprecationWarning
         # Debug: SetTransparent() must be called before Show()
         # need to update for linux

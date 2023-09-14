@@ -93,7 +93,6 @@ class TextEditor(wx.stc.StyledTextCtrl):
                                        EID.EDIT_PASTE, "Paste")
         self.menu_popup.Append(menu_popup_paste)
         self.Bind(wx.EVT_MENU, self.paste, menu_popup_paste)
-        self.Bind(wx.EVT_MENU, self.paste, id=5033)  # TODO what's this?
 
         menu_popup_delete = wx.MenuItem(self.menu_popup,
                                         EID.EDIT_DELETE, "Delete")

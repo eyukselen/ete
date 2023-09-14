@@ -46,9 +46,11 @@ class FileDropTarget(wx.FileDropTarget):
 class MainWindow(wx.Frame):
     def __init__(self, parent):
         wx.Frame.__init__(self, parent, title='ete - ete text editor')
-        self.SetSize((800, 600))
-        self.compare_tabs = []
         self.transparency = 255
+        self.SetTransparent(self.transparency)
+        self.SetSize((800, 600))
+
+        self.compare_tabs = []
         self.ID_SYNC_SCROLL_R = wx.ID_ANY
         self.ID_SYNC_SCROLL_L = wx.ID_ANY
         self.ID_SYNC_ZOOM_L = wx.ID_ANY
@@ -1040,11 +1042,8 @@ class TransparencyDlg(wx.Dialog):
         x = event.Selection
         self.parent.transparency = x
         if self.parent.CanSetTransparent():
-            # self.parent.SetBackgroundStyle(wx.BG_STYLE_TRANSPARENT)
             self.parent.SetTransparent(max(x, 10))
-        # unexpectedly printing alpha on console with DeprecationWarning
-        # Debug: SetTransparent() must be called before Show()
-        # need to update for linux
+            self.Refresh()
 
 
 app = wx.App()

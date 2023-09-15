@@ -1049,8 +1049,6 @@ class TransparencyDlg(wx.Dialog):
             self.Refresh()
 
 
-
-
 app = wx.App()
 MainWindow(None)
 # wx.lib.inspection.InspectionTool().Show()  # for debugging

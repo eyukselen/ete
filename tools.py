@@ -30,5 +30,26 @@ def png2str(svg_file):
     return res
 
 
-svg_file = "sniplets.svg"
-print(png2str(svg_file))
+def svg_to_data(svgfile):
+    """ function to read svg file and convert it to data to be stored in python files"""
+    with open(svgfile, 'rb') as sf:
+        svg_buff = io.BytesIO(sf.read())
+    return base64.b64encode(zlib.compress(svg_buff.read()))
+
+
+def data_to_svg(bitmap_data):
+    """ function to read data to be stored in python files and convert it to svg file """
+    return zlib.decompress(base64.b64decode(bitmap_data))
+
+
+# svg_file = "icons/Document-open.svg"
+# print(png2str(svg_file))
+
+file = "icons/Document-open.svg"
+file_tgt = "icons/Document-open_new.svg"
+bitmap = svg_to_data(file)
+print(bitmap)
+
+b2 = data_to_svg(bitmap)
+with open(file_tgt, 'wb') as nf:
+    nf.write(b2)

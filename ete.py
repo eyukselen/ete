@@ -15,7 +15,7 @@ from TextEditor import TextEditor
 from sniplets import SnipletControl
 from TreeView import FileTree
 from FileManager import FileManager
-from tools import get_icon2
+# from tools import get_icon2
 
 # region high dpi settings for windows
 if sys.platform == 'win32':

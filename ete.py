@@ -15,6 +15,7 @@ from TextEditor import TextEditor
 from sniplets import SnipletControl
 from TreeView import FileTree
 from FileManager import FileManager
+from tools import get_icon2
 
 # region high dpi settings for windows
 if sys.platform == 'win32':
@@ -197,7 +198,6 @@ class MainWindow(wx.Frame):
                               kind=wx.ITEM_NORMAL, shortHelp='Explorer',
                               longHelp='', clientData=None)
 
-        self.tool_bar.SetToolBitmapSize(self.icon_size)
         self.SetToolBar(self.tool_bar)
         self.tool_bar.Realize()
         # endregion

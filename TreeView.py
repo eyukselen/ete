@@ -1,16 +1,8 @@
 import wx
 from wx import TreeCtrl
 import os
-from configs import icons
-import io
-import zlib
-import base64
-
-
-def get_icon(name):
-    with io.BytesIO(zlib.decompress(base64.b64decode(icons[name]))) as stream:
-        icon = wx.Bitmap(wx.Image(stream))
-    return icon
+from configs import svg_icons, settings
+from tools import get_svg_icon
 
 
 class FileTreeCtrl(TreeCtrl):
@@ -125,23 +117,23 @@ class FileTree(wx.Panel):
 
         self.tool_bar = wx.ToolBar(parent=self)
         self.tool_bar.AddTool(toolId=wx.ID_ADD, label='Add',
-                              bitmap=get_icon('snip_add'),
-                              bmpDisabled=get_icon('snip_add'),
+                              bitmap=get_svg_icon(svg_icons['snip_add'], settings['icon_size']),
+                              bmpDisabled=get_svg_icon(svg_icons['snip_add'], settings['icon_size']),
                               kind=wx.ITEM_NORMAL, shortHelp='Add',
                               longHelp='', clientData=None)
         self.tool_bar.AddTool(toolId=wx.ID_DELETE, label='Del',
-                              bitmap=get_icon('snip_del'),
-                              bmpDisabled=get_icon('snip_del'),
+                              bitmap=get_svg_icon(svg_icons['snip_del'], settings['icon_size']),
+                              bmpDisabled=get_svg_icon(svg_icons['snip_del'], settings['icon_size']),
                               kind=wx.ITEM_NORMAL, shortHelp='Delete',
                               longHelp='', clientData=None)
         self.tool_bar.AddTool(toolId=wx.ID_EDIT, label='Edit',
-                              bitmap=get_icon('snip_edit'),
-                              bmpDisabled=get_icon('snip_edit'),
+                              bitmap=get_svg_icon(svg_icons['snip_edit'], settings['icon_size']),
+                              bmpDisabled=get_svg_icon(svg_icons['snip_edit'], settings['icon_size']),
                               kind=wx.ITEM_NORMAL, shortHelp='Edit',
                               longHelp='', clientData=None)
         self.tool_bar.AddTool(toolId=wx.ID_SAVE, label='Save',
-                              bitmap=get_icon('save_ico'),
-                              bmpDisabled=get_icon('save_ico'),
+                              bitmap=get_svg_icon(svg_icons['save_ico'], settings['icon_size']),
+                              bmpDisabled=get_svg_icon(svg_icons['save_ico'], settings['icon_size']),
                               kind=wx.ITEM_NORMAL, shortHelp='Save',
                               longHelp='', clientData=None)
 

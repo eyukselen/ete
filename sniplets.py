@@ -1,21 +1,13 @@
 import wx
 from wx import TreeCtrl
 from sniplet_edit import SnipletEditor
-from configs import icons
-import io
-import zlib
-import base64
+from configs import svg_icons, settings
+from tools import get_svg_icon
 from epytree import Tree, Node
 
 
-def get_icon(name):
-    with io.BytesIO(zlib.decompress(base64.b64decode(icons[name]))) as stream:
-        icon = wx.Bitmap(wx.Image(stream))
-    return icon
-
-
 class SnipletTree(TreeCtrl):
-    def __init__(self, parent):
+    def __init__(self, parent, sniplets_file):
         TreeCtrl.__init__(self, parent,
                           style=wx.TR_FULL_ROW_HIGHLIGHT |
                           wx.TR_LINES_AT_ROOT |
@@ -23,8 +15,7 @@ class SnipletTree(TreeCtrl):
                           wx.TR_SINGLE |
                           wx.TR_TWIST_BUTTONS |
                           wx.TR_EDIT_LABELS)
-        # self.file = 'sniplets.json'
-        self.file = 'sniplets.json'
+        self.file = sniplets_file
         self.tree = Tree()
         self.tree.load(self.file)  # load tree data
         self.populate_tree()
@@ -179,34 +170,36 @@ class SnipletTree(TreeCtrl):
 
 
 class SnipletControl(wx.Panel):
-    def __init__(self, parent):
+    def __init__(self, parent, filename):
         wx.Panel.__init__(self, parent, style=wx.SUNKEN_BORDER)
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
         self.SetSizer(self.main_sizer)
+        self.filename = filename
 
         self.tool_bar = wx.ToolBar(parent=self)
+        # TODO do not call get_svg_icon twice and conver to bundle in sniplets and TreeView
         self.tool_bar.AddTool(toolId=wx.ID_ADD, label='Add',
-                              bitmap=get_icon('snip_add'),
-                              bmpDisabled=get_icon('snip_add'),
+                              bitmap=get_svg_icon(svg_icons['snip_add'], settings['icon_size']),
+                              bmpDisabled=get_svg_icon(svg_icons['snip_add'], settings['icon_size']),
                               kind=wx.ITEM_NORMAL, shortHelp='Add',
                               longHelp='', clientData=None)
         self.tool_bar.AddTool(toolId=wx.ID_DELETE, label='Del',
-                              bitmap=get_icon('snip_del'),
-                              bmpDisabled=get_icon('snip_del'),
+                              bitmap=get_svg_icon(svg_icons['snip_del'], settings['icon_size']),
+                              bmpDisabled=get_svg_icon(svg_icons['snip_del'], settings['icon_size']),
                               kind=wx.ITEM_NORMAL, shortHelp='Delete',
                               longHelp='', clientData=None)
         self.tool_bar.AddTool(toolId=wx.ID_EDIT, label='Edit',
-                              bitmap=get_icon('snip_edit'),
-                              bmpDisabled=get_icon('snip_edit'),
+                              bitmap=get_svg_icon(svg_icons['snip_edit'], settings['icon_size']),
+                              bmpDisabled=get_svg_icon(svg_icons['snip_edit'], settings['icon_size']),
                               kind=wx.ITEM_NORMAL, shortHelp='Edit',
                               longHelp='', clientData=None)
         self.tool_bar.AddTool(toolId=wx.ID_SAVE, label='Save',
-                              bitmap=get_icon('save_ico'),
-                              bmpDisabled=get_icon('save_ico'),
+                              bitmap=get_svg_icon(svg_icons['save_ico'], settings['icon_size']),
+                              bmpDisabled=get_svg_icon(svg_icons['save_ico'], settings['icon_size']),
                               kind=wx.ITEM_NORMAL, shortHelp='Save',
                               longHelp='', clientData=None)
 
-        self.sniplets = SnipletTree(parent=self)
+        self.sniplets = SnipletTree(parent=self, sniplets_file=self.filename)
 
         self.main_sizer.Add(self.tool_bar, 0, wx.EXPAND)
         self.main_sizer.Add(self.sniplets, 2, wx.EXPAND)

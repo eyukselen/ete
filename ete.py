@@ -48,7 +48,8 @@ class MainWindow(wx.Frame):
         self.settings = settings
         self.settings['cwd'] = os.getcwd()
         self.settings['app_dir'] = os.path.dirname(__file__)
-        self.settings['snip_file'] = os.path.dirname(__file__) + '/sniplets.json'
+        self.settings['snip_file'] = \
+            os.path.dirname(__file__) + '/sniplets.json'
 
         self.SetSize(self.settings['window_size'])
         self.compare_tabs = []

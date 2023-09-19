@@ -50,7 +50,10 @@ class MainWindow(wx.Frame):
         self.settings['app_dir'] = os.path.dirname(__file__)
         self.settings['snip_file'] = \
             os.path.dirname(__file__) + '/sniplets.json'
-
+        self.bitmaps = {icon_name: get_svg_icon(icon_data,
+                                                self.settings['icon_size'])
+                        for icon_name, icon_data in svg_icons.items()
+                        }
         self.SetSize(self.settings['window_size'])
         self.compare_tabs = []
         self.ID_SYNC_SCROLL_R = wx.ID_ANY
@@ -76,8 +79,7 @@ class MainWindow(wx.Frame):
                     mit = wx.MenuItem(parentMenu=mnu, id=mi[0],
                                       text=mi[1], kind=wx.ITEM_NORMAL)
                     if mi[2] and mi[4]:
-                        mit.SetBitmap(get_svg_icon(svg_icons[mi[2]],
-                                                   self.settings['icon_size']))
+                        mit.SetBitmap(self.bitmaps[mi[2]])
                     mnu.Append(mit)
             self.menu_bar.Append(mnu, k)
 
@@ -99,10 +101,8 @@ class MainWindow(wx.Frame):
                         # item[4] show in menu
                         toolbar.AddTool(toolId=item[0],
                                         label=item[1].replace('&', ''),
-                                        bitmap=get_svg_icon(
-                                            svgicons[item[2]], icon_size),
-                                        bmpDisabled=get_svg_icon(
-                                            svgicons[item[2]], icon_size),
+                                        bitmap=self.bitmaps[item[2]],
+                                        bmpDisabled=self.bitmaps[item[2]],
                                         kind=wx.ITEM_NORMAL,
                                         shortHelp=item[1].replace('&', ''),
                                         longHelp='',
@@ -286,6 +286,7 @@ class MainWindow(wx.Frame):
                                              notebook=self.notebook)
         self.info = wx.adv.AboutDialogInfo()
         self.Show()
+        exit()
 
     def on_menu_tools_sniplets(self, event):
         if self.main_panel_right.IsSplit():

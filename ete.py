@@ -47,9 +47,8 @@ class MainWindow(wx.Frame):
         self.SetTransparent(self.transparency)
         self.settings = settings
         self.settings['cwd'] = os.getcwd()
-        self.settings['app_dir'] = os.path.dirname(__file__)
-        self.settings['snip_file'] = \
-            os.path.dirname(__file__) + '/sniplets.json'
+        self.settings['app_dir'] = os.path.dirname(os.path.realpath(__file__))
+        self.settings['snip_file'] = self.settings['app_dir'] + '/sniplets.json'
         self.bitmaps = {icon_name: get_svg_icon(icon_data,
                                                 self.settings['icon_size'])
                         for icon_name, icon_data in svg_icons.items()
@@ -286,7 +285,6 @@ class MainWindow(wx.Frame):
                                              notebook=self.notebook)
         self.info = wx.adv.AboutDialogInfo()
         self.Show()
-        exit()
 
     def on_menu_tools_sniplets(self, event):
         if self.main_panel_right.IsSplit():

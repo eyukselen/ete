@@ -170,41 +170,32 @@ class SnipletTree(TreeCtrl):
 
 
 class SnipletControl(wx.Panel):
-    def __init__(self, parent, filename):
+    def __init__(self, parent, filename, icons=None):
         wx.Panel.__init__(self, parent, style=wx.SUNKEN_BORDER)
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
         self.SetSizer(self.main_sizer)
         self.filename = filename
+        self.icons = icons
 
         self.tool_bar = wx.ToolBar(parent=self)
-        # TODO do not call get_svg_icon twice
-        # and convert to bundle in sniplets and TreeView
         self.tool_bar.AddTool(toolId=wx.ID_ADD, label='Add',
-                              bitmap=get_svg_icon(svg_icons['snip_add'],
-                                                  settings['icon_size']),
-                              bmpDisabled=get_svg_icon(svg_icons['snip_add'],
-                                                       settings['icon_size']),
+                              bitmap=self.icons['snip_add'],
+                              bmpDisabled=self.icons['snip_add'],
                               kind=wx.ITEM_NORMAL, shortHelp='Add',
                               longHelp='', clientData=None)
         self.tool_bar.AddTool(toolId=wx.ID_DELETE, label='Del',
-                              bitmap=get_svg_icon(svg_icons['snip_del'],
-                                                  settings['icon_size']),
-                              bmpDisabled=get_svg_icon(svg_icons['snip_del'],
-                                                       settings['icon_size']),
+                              bitmap=self.icons['snip_del'],
+                              bmpDisabled=self.icons['snip_del'],
                               kind=wx.ITEM_NORMAL, shortHelp='Delete',
                               longHelp='', clientData=None)
         self.tool_bar.AddTool(toolId=wx.ID_EDIT, label='Edit',
-                              bitmap=get_svg_icon(svg_icons['snip_edit'],
-                                                  settings['icon_size']),
-                              bmpDisabled=get_svg_icon(svg_icons['snip_edit'],
-                                                       settings['icon_size']),
+                              bitmap=self.icons['snip_edit'],
+                              bmpDisabled=self.icons['snip_edit'],
                               kind=wx.ITEM_NORMAL, shortHelp='Edit',
                               longHelp='', clientData=None)
         self.tool_bar.AddTool(toolId=wx.ID_SAVE, label='Save',
-                              bitmap=get_svg_icon(svg_icons['save_ico'],
-                                                  settings['icon_size']),
-                              bmpDisabled=get_svg_icon(svg_icons['save_ico'],
-                                                       settings['icon_size']),
+                              bitmap=self.icons['save_ico'],
+                              bmpDisabled=self.icons['save_ico'],
                               kind=wx.ITEM_NORMAL, shortHelp='Save',
                               longHelp='', clientData=None)
 

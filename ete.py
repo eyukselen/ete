@@ -136,7 +136,8 @@ class MainWindow(wx.Frame):
         self.main_panel_window.SetSizer(self.mp_sizer)
         self.explorer_panel = FileTree(parent=self.main_panel_window,
                                        main_window=self,
-                                       file_manager=self.file_manager)
+                                       file_manager=self.file_manager,
+                                       icons=self.bitmaps)
         self.main_panel_right = wx.SplitterWindow(
             parent=self.main_panel_window,
             id=wx.ID_ANY,
@@ -151,7 +152,8 @@ class MainWindow(wx.Frame):
         self.editor_panel.Bind(wx.EVT_DROP_FILES, self.open_page)
         self.sniplets_panel = SnipletControl(
             parent=self.main_panel_right,
-            filename=self.settings['snip_file'])
+            filename=self.settings['snip_file'],
+            icons=self.bitmaps)
         self.mpr_sizer = wx.BoxSizer(wx.VERTICAL)
         self.main_panel_right.SetSizer(self.mpr_sizer)
         self.mpr_sizer.Add(self.editor_panel, 3, wx.EXPAND)
@@ -293,7 +295,8 @@ class MainWindow(wx.Frame):
         else:
             self.sniplets_panel = SnipletControl(
                 parent=self.main_panel_right,
-                filename=self.settings['snip_file'])
+                filename=self.settings['snip_file'],
+                icons=self.bitmaps)
             self.main_panel_right.SplitVertically(self.editor_panel,
                                                   self.sniplets_panel,
                                                   -250)

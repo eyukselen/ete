@@ -545,8 +545,9 @@ class MainWindow(wx.Frame):
         self.close_tab(page_to_close)
 
     def onclose(self, event):
-        if event.CanVeto():
-            event.Veto()
+        if hasattr(event, 'CanVeto'):
+            if event.CanVeto():
+                event.Veto()
         for x in range(self.notebook.GetPageCount(), 0, -1):
             cp = self.notebook.GetPage(x-1)
             for widget in cp.GetChildren():
@@ -561,7 +562,7 @@ class MainWindow(wx.Frame):
                         dlg = wx.MessageBox(msg, 'Save ?',
                                             wx.YES_NO | wx.CANCEL)
                         if dlg == wx.YES:
-                            self.save_page(event)
+                            self.save_page(None)
                             self.notebook.DeletePage(
                                 self.notebook.GetPageIndex(cp))
                         elif dlg == wx.NO:

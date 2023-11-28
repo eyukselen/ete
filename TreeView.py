@@ -1,16 +1,8 @@
 import wx
 from wx import TreeCtrl
 import os
-from configs import icons
-import io
-import zlib
-import base64
-
-
-def get_icon(name):
-    with io.BytesIO(zlib.decompress(base64.b64decode(icons[name]))) as stream:
-        icon = wx.Bitmap(wx.Image(stream))
-    return icon
+from configs import svg_icons, settings
+from tools import get_svg_icon
 
 
 class FileTreeCtrl(TreeCtrl):
@@ -25,8 +17,7 @@ class FileTreeCtrl(TreeCtrl):
         self.main_window = main_window
         self.file_manager = file_manager
         self.root = None
-
-        self.populate(self.file_manager.root_path)
+        self.set_root_path(self.file_manager.root_path)
 
         # region popup menu
         self.tree_popup = wx.Menu()
@@ -46,6 +37,16 @@ class FileTreeCtrl(TreeCtrl):
         # self.Bind(wx.EVT_TREE_END_DRAG, self.on_end_drag)
         # self.Bind(wx.EVT_TREE_SEL_CHANGED, self.on_selection_changed)
         # endregion
+
+    def set_root_path(self, root_path):
+        if os.path.isdir(root_path):
+            self.file_manager.root_path = root_path
+            self.DeleteAllItems()
+            if self.GetRootItem().IsOk():
+                self.Delete(self.GetRootItem())
+            self.populate(self.file_manager.root_path)
+        else:
+            return
 
     def node_activated(self, event):
         node = event.GetItem()
@@ -94,7 +95,6 @@ class FileTreeCtrl(TreeCtrl):
         self.Expand(self.root)
 
     def populate_expand(self, node):
-        # TODO: update this to only refresh selected node not traverse all
         root_pth = self.GetItemData(node)
         pth = self.GetItemText(node)
         res = []
@@ -115,33 +115,37 @@ class FileTreeCtrl(TreeCtrl):
 
 class FileTree(wx.Panel):
     """This is only a panel to glue together actual
-    tree control and controls"""
-    def __init__(self, parent, main_window, file_manager):
+    tree control and other controls"""
+    def __init__(self, parent, main_window, file_manager, icons):
         wx.Panel.__init__(self, parent, style=wx.SUNKEN_BORDER)
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
         self.SetSizer(self.main_sizer)
         self.main_window = main_window
         self.file_manager = file_manager
+        self.icons = icons
 
+        self.path_bar = wx.TextCtrl(parent=self,
+                                    value=self.file_manager.root_path,
+                                    style=wx.TE_PROCESS_ENTER)
         self.tool_bar = wx.ToolBar(parent=self)
         self.tool_bar.AddTool(toolId=wx.ID_ADD, label='Add',
-                              bitmap=get_icon('snip_add'),
-                              bmpDisabled=get_icon('snip_add'),
+                              bitmap=self.icons['snip_add'],
+                              bmpDisabled=self.icons['snip_add'],
                               kind=wx.ITEM_NORMAL, shortHelp='Add',
                               longHelp='', clientData=None)
         self.tool_bar.AddTool(toolId=wx.ID_DELETE, label='Del',
-                              bitmap=get_icon('snip_del'),
-                              bmpDisabled=get_icon('snip_del'),
+                              bitmap=self.icons['snip_del'],
+                              bmpDisabled=self.icons['snip_del'],
                               kind=wx.ITEM_NORMAL, shortHelp='Delete',
                               longHelp='', clientData=None)
         self.tool_bar.AddTool(toolId=wx.ID_EDIT, label='Edit',
-                              bitmap=get_icon('snip_edit'),
-                              bmpDisabled=get_icon('snip_edit'),
+                              bitmap=self.icons['snip_edit'],
+                              bmpDisabled=self.icons['snip_edit'],
                               kind=wx.ITEM_NORMAL, shortHelp='Edit',
                               longHelp='', clientData=None)
         self.tool_bar.AddTool(toolId=wx.ID_SAVE, label='Save',
-                              bitmap=get_icon('save_ico'),
-                              bmpDisabled=get_icon('save_ico'),
+                              bitmap=self.icons['save_ico'],
+                              bmpDisabled=self.icons['save_ico'],
                               kind=wx.ITEM_NORMAL, shortHelp='Save',
                               longHelp='', clientData=None)
 
@@ -149,7 +153,15 @@ class FileTree(wx.Panel):
                                      main_window=self.main_window,
                                      file_manager=self.file_manager)
 
+        self.main_sizer.Add(self.path_bar, 0, wx.EXPAND)
         self.main_sizer.Add(self.tool_bar, 0, wx.EXPAND)
         self.main_sizer.Add(self.explorer, 2, wx.EXPAND)
         self.tool_bar.Realize()
         self.Refresh()
+
+        self.Bind(wx.EVT_TEXT_ENTER, self.on_path_change)
+
+    def on_path_change(self, event):
+        self.explorer.set_root_path(event.String)
+        event.Skip()
+

@@ -4,17 +4,14 @@ import wx
 import wx.adv
 import wx.aui as aui
 import wx.stc as stc
-import wx.svg
-import io
 # import wx.lib.inspection  # for debugging
-import zlib
-import base64
-from configs import icons, menu, EID
+from configs import EID, svg_icons, new_menu, settings
 import FindReplaceDlg as Frd
 from TextEditor import TextEditor
 from sniplets import SnipletControl
 from TreeView import FileTree
 from FileManager import FileManager
+from tools import get_svg_icon
 
 # region high dpi settings for windows
 if sys.platform == 'win32':
@@ -46,52 +43,44 @@ class FileDropTarget(wx.FileDropTarget):
 class MainWindow(wx.Frame):
     def __init__(self, parent):
         wx.Frame.__init__(self, parent, title='ete - ete text editor')
-        self.SetSize((800, 600))
-        self.compare_tabs = []
         self.transparency = 255
+        self.SetTransparent(self.transparency)
+        self.settings = settings
+        self.settings['cwd'] = os.getcwd()
+        self.settings['app_dir'] = os.path.dirname(os.path.realpath(__file__))
+        self.settings['snip_file'] = self.settings['app_dir'] + '/sniplets.json'
+        self.bitmaps = {icon_name: get_svg_icon(icon_data,
+                                                self.settings['icon_size'])
+                        for icon_name, icon_data in svg_icons.items()
+                        }
+        self.SetSize(self.settings['window_size'])
+        self.compare_tabs = []
         self.ID_SYNC_SCROLL_R = wx.ID_ANY
         self.ID_SYNC_SCROLL_L = wx.ID_ANY
         self.ID_SYNC_ZOOM_L = wx.ID_ANY
         self.ID_SYNC_ZOOM_R = wx.ID_ANY
         app_ico = wx.Icon()
-        app_ico.LoadFile('ete.png', wx.BITMAP_TYPE_PNG, 32, 32)
+        app_ico.LoadFile(self.settings['app_dir'] + '/ete.png',
+                         wx.BITMAP_TYPE_PNG, 32, 32)
         self.SetIcon(app_ico)
         # self.file_manager = FileManager(pth=None)
-        self.file_manager = FileManager(pth='/home/emre/Documents/MyNotes')
-
-        def get_icon(name):
-            with io.BytesIO(zlib.decompress(
-                    base64.b64decode(icons[name]))) as stream:
-                icon = wx.Bitmap(wx.Image(stream))
-            return icon
+        self.file_manager = FileManager(pth=self.settings['cwd'])
 
         # region menubar
 
         self.menu_bar = wx.MenuBar()
-
-        for item in menu:
-            m = wx.Menu()
-            for i in menu[item]:
-                if i[0] == EID.SEP:
-                    m.AppendSeparator()
+        for k, v in new_menu.items():
+            mnu = wx.Menu()
+            for mi in v:
+                if mi[0] == EID.SEP:
+                    mnu.AppendSeparator()
                 else:
-                    try:
-                        mi = wx.MenuItem(parentMenu=m, id=i[0],
-                                         text=i[1], kind=wx.ITEM_NORMAL)
-                        if len(i) > 2:
-                            bmp = get_icon(i[2])
-                            img = bmp.ConvertToImage()
-                            mi.SetBitmap(wx.Bitmap(img.Scale(16, 16,
-                                                   wx.IMAGE_QUALITY_HIGH)))
-                            # TODO: this call is only for mac os
-                            # windows handles this fine.
-                            # mac os scales same bitmap differently for toolbar
-                            # and menu. normally entire if block should be
-                            # only mi.SetBitmap(i[2]) for windows
-                        m.Append(mi)
-                    finally:
-                        pass
-            self.menu_bar.Append(m, item)
+                    mit = wx.MenuItem(parentMenu=mnu, id=mi[0],
+                                      text=mi[1], kind=wx.ITEM_NORMAL)
+                    if mi[2] and mi[4]:
+                        mit.SetBitmap(self.bitmaps[mi[2]])
+                    mnu.Append(mit)
+            self.menu_bar.Append(mnu, k)
 
         self.SetMenuBar(self.menu_bar)
         # endregion
@@ -99,7 +88,31 @@ class MainWindow(wx.Frame):
         # region toolbar definition
         # cascaded toolbar on macOS does not show icons so text added
         # on windows adding text makes icons too big
+
         self.tool_bar = wx.ToolBar(self)
+
+        def toolbar_provider(toolbar, menu_dict, svgicons, icon_size):
+            for k, v in menu_dict.items():
+                for item in v:
+                    if item[3] and item[2]:
+                        # item[2] has icon defined
+                        # item[3] show in toolbar
+                        # item[4] show in menu
+                        toolbar.AddTool(toolId=item[0],
+                                        label=item[1].replace('&', ''),
+                                        bitmap=self.bitmaps[item[2]],
+                                        bmpDisabled=self.bitmaps[item[2]],
+                                        kind=wx.ITEM_NORMAL,
+                                        shortHelp=item[1].replace('&', ''),
+                                        longHelp='',
+                                        clientData=None)
+                    elif item[0] == EID.SEP and item[3]:
+                        toolbar.AddSeparator()
+
+            return toolbar
+
+        toolbar_provider(self.tool_bar, new_menu, svg_icons,
+                         self.settings['icon_size'])
         if sys.platform == 'win32':
             self.tool_bar.SetWindowStyle(
                 wx.TB_HORIZONTAL | wx.TB_FLAT | wx.NO_BORDER)
@@ -109,89 +122,6 @@ class MainWindow(wx.Frame):
         else:
             self.tool_bar.SetWindowStyle(
                 wx.TB_HORIZONTAL | wx.TB_FLAT | wx.NO_BORDER)
-
-        self.tool_bar.AddTool(toolId=EID.FILE_NEW, label='New',
-                              bitmap=get_icon('new_ico'),
-                              bmpDisabled=get_icon('new_ico'),
-                              kind=wx.ITEM_NORMAL, shortHelp='New File',
-                              longHelp='', clientData=None)
-        self.tool_bar.AddTool(toolId=EID.FILE_OPEN, label='Open',
-                              bitmap=get_icon('open_ico'),
-                              bmpDisabled=get_icon('open_ico'),
-                              kind=wx.ITEM_NORMAL, shortHelp='Open File',
-                              longHelp='', clientData=None)
-        self.tool_bar.AddTool(toolId=EID.FILE_SAVE, label='Save',
-                              bitmap=get_icon('save_ico'),
-                              bmpDisabled=get_icon('save_ico'),
-                              kind=wx.ITEM_NORMAL, shortHelp='Save File',
-                              longHelp='', clientData=None)
-        self.tool_bar.AddTool(toolId=EID.FILE_SAVEAS, label='Save As',
-                              bitmap=get_icon('save_as_ico'),
-                              bmpDisabled=get_icon('save_as_ico'),
-                              kind=wx.ITEM_NORMAL, shortHelp='Save File As',
-                              longHelp='', clientData=None)
-        self.tool_bar.AddSeparator()
-        self.tool_bar.AddTool(toolId=EID.EDIT_CUT, label='Cut',
-                              bitmap=get_icon('cut_ico'),
-                              bmpDisabled=get_icon('cut_ico'),
-                              kind=wx.ITEM_NORMAL, shortHelp='Cut',
-                              longHelp='Cut Text', clientData=None)
-        self.tool_bar.AddTool(toolId=EID.EDIT_COPY, label='Copy',
-                              bitmap=get_icon('copy_ico'),
-                              bmpDisabled=get_icon('copy_ico'),
-                              kind=wx.ITEM_NORMAL, shortHelp='Copy',
-                              longHelp='Copy Text', clientData=None)
-        self.tool_bar.AddTool(toolId=EID.EDIT_PASTE, label='Paste',
-                              bitmap=get_icon('paste_ico'),
-                              bmpDisabled=get_icon('paste_ico'),
-                              kind=wx.ITEM_NORMAL, shortHelp='Paste',
-                              longHelp='Paste Text', clientData=None)
-        self.tool_bar.AddSeparator()
-        self.tool_bar.AddTool(toolId=EID.EDIT_FIND, label='Find',
-                              bitmap=get_icon('find_ico'),
-                              bmpDisabled=get_icon('find_ico'),
-                              kind=wx.ITEM_NORMAL, shortHelp='Find',
-                              longHelp='Find Text', clientData=None)
-        self.tool_bar.AddTool(toolId=EID.EDIT_REPLACE, label='Replace Text',
-                              bitmap=get_icon('replace_ico'),
-                              bmpDisabled=get_icon('replace_ico'),
-                              kind=wx.ITEM_NORMAL, shortHelp='Replace',
-                              longHelp='Replace Text', clientData=None)
-        self.tool_bar.AddSeparator()
-        self.tool_bar.AddTool(toolId=EID.ABOUT_INFO, label='Info',
-                              bitmap=get_icon('info_ico'),
-                              bmpDisabled=get_icon('info_ico'),
-                              kind=wx.ITEM_NORMAL, shortHelp='Information',
-                              longHelp='', clientData=None)
-        self.tool_bar.AddTool(toolId=EID.FILE_EXIT, label='Exit',
-                              bitmap=get_icon('exit_ico'),
-                              bmpDisabled=get_icon('exit_ico'),
-                              kind=wx.ITEM_NORMAL,
-                              shortHelp='Exit Application',
-                              longHelp='', clientData=None)
-        self.tool_bar.AddSeparator()
-        self.tool_bar.AddTool(toolId=EID.TOOLS_COMPARE, label='Compare',
-                              bitmap=get_icon('compare_ico'),
-                              bmpDisabled=get_icon('compare_ico'),
-                              kind=wx.ITEM_NORMAL, shortHelp='Compare',
-                              longHelp='', clientData=None)
-        self.tool_bar.AddTool(toolId=EID.TOOLS_CLEARCOMP,
-                              label='Clear Compare',
-                              bitmap=get_icon('clear_compare_ico'),
-                              bmpDisabled=get_icon('clear_compare_ico'),
-                              kind=wx.ITEM_NORMAL, shortHelp='Clear Compare',
-                              longHelp='', clientData=None)
-        self.tool_bar.AddSeparator()
-        self.tool_bar.AddTool(toolId=EID.TOOLS_SNIPLETS, label="Sniplets",
-                              bitmap=get_icon('sniplets'),
-                              bmpDisabled=get_icon('sniplets'),
-                              kind=wx.ITEM_NORMAL, shortHelp='Sniplets',
-                              longHelp='', clientData=None)
-        self.tool_bar.AddTool(toolId=EID.TOOLS_EXPLORER, label="Explorer",
-                              bitmap=get_icon('select_ico'),
-                              bmpDisabled=get_icon('select_ico'),
-                              kind=wx.ITEM_NORMAL, shortHelp='Explorer',
-                              longHelp='', clientData=None)
 
         self.SetToolBar(self.tool_bar)
         self.tool_bar.Realize()
@@ -206,7 +136,8 @@ class MainWindow(wx.Frame):
         self.main_panel_window.SetSizer(self.mp_sizer)
         self.explorer_panel = FileTree(parent=self.main_panel_window,
                                        main_window=self,
-                                       file_manager=self.file_manager)
+                                       file_manager=self.file_manager,
+                                       icons=self.bitmaps)
         self.main_panel_right = wx.SplitterWindow(
             parent=self.main_panel_window,
             id=wx.ID_ANY,
@@ -219,7 +150,10 @@ class MainWindow(wx.Frame):
         self.editor_panel.SetSizer(self.editor_sizer)
         self.editor_panel.DragAcceptFiles(True)
         self.editor_panel.Bind(wx.EVT_DROP_FILES, self.open_page)
-        self.sniplets_panel = SnipletControl(parent=self.main_panel_right)
+        self.sniplets_panel = SnipletControl(
+            parent=self.main_panel_right,
+            filename=self.settings['snip_file'],
+            icons=self.bitmaps)
         self.mpr_sizer = wx.BoxSizer(wx.VERTICAL)
         self.main_panel_right.SetSizer(self.mpr_sizer)
         self.mpr_sizer.Add(self.editor_panel, 3, wx.EXPAND)
@@ -244,10 +178,11 @@ class MainWindow(wx.Frame):
                                         style=aui.AUI_NB_CLOSE_ON_ALL_TABS |
                                         aui.AUI_NB_DEFAULT_STYLE |
                                         aui.AUI_NB_WINDOWLIST_BUTTON)
-        # TODO: later to play with colours in tabs a little
-        # asta = self.notebook.GetArtProvider()
-        # asta.SetActiveColour(wx.Colour(77, 184, 255))
-        # asta.SetColour(wx.Colour(153, 214, 255))
+        # tab colors
+        asta = self.notebook.GetArtProvider()
+        asta.SetActiveColour(wx.Colour(77, 184, 255))
+        asta.SetColour(wx.Colour(153, 214, 255))
+
         self.editor_sizer.Add(self.notebook, 1, wx.EXPAND)
         # endregion
 
@@ -259,11 +194,6 @@ class MainWindow(wx.Frame):
                                          wx.SB_SUNKEN,
                                          wx.SB_SUNKEN,
                                          wx.SB_SUNKEN])
-        # 0 - empty
-        # 1 - cursor
-        # 2 - ?
-        # 3 - ?
-        # 4 - ?
         self.SetStatusBar(self.status_bar)
         # endregion
 
@@ -364,7 +294,9 @@ class MainWindow(wx.Frame):
             self.main_panel_right.Unsplit()
         else:
             self.sniplets_panel = SnipletControl(
-                parent=self.main_panel_right)
+                parent=self.main_panel_right,
+                filename=self.settings['snip_file'],
+                icons=self.bitmaps)
             self.main_panel_right.SplitVertically(self.editor_panel,
                                                   self.sniplets_panel,
                                                   -250)
@@ -616,8 +548,9 @@ class MainWindow(wx.Frame):
         self.close_tab(page_to_close)
 
     def onclose(self, event):
-        if event.CanVeto():
-            event.Veto()
+        if hasattr(event, 'CanVeto'):
+            if event.CanVeto():
+                event.Veto()
         for x in range(self.notebook.GetPageCount(), 0, -1):
             cp = self.notebook.GetPage(x-1)
             for widget in cp.GetChildren():
@@ -632,7 +565,7 @@ class MainWindow(wx.Frame):
                         dlg = wx.MessageBox(msg, 'Save ?',
                                             wx.YES_NO | wx.CANCEL)
                         if dlg == wx.YES:
-                            self.save_page(event)
+                            self.save_page(None)
                             self.notebook.DeletePage(
                                 self.notebook.GetPageIndex(cp))
                         elif dlg == wx.NO:
@@ -1043,10 +976,9 @@ class TransparencyDlg(wx.Dialog):
     def on_slide(self, event):
         x = event.Selection
         self.parent.transparency = x
-        self.parent.SetTransparent(max(x, 10))
-        # unexpectedly printing alpha on console with DeprecationWarning
-        # Debug: SetTransparent() must be called before Show()
-        # need to update for linux
+        if self.parent.CanSetTransparent():
+            self.parent.SetTransparent(max(x, 10))
+            self.Refresh()
 
 
 app = wx.App()

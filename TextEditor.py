@@ -93,7 +93,6 @@ class TextEditor(wx.stc.StyledTextCtrl):
                                        EID.EDIT_PASTE, "Paste")
         self.menu_popup.Append(menu_popup_paste)
         self.Bind(wx.EVT_MENU, self.paste, menu_popup_paste)
-        self.Bind(wx.EVT_MENU, self.paste, id=5033)  # TODO what's this?
 
         menu_popup_delete = wx.MenuItem(self.menu_popup,
                                         EID.EDIT_DELETE, "Delete")
@@ -249,7 +248,6 @@ class TextEditor(wx.stc.StyledTextCtrl):
         if fold:
             self.folding = True
             self.SetProperty('fold', '1')  # this needs to be sent to stc
-            # TODO: below property needs to run only when lang=xml|html
             self.SetProperty("fold.html", "1")  # needed for html and xml
             self.SetMarginType(self.FOLD_MARGIN, wx.stc.STC_MARGIN_SYMBOL)
             self.SetMarginMask(self.FOLD_MARGIN, wx.stc.STC_MASK_FOLDERS)

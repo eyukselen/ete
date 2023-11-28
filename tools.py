@@ -3,15 +3,9 @@ import zlib
 import base64
 import wx
 from wx.svg import SVGimage
-from configs import icons
+
 
 app = wx.App()
-
-
-def get_icon(name):
-    with io.BytesIO(zlib.decompress(base64.b64decode(icons[name]))) as stream:
-        icon = wx.Bitmap(wx.Image(stream))
-    return icon
 
 
 def png2str(svg_file):
@@ -30,5 +24,22 @@ def png2str(svg_file):
     return res
 
 
-svg_file = "sniplets.svg"
-print(png2str(svg_file))
+def svg_to_data(svgfile):
+    """ function to read svg file and convert it
+    to data to be stored in python files"""
+    with open(svgfile, 'rb') as sf:
+        svg_buff = io.BytesIO(sf.read())
+    return base64.b64encode(zlib.compress(svg_buff.read()))
+
+
+def data_to_svg(bitmap_data):
+    """ function to read data to be stored in
+    python files and convert it to svg file """
+    return zlib.decompress(base64.b64decode(bitmap_data))
+
+
+def get_svg_icon(svg_bytes, icon_size):
+    with io.BytesIO(zlib.decompress(base64.b64decode(svg_bytes))) as stream:
+        bmp = SVGimage.CreateFromBytes(
+            stream.read()).ConvertToScaledBitmap(icon_size)
+    return bmp

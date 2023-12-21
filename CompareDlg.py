@@ -8,8 +8,10 @@ class CompareDlg(wx.Dialog):
                            pos=wx.DefaultPosition, size=wx.DefaultSize,
                            style=wx.DEFAULT_DIALOG_STYLE |
                            wx.RESIZE_BORDER | wx.STAY_ON_TOP)
-        self.lstc = lstc
-        self.rstc = rstc
+        te1 = TextEditor(self, None, None)
+        te2 = TextEditor(self, None, None)
+        te1.SetDocPointer(lstc.GetDocPointer())
+        te2.SetDocPointer(rstc.GetDocPointer())
         self.SetMinSize((512, 310))
 
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -22,9 +24,9 @@ class CompareDlg(wx.Dialog):
         self.splitter = wx.Panel(self, size=wx.Size(40, -1))
         self.splitter.SetBackgroundColour(wx.Colour(54, 103, 163))
 
-        self.middle_sizer.Add(self.lstc, 2, wx.EXPAND)
+        self.middle_sizer.Add(te1, 2, wx.EXPAND)
         self.middle_sizer.Add(self.splitter, 0, wx.EXPAND)
-        self.middle_sizer.Add(self.rstc, 2, wx.EXPAND)
+        self.middle_sizer.Add(te2, 2, wx.EXPAND)
 
         self.Refresh()
 

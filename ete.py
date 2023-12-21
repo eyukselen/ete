@@ -4,7 +4,7 @@ import wx
 import wx.adv
 import wx.aui as aui
 import wx.stc as stc
-# import wx.lib.inspection  # for debugging
+import wx.lib.inspection  # for debugging
 from configs import EID, svg_icons, new_menu, settings
 import FindReplaceDlg as Frd
 from TextEditor import TextEditor
@@ -607,52 +607,11 @@ class MainWindow(wx.Frame):
 
         lstc = self.get_text_editor_from_page(lpi)
         rstc = self.get_text_editor_from_page(rpi)
+        from CompareDlg import CompareDlg
+        compare_dlg = CompareDlg(self, lstc, rstc)
+        compare_dlg.Show()
 
-        self.compare_tabs = [lstc, rstc]
-        self.notebook.Split(rpi, wx.RIGHT)
-        # endregion
 
-        l_list = []
-        for i in range(lstc.GetLineCount()):
-            l_list.append(lstc.GetLineText(i))
-
-        r_list = []
-        for i in range(rstc.GetLineCount()):
-            r_list.append(rstc.GetLineText(i))
-
-        res = self.diff(l_list, r_list)
-
-        rstc.set_styles()
-        lstc.set_styles()
-        print(res)
-
-        eol_left = lstc.get_eol_len()
-        eol_right = rstc.get_eol_len()
-
-        curline = 0
-        for x in res:
-            for _ in x[1]:
-                if x[0] == '-':
-                    rstc.InsertText(rstc.XYToPosition(0, curline), '\n')
-                    lstc.MarkerAdd(curline, lstc.MARKER_MINUS)
-                    rstc.SetLineState(curline, 1)
-                    lstc.StartStyling(lstc.XYToPosition(0, curline))
-                    lstc.SetStyling(lstc.GetLineLength(curline) + eol_right, 5)
-                if x[0] == '+':
-                    lstc.InsertText(lstc.XYToPosition(0, curline), '\n')
-                    rstc.MarkerAdd(curline, rstc.MARKER_PLUS)
-                    lstc.SetLineState(curline, 1)
-                    rstc.StartStyling(rstc.XYToPosition(0, curline))
-                    rstc.SetStyling(rstc.GetLineLength(curline) + eol_right, 5)
-                if x[0] == '=':
-                    lstc.StartStyling(lstc.XYToPosition(0, curline))
-                    lstc.SetStyling(lstc.GetLineLength(curline) + eol_left, 4)
-                    rstc.StartStyling(rstc.XYToPosition(0, curline))
-                    rstc.SetStyling(rstc.GetLineLength(curline) + eol_right, 4)
-                curline += 1
-        self.set_tabs_in_sync(lstc, rstc, True)
-        self.notebook.SetSelection(lpi)
-        self.notebook.SetSelection(rpi)
 
     def on_menu_tools_clear_compare(self, _):
         # I will lose tab id when they are switched or new tabs added
@@ -983,7 +942,7 @@ class TransparencyDlg(wx.Dialog):
 
 app = wx.App()
 MainWindow(None)
-# wx.lib.inspection.InspectionTool().Show()  # for debugging
+wx.lib.inspection.InspectionTool().Show()  # for debugging
 app.MainLoop()
 
 

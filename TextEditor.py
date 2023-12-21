@@ -170,7 +170,8 @@ class TextEditor(wx.stc.StyledTextCtrl):
         line_num = self.GetCurrentLine() + 1
         col_num = self.GetColumn(self.GetCurrentPos())
         sel_len = abs(cursor - anchor)
-        self.status_bar.SetStatusText('line:' + str(line_num)
+        if self.status_bar:
+            self.status_bar.SetStatusText('line:' + str(line_num)
                                       + ' col :' + str(col_num)
                                       + ' Sel:' + str(sel_len), 1)
         self.indicate_selection()
@@ -193,7 +194,8 @@ class TextEditor(wx.stc.StyledTextCtrl):
     def update_toolbar_eol_mode(self):
         eol_dict = {0: 'CRLF', 1: 'CR', 2: 'LF'}
         eol_mode = eol_dict.get(self.GetEOLMode(), 'N/A')
-        self.status_bar.SetStatusText(str(eol_mode), 2)
+        if self.status_bar:
+            self.status_bar.SetStatusText(str(eol_mode), 2)
 
     def check_braces(self):
         cp = self.GetCurrentPos()
@@ -241,7 +243,8 @@ class TextEditor(wx.stc.StyledTextCtrl):
 
         f = langs[lang]
         self.lang = lang
-        self.status_bar.SetStatusText(f.__name__[5:], 4)
+        if self.status_bar:
+            self.status_bar.SetStatusText(f.__name__[5:], 4)
         f()
 
     def set_folding(self, fold=False):
@@ -547,12 +550,14 @@ class TextEditor(wx.stc.StyledTextCtrl):
         if self.is_utf8(f):
             self.code_page = 'utf-8'
             self.SetTextRaw(f)
-            self.status_bar.SetStatusText('utf-8', 3)
+            if self.status_bar:
+                self.status_bar.SetStatusText('utf-8', 3)
             self.SetModified(False)
         else:
             self.code_page = 'windows-1252'
             self.SetText(f.decode('windows-1252'))
-            self.status_bar.SetStatusText('windows-1252', 3)
+            if self.status_bar:
+                self.status_bar.SetStatusText('windows-1252', 3)
             self.SetModified(False)
 
     def save_file(self, file):

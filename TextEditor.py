@@ -135,16 +135,21 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.SelectAll()
 
     def on_key_down(self, event):
-        keycode = event.GetUnicodeKey()
+        keycode = event.GetKeyCode()
         ctrl_down = event.CmdDown()
-        if keycode == wx.WXK_CONTROL_V:
-            print('ctrl v')
-        if keycode ==wx.WXK_CONTROL_A:
-            print('ctrl a')
-        if keycode == wx.WXK_CONTROL_C:
-            print('ctrl c')
+        if ctrl_down:
+            if keycode == 86:
+                print('ctrl+v')
+                self.Paste()
+            if keycode == 65:
+                print('ctrl+a')
+            if keycode == 67:
+                print('ctrl+c')
+            if keycode == 88:
+                print('ctrl+x')
         else:
-            print(keycode, ctrl_down)
+            event.Skip()
+
 
 
     def on_popup(self, event):

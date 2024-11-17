@@ -31,7 +31,6 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.Bind(wx.EVT_RIGHT_UP, self.on_popup)
         self.Bind(wx.stc.EVT_STC_MARGINCLICK, self.on_margin_click,
                   id=self.ID_MARGIN_CLICK)
-        self.Bind(wx.EVT_KEY_DOWN, self.on_key_down)
         self.set_styles()
         self.set_margins()
         self.SetAdditionalSelectionTyping(True)
@@ -134,23 +133,6 @@ class TextEditor(wx.stc.StyledTextCtrl):
     def select_all(self, _):
         self.SelectAll()
 
-    def on_key_down(self, event):
-        keycode = event.GetKeyCode()
-        ctrl_down = event.CmdDown()
-        if ctrl_down:
-            if keycode == 86:
-                print('ctrl+v')
-                self.Paste()
-            if keycode == 65:
-                print('ctrl+a')
-            if keycode == 67:
-                print('ctrl+c')
-            if keycode == 88:
-                print('ctrl+x')
-        else:
-            event.Skip()
-
-
 
     def on_popup(self, event):
         self.PopupMenu(self.menu_popup, pos=event.GetPosition())
@@ -189,9 +171,9 @@ class TextEditor(wx.stc.StyledTextCtrl):
         line_num = self.GetCurrentLine() + 1
         col_num = self.GetColumn(self.GetCurrentPos())
         sel_len = abs(cursor - anchor)
-        self.status_bar.SetStatusText('line:' + str(line_num)
-                                      + ' col :' + str(col_num)
-                                      + ' Sel:' + str(sel_len), 1)
+        # self.status_bar.SetStatusText('line:' + str(line_num)
+        #                               + ' col :' + str(col_num)
+        #                               + ' Sel:' + str(sel_len), 1)
         self.indicate_selection()
         self.set_margins()
         self.check_braces()

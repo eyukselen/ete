@@ -165,6 +165,11 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.MarginSetStyle(0, stc.STC_STYLE_LINENUMBER)
         self.Refresh()
 
+    def set_line_numbers(self):
+        for x in range(self.GetLineCount()):
+            self.MarginSetText(x, str(x))
+
+
     def on_receive_event(self, event):
         wx.PostEvent(self.GetEventHandler(), event)
         event.Skip()
@@ -181,6 +186,7 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.set_margins()
         self.check_braces()
         event.Skip()
+        self.set_line_numbers()
         self.refresh()
 
     def refresh(self):

@@ -8,10 +8,10 @@ class CompareDlg(wx.Dialog):
                            pos=wx.DefaultPosition, size=wx.DefaultSize,
                            style=wx.DEFAULT_DIALOG_STYLE |
                            wx.RESIZE_BORDER | wx.STAY_ON_TOP)
-        te1 = TextEditor(self, None, None)
-        te2 = TextEditor(self, None, None)
-        te1.SetDocPointer(lstc.GetDocPointer())
-        te2.SetDocPointer(rstc.GetDocPointer())
+        self.te1 = TextEditor(self, None, None)
+        self.te2 = TextEditor(self, None, None)
+        self.te1.SetDocPointer(lstc.GetDocPointer())
+        self.te2.SetDocPointer(rstc.GetDocPointer())
         self.SetMinSize((512, 310))
 
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -24,11 +24,21 @@ class CompareDlg(wx.Dialog):
         self.splitter = wx.Panel(self, size=wx.Size(40, -1))
         self.splitter.SetBackgroundColour(wx.Colour(54, 103, 163))
 
-        self.middle_sizer.Add(te1, 2, wx.EXPAND)
+        self.middle_sizer.Add(self.te1, 2, wx.EXPAND)
         self.middle_sizer.Add(self.splitter, 0, wx.EXPAND)
-        self.middle_sizer.Add(te2, 2, wx.EXPAND)
+        self.middle_sizer.Add(self.te2, 2, wx.EXPAND)
 
         self.Refresh()
+        self.diff()
+
+    def diff(self):
+        tex1 = self.te1.GetText()
+        import wx.stc
+        for x in range(self.te1.GetLineCount()):
+            self.te1.MarginSetStyle(x, wx.stc.STC_MARGIN_TEXT)
+            self.te1.MarginSetText(x, "e")
+        self.Refresh()
+
 
 
 

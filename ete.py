@@ -4,7 +4,7 @@ import wx
 import wx.adv
 import wx.aui as aui
 import wx.stc as stc
-import wx.lib.inspection  # for debugging
+# import wx.lib.inspection  # for debugging
 from configs import EID, svg_icons, new_menu, settings
 import FindReplaceDlg as Frd
 from TextEditor import TextEditor
@@ -942,7 +942,7 @@ class TransparencyDlg(wx.Dialog):
 
 app = wx.App()
 MainWindow(None)
-wx.lib.inspection.InspectionTool().Show()  # for debugging
+# wx.lib.inspection.InspectionTool().Show()  # for debugging
 app.MainLoop()
 
 

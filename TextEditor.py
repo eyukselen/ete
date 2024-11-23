@@ -8,16 +8,18 @@ class TextEditor(wx.stc.StyledTextCtrl):
         stc.StyledTextCtrl.__init__(self, parent, style=wx.SIMPLE_BORDER)
         self.ID_MARGIN_CLICK = wx.ID_ANY
         self.markers = {}
-        self.FOLD_MARGIN = 2
-        self.LINE_NUMBERS_MARGIN = 0
-        self.MARKER_MARGIN = 1
+        self.MARGIN_MARKER = 0
+        self.MARGIN_LINE_NUMBERS = 1
+        self.MARGIN_LINE_TEXT = 2
+        self.MARGIN_FOLD = 3
         self.MARKER_BOOKMARK = 4
         self.MARKER_PLUS = 5
         self.MARKER_MINUS = 6
-        self.MarkerDefine(self.MARKER_PLUS, self.MARKER_PLUS,
-                          foreground="RED", background="BLACK")
-        self.MarkerDefine(self.MARKER_MINUS, self.MARKER_MINUS,
-                          foreground="RED", background="BLACK")
+        # diff markers
+        self.MarkerDefine(self.MARKER_BOOKMARK, stc.STC_MARK_BOOKMARK,'black', 'red')
+        self.MarkerDefine(self.MARKER_PLUS, stc.STC_MARK_PLUS, foreground="RED", background="BLACK")
+        self.MarkerDefine(self.MARKER_MINUS, stc.STC_MARK_MINUS, foreground="RED", background="BLACK")
+
         self.check_for_braces = False
         self.SetMultipleSelection(False)
         self.file_name = filename
@@ -133,34 +135,35 @@ class TextEditor(wx.stc.StyledTextCtrl):
     def select_all(self, _):
         self.SelectAll()
 
-
     def on_popup(self, event):
         self.PopupMenu(self.menu_popup, pos=event.GetPosition())
         event.Skip()
 
     def set_margins(self):
-        # margins 0:markers, 1:line numbers, 2: folding options
+        # margins 0:markers, 1:line numbers, 2:line text, 3: folding options
         # margin 0 and 1 defined below, 2 is defined in code folding function
-        # marker margin
-        self.SetMarginType(self.MARKER_MARGIN, wx.stc.STC_MARGIN_SYMBOL)
-        self.SetMarginMask(self.MARKER_MARGIN,  ~wx.stc.STC_MASK_FOLDERS)
-        self.SetMarginSensitive(self.MARKER_MARGIN, True)
-        self.SetMarginWidth(self.MARKER_MARGIN, 12)
 
-        # diff markers
-        self.MarkerDefine(self.MARKER_BOOKMARK, stc.STC_MARK_BOOKMARK,
-                          'black', 'red')
-        self.MarkerDefine(self.MARKER_PLUS, stc.STC_MARK_PLUS)
-        self.MarkerDefine(self.MARKER_MINUS, stc.STC_MARK_MINUS)
+        #  If (mask & SC_MASK_FOLDERS)==0, the margin background colour is controlled by style 33 (STYLE_LINENUMBER).
+        # margin bookmark
+        self.SetMarginType(self.MARGIN_MARKER, stc.STC_MARGIN_SYMBOL)
+        self.SetMarginWidth(self.MARGIN_MARKER, 20)
+        self.SetMarginMask(self.MARGIN_MARKER,  ~stc.STC_MASK_FOLDERS)
+        #self.SetMarginMask(self.MARGIN_MARKER, ~1 << 1)
+        self.SetMarginSensitive(self.MARGIN_MARKER, True)
+        self.SetMarginWidth(self.MARGIN_MARKER, 24)
+        # margin line numbers
+        self.SetMarginType(self.MARGIN_LINE_NUMBERS, stc.STC_MARGIN_NUMBER)
+        self.SetMarginWidth(self.MARGIN_LINE_NUMBERS, 20)
+        self.SetMarginMask(self.MARGIN_LINE_NUMBERS, 1 << 1)
+        # margin text
+        self.SetMarginType(self.MARGIN_LINE_TEXT, stc.STC_MARGIN_TEXT)
+        self.SetMarginWidth(self.MARGIN_LINE_TEXT, 40)
+        self.SetMarginMask(self.MARGIN_LINE_TEXT, 1 << 1)
 
-        # Line Numbers
-        self.SetMarginType(self.LINE_NUMBERS_MARGIN, wx.stc.STC_MARGIN_NUMBER)
-        line_width = self.TextWidth(wx.stc.STC_STYLE_LINENUMBER, '9' + '9'
-                                    * len(str(self.GetFirstVisibleLine()
-                                              + self.LinesOnScreen())))
-        self.SetMarginWidth(self.LINE_NUMBERS_MARGIN, line_width)
-        self.StyleSetSpec(wx.stc.STC_STYLE_LINENUMBER,
-                          'fore:#FFFFFF,back:#5f74A1')
+        self.StyleSetSpec(stc.STC_STYLE_LINENUMBER, 'fore:#000000,back:#ADD8E6')
+        self.MarginSetText(0, "emre")
+        self.MarginSetStyle(0, stc.STC_STYLE_LINENUMBER)
+        self.Refresh()
 
     def on_receive_event(self, event):
         wx.PostEvent(self.GetEventHandler(), event)
@@ -183,7 +186,7 @@ class TextEditor(wx.stc.StyledTextCtrl):
     def refresh(self):
         # TODO: this needs to move out from on_update_ui
         self.update_toolbar_eol_mode()
-        self.set_lang(self.lang)
+        # self.set_lang(self.lang)
 
     def get_eol_len(self):
         res = 1
@@ -194,7 +197,8 @@ class TextEditor(wx.stc.StyledTextCtrl):
     def update_toolbar_eol_mode(self):
         eol_dict = {0: 'CRLF', 1: 'CR', 2: 'LF'}
         eol_mode = eol_dict.get(self.GetEOLMode(), 'N/A')
-        self.status_bar.SetStatusText(str(eol_mode), 2)
+        if self.status_bar:
+            self.status_bar.SetStatusText(str(eol_mode), 2)
 
     def check_braces(self):
         cp = self.GetCurrentPos()
@@ -229,6 +233,7 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.SetEOLMode(eol_mode)
 
     def set_lang(self, lang=EID.LANG_TXT):
+        # TODO: StyleClearAll should be removed from all set lang functions
 
         langs = {EID.LANG_PYTHON: self.lang_python,
                  EID.LANG_BASH: self.lang_bash,
@@ -242,7 +247,8 @@ class TextEditor(wx.stc.StyledTextCtrl):
 
         f = langs[lang]
         self.lang = lang
-        self.status_bar.SetStatusText(f.__name__[5:], 4)
+        if self.status_bar:
+            self.status_bar.SetStatusText(f.__name__[5:], 4)
         f()
 
     def set_folding(self, fold=False):
@@ -250,10 +256,10 @@ class TextEditor(wx.stc.StyledTextCtrl):
             self.folding = True
             self.SetProperty('fold', '1')  # this needs to be sent to stc
             self.SetProperty("fold.html", "1")  # needed for html and xml
-            self.SetMarginType(self.FOLD_MARGIN, wx.stc.STC_MARGIN_SYMBOL)
-            self.SetMarginMask(self.FOLD_MARGIN, wx.stc.STC_MASK_FOLDERS)
-            self.SetMarginSensitive(self.FOLD_MARGIN, True)
-            self.SetMarginWidth(self.FOLD_MARGIN, 16)
+            self.SetMarginType(self.MARGIN_FOLD, wx.stc.STC_MARGIN_SYMBOL)
+            self.SetMarginMask(self.MARGIN_FOLD, wx.stc.STC_MASK_FOLDERS)
+            self.SetMarginSensitive(self.MARGIN_FOLD, True)
+            self.SetMarginWidth(self.MARGIN_FOLD, 16)
             self.MarkerDefine(stc.STC_MARKNUM_FOLDERMIDTAIL,
                               stc.STC_MARK_TCORNERCURVE,
                               "WHEAT", "#808080")
@@ -282,15 +288,15 @@ class TextEditor(wx.stc.StyledTextCtrl):
         else:
             self.folding = False
             self.SetProperty('fold', '0')  # this needs to be send to stc
-            self.SetMarginWidth(self.FOLD_MARGIN, 0)
-            self.SetMarginSensitive(self.FOLD_MARGIN, False)
+            self.SetMarginWidth(self.MARGIN_FOLD, 0)
+            self.SetMarginSensitive(self.MARGIN_FOLD, False)
             self.Unbind(wx.stc.EVT_STC_MARGINCLICK, id=self.ID_MARGIN_CLICK)
 
     def on_margin_click(self, event):
-        if event.GetMargin() == self.FOLD_MARGIN:
+        if event.GetMargin() == self.MARGIN_FOLD:
             line_clicked = self.LineFromPosition(event.GetPosition())
             self.ToggleFold(line_clicked)
-        elif event.GetMargin() == self.MARKER_MARGIN:
+        elif event.GetMargin() == self.MARGIN_MARKER:
             line_clicked = self.LineFromPosition(event.GetPosition())
             if (line_clicked, self.MARKER_BOOKMARK) in self.markers.items():
                 self.MarkerDelete(line_clicked, self.MARKER_BOOKMARK)
@@ -300,7 +306,6 @@ class TextEditor(wx.stc.StyledTextCtrl):
                 self.markers[line_clicked] = self.MARKER_BOOKMARK
 
     def lang_python(self):
-        self.StyleClearAll()
         self.SetLexer(stc.STC_LEX_PYTHON)
         self.SetKeyWords(0, keywords['python']['keywords_0'])
         self.StyleSetSpec(stc.STC_P_DEFAULT, 'fore:#000000,back:#FFFFFF')
@@ -391,7 +396,7 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.StyleSetSpec(stc.STC_SH_WORD, 'fore:#FFFF00')
 
     def lang_txt(self):
-        self.StyleClearAll()
+        #self.StyleClearAll()
         self.SetLexer(stc.STC_LEX_NULL)
         self.StyleSetSpec(stc.STC_STYLE_BRACELIGHT,
                           "fore:RED,back:MEDIUM TURQUOISE,bold")
@@ -510,6 +515,7 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.StyleSetSpec(5, 'back:WHEAT')
         self.StyleSetEOLFilled(4, True)
         self.StyleSetEOLFilled(5, True)
+
         self.SetIndicatorCurrent(9)
         # style set 9 for matched search word indicator
         self.IndicatorSetStyle(9, stc.STC_INDIC_ROUNDBOX)

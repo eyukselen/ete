@@ -596,13 +596,11 @@ class MainWindow(wx.Frame):
         print(self.file_manager.open_files)
 
     def on_menu_tools_compare(self, _):
-        if len(self.compare_tabs) == 2:  # already in compare so do nothing
+        if self.notebook.GetPageCount() < 2:
             return
 
-        # region splitting window for compare
-        rpi = self.notebook.GetPageIndex(self.notebook.GetCurrentPage())
-        if rpi < 1:  # there should be at least 1 tab left to active tab
-            return
+        # compare last two tabs
+        rpi = self.notebook.GetPageCount() - 1
         lpi = rpi - 1
 
         lstc = self.get_text_editor_from_page(lpi)

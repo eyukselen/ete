@@ -528,6 +528,7 @@ class TextEditor(wx.stc.StyledTextCtrl):
         self.IndicatorSetForeground(9, 'BLUE')
 
     def indicate_selection(self):
+        self.SetIndicatorCurrent(9)
         if self.GetSelectionEmpty():
             self.IndicatorClearRange(0, self.GetTextLength())
         else:
